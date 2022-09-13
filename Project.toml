@@ -1,0 +1,9 @@
+name = "StateTransitionNetworks"
+uuid = "3840ccf8-8f4d-4ca1-a48b-c3a8348f3866"
+authors = ["kdenes <kdenes@akceso.ch>", "sbulcsu <bulcsu.sandor@ubbcluj.ro>", "rusandris <rusandris@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+SimpleWeightedGraphs = "47aef6b3-ad0c-573a-a1e2-d07658019622"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
