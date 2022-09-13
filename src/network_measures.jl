@@ -33,8 +33,7 @@ function walk_statistics(ensemble, graph, N_steps, transient=5000)
     for i in 1:ensemble
         walk_length[i] = random_walk_on_weighted_graph(graph, N_steps, transient)
     end
-    walk_length = walk_length./(N_steps-transient)
-    entropy = mean(walk_length)
-    lyapunov_measure = var(walk_length)
+   	entropy = mean(walk_length)/(N_steps-transient)
+    lyapunov_measure = var(walk_length)/(N_steps-transient)
     return entropy, lyapunov_measure
 end
