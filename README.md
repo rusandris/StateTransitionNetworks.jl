@@ -11,7 +11,7 @@ using StateTransitionNetworks
 If one wants to return to the default environment to use other packages: `pkg> activate`
 
 Constructing state-transition network for the Henon map (2D discrete dynamical system):
-```
+```julia
 using DynamicalSystems
 ds = Systems.henon()
 traj = trajectory(ds,10000;Tr = 1500) #generate timeseries
