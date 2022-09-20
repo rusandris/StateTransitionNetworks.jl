@@ -14,18 +14,18 @@ Constructing state-transition network for the Henon map (2D discrete dynamical s
 ```julia
 using DynamicalSystems
 ds = Systems.henon()
-traj = trajectory(ds,10000;Tr = 1500) #generate timeseries
+traj = trajectory(ds,10000;Ttr = 1500) #generate timeseries
 ```
 This can be fed into `timeseries_to_grid` which discretizes the timeseries and returns the name of the vertices:
 ```julia
 traj_grid, vertex_names = timeseries_to_grid(traj,20) # 20x20 grid
 ```
-These vertices (nodes) will be the states of our state-transition network. If the discretized trajectory contains a transition from state 'i' to 'j', there will be an edge between two vertices `i -> j`.
+These vertices (nodes) will be the states of our state-transition network. If the discretized trajectory contains a transition from state `i` to `j`, there will be an edge between two vertices `i -> j`.
 Use `create_STN` to construct the graph object that corresponds to the STN:
 ```julia
 stn_q, stn_p = create_STN(traj_grid,vertex_names)
 ```
-The newtork is a SimpleWeightedDiGraph object. Two graphs are returned,one with occurence probability (`Q_ij`) and one with the transition probability
+The network is a SimpleWeightedDiGraph object. Two graphs are returned,one with occurence probability (`Q_ij`) and one with the transition probability
 as weights (`P_ij`). 
 
 Calculate entropy and lyapunov measures with `walk_statistics`:
