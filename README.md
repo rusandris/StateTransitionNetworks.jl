@@ -1,5 +1,5 @@
 # StateTransitionNetworks.jl
-Toolkit for dynamics on state-transition networks
+Toolkit for dynamics on state-transition networks based on the paper Sándor et al. (2022).
 
 ## Basic usage
 
