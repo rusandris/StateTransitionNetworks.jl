@@ -11,8 +11,12 @@ function timeseries_to_grid(timeseries, grid)
     y_min = minimum(timeseries[:, 2])
     x_max = maximum(timeseries[:, 1])
     y_max = maximum(timeseries[:, 2])
-    x_grid = range(x_min, x_max, grid);
-    y_grid = range(y_min, y_max, grid);
+    dx = 0.5*(x_max-x_min)/grid
+    dy = 0.5*(y_max-y_min)/grid
+    x_grid = range(x_min-dx, x_max+dx, grid);
+    x_min = x_grid[1]
+    y_grid = range(y_min-dy, y_max+dy, grid);
+    y_min = y_grid[1]
     x_n = Vector{Int64}(undef, T)
     y_n = Vector{Int64}(undef, T)
     num_vertex = 0

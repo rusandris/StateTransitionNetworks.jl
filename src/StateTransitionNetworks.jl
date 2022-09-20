@@ -1,6 +1,6 @@
 module StateTransitionNetworks
 
-import Graphs: add_edge!, outneighbors, nv, weights
+import Graphs: add_edge!, outneighbors, nv, weights, is_strongly_connected
 import SimpleWeightedGraphs: SimpleWeightedDiGraph, get_weight
 import StatsBase: sample, mean, var, Weights
 
