@@ -4,7 +4,7 @@ Toolkit for dynamics on state-transition networks based on the paper Sándor et 
 ## Basic usage
 
 Using the package in REPL:
-```
+```julia
 pkg> activate .
 using StateTransitionNetworks
 ```
@@ -17,19 +17,19 @@ ds = Systems.henon()
 traj = trajectory(ds,10000;Tr = 1500) #generate timeseries
 ```
 This can be fed into `timeseries_to_grid` which discretizes the timeseries and returns the name of the vertices:
-```
+```julia
 traj_grid, vertex_names = timeseries_to_grid(traj,20) # 20x20 grid
 ```
 These vertices (nodes) will be the states of our state-transition network. If the discretized trajectory contains a transition from state 'i' to 'j', there will be an edge between two vertices `i -> j`.
 Use `create_STN` to construct the graph object that corresponds to the STN:
-```
+```julia
 stn_q, stn_p = create_STN(traj_grid,vertex_names)
 ```
 The newtork is a SimpleWeightedDiGraph object. Two graphs are returned,one with occurence probability (`Q_ij`) and one with the transition probability
 as weights (`P_ij`). 
 
 Calculate entropy and lyapunov measures with `walk_statistics`:
-```
+```julia
 ensemble = 100 #number of random walks on the network
 N_steps = 1e4 #number of steps taken in a random walk
 
@@ -39,7 +39,7 @@ entropy, lyapunov = walk_statistics(ensemble, stn_p, N_steps)
 ### Generating figures: parameter dependence of the network measures 
 Calculate the network measures for different parameters (dynamics) of the Henon map:
 
-```
+```julia
 b = 0.3;
 a_values = 1:0.001:1.4;
 traj_length = 30000;
@@ -60,7 +60,7 @@ for (i,a) in enumerate(a_values)
 end
 ```
 Plot results with:
-```
+```julia
 plot(
    a_values, lyapunov,
    #ylims = (0,1.5),
