@@ -61,6 +61,7 @@ end
 ```
 Plot results with:
 ```julia
+using Plots, LaTeXStrings
 plot(
    a_values, lyapunov,
    #ylims = (0,1.5),
