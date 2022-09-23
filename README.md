@@ -104,6 +104,7 @@ We can also study the network measures for different parameters. With `PSOS`, th
 ```julia
 
 rho_values = 180:0.003:182;
+grid = 20
 ensemble = 100
 N_steps = 10000
 lyapunov = zeros(length(rho))
