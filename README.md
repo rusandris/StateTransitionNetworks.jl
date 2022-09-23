@@ -8,9 +8,10 @@ Using the package in REPL:
 pkg> activate .
 using StateTransitionNetworks
 ```
-If one wants to return to the default environment to use other packages: `pkg> activate`
 
-Constructing state-transition network for the Henon map (2D discrete dynamical system):
+### Discrete example: Henon map
+
+Constructing state-transition network for the [Henon map](https://juliadynamics.github.io/DynamicalSystems.jl/dev/ds/predefined/#DynamicalSystemsBase.Systems.henon) (2D discrete dynamical system):
 ```julia
 using DynamicalSystems
 ds = Systems.henon()
@@ -36,7 +37,7 @@ N_steps = 1e4 #number of steps taken in a random walk
 entropy, lyapunov = walk_statistics(ensemble, stn_p, N_steps)
 ```
 
-### Generating figures: parameter dependence of the network measures 
+
 Calculate the network measures for different parameters (dynamics) of the Henon map:
 
 ```julia
@@ -76,6 +77,47 @@ plot(
    tickfontsize=10
    )
 
+```
+
+### Continuous example: Lorenz system
+The workflow is similar for continuous systems. The difference is that one must turn the continuous system into map using [Poincaré surface of section](https://juliadynamics.github.io/DynamicalSystems.jl/dev/chaos/orbitdiagram/#Poincar%C3%A9-Surface-of-Section) (`PSOS`) with a given plane. This avoids the problem of high number of self-loops appearing in our STN.
+
+Constructing state-transition network for the [Lorenz system](https://juliadynamics.github.io/DynamicalSystems.jl/dev/ds/predefined/#DynamicalSystemsBase.Systems.lorenz) (3D continuous dynamical system):
+```julia
+ds = Systems.lorenz()
+plane = (1,15.0) #plane in 3D phase space with x = 15.0
+```
+Calculate the `PSOS` with `poincaresos`
+
+```julia
+T = 500
+psection = poincaresos(ds, plane, T; Ttr=300, direction=+1); 
+traj = psection[:,2:end] #select y,z variables only
+```
+This can be treated as a 2D map:
+```julia
+traj_grid, vertex_names = timeseries_to_grid(traj,20) # 20x20 grid
+stn_q, stn_p = create_STN(traj_grid,vertex_names)
+```
+We can also study the network measures for different parameters. With `PSOS`, the resulting network is not necesarrily strongly connected (not every vertex is reachable from every other vertex) in which case a random walk process would fail (we need ergodicity for the network measures). 
+
+```julia
+
+rho = 180:0.003:182;
+ensemble = 100
+N_steps = 10000
+lyapunov = zeros(length(rho))
+entropy = zeros(length(rho))
+@time for r in eachindex(rho)
+    system = Systems.lorenz(ρ=rho[r])
+    psection = poincaresos(system, plane, 500; Ttr=300, direction=+1)
+    timeseries = psection[:,2:end]
+    discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid)
+    _, stn_p = create_STN(discrete_timeseries, vertex_names)
+    if is_strongly_connected(stn_P)
+        entropy[r], lyapunov[r] = walk_statistics(ensemble, stn_p, N_steps)
+    end
+end
 ```
 
 # References
