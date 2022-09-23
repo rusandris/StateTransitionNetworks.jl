@@ -103,19 +103,19 @@ We can also study the network measures for different parameters. With `PSOS`, th
 
 ```julia
 
-rho = 180:0.003:182;
+rho_values = 180:0.003:182;
 ensemble = 100
 N_steps = 10000
 lyapunov = zeros(length(rho))
 entropy = zeros(length(rho))
-@time for r in eachindex(rho)
-    system = Systems.lorenz(ρ=rho[r])
-    psection = poincaresos(system, plane, 500; Ttr=300, direction=+1)
+for (i,ρ) in enumerate(rho_values)
+    ds = Systems.lorenz(ρ=ρ)
+    psection = poincaresos(ds, plane, 500; Ttr=300, direction=+1)
     timeseries = psection[:,2:end]
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid)
     _, stn_p = create_STN(discrete_timeseries, vertex_names)
-    if is_strongly_connected(stn_P)
-        entropy[r], lyapunov[r] = walk_statistics(ensemble, stn_p, N_steps)
+    if is_strongly_connected(stn_p)
+        entropy[i], lyapunov[i] = walk_statistics(ensemble, stn_p, N_steps)
     end
 end
 ```
