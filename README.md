@@ -102,13 +102,13 @@ stn_q, stn_p = create_STN(traj_grid,vertex_names)
 We can also study the network measures for different parameters. With `PSOS`, the resulting network is not necesarrily strongly connected (not every vertex is reachable from every other vertex) in which case a random walk process would fail (we need ergodicity for the network measures). 
 
 ```julia
-
+using Graphs
 rho_values = 180:0.003:182;
 grid = 20
 ensemble = 100
 N_steps = 10000
-lyapunov = zeros(length(rho))
-entropy = zeros(length(rho))
+lyapunov = zeros(length(rho_values))
+entropy = zeros(length(rho_values))
 for (i,ρ) in enumerate(rho_values)
     ds = Systems.lorenz(ρ=ρ)
     psection = poincaresos(ds, plane, 500; Ttr=300, direction=+1)
