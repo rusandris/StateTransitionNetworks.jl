@@ -45,20 +45,20 @@ b = 0.3;
 a_values = 1:0.001:1.4;
 traj_length = 30000;
 trans = 1000;
-grid = 20;
+grid_size = 20;
 ensemble = 100;
 N_steps = 10000;
 
-entropy = zeros(length(a_values))
-lyapunov = zeros(length(a_values))
+entropy_measures = zeros(length(a_values))
+lyapunov_measures = zeros(length(a_values))
 
 for (i,a) in enumerate(a_values)
     system = Systems.henon([0.0, 0.0]; a=a, b=b)
     @show a
     timeseries = trajectory(system, traj_length, [0, 0]; Ttr=trans)
-    discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid);
+    discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
     stn_q, stn_p = create_STN(discrete_timeseries, vertex_names)
-    entropy[i], lyapunov[i] = walk_statistics(ensemble, stn_p, N_steps)
+    entropy_measures[i], lyapunov_measures[i] = walk_statistics(ensemble, stn_p, N_steps)
 end
 ```
 Plot results with:
