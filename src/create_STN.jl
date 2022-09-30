@@ -81,6 +81,8 @@ function create_STN(discrete_timeseries, vertex_names)
             end
         end
     end
+    
+    is_strongly_connected(stn_prob) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
 
     return stn_weight, stn_prob
 end

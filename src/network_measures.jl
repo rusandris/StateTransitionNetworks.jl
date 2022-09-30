@@ -38,6 +38,44 @@ function walk_statistics(ensemble, graph, N_steps, transient=5000)
     return entropy, lyapunov_measure
 end
 
+function randomwalk_step(graph,source)
+	neigh = outneighbors(graph, source)
+	neigh_weights = [get_weight(graph,source,vertex) for vertex in neigh] 
+	destination = sample(neigh, Weights(neigh_weights))
+	
+	w = neigh_weights[indexin(destination,neigh)[1]]
+	return destination,-log(w)
+end
+
+"""
+	measure_convergence(graph::SimpleWeightedDiGraph,ensemble,N_max) -> entropy_timeseries,lyapunov_timeseries
+Calculates and returns network measures at every step in the random walk up to N_max.
+"""
+function measure_convergence(graph,ensemble,N_max)
+	ensemble_walk_lengths = [] #container for walk lengths for every step for every random_walk
+	
+	for i in 1:ensemble
+		source = sample(1:nv(graph));
+		walk_length_timeseries = zeros(N_max) #container for individual walk lengths for every step 
+		walk_length = 0
+		
+		for n in 1:N_max
+			source, l = randomwalk_step(graph,source) #make one step in the graph
+			walk_length += l
+			walk_length_timeseries[n] = walk_length  
+		end
+		push!(ensemble_walk_lengths,walk_length_timeseries) #save individual walk length timeseries
+	end
+	ensemble_walk_lengths = hcat(ensemble_walk_lengths...) 
+	
+	#calculate measures for every step
+	steps = 1:N_max
+	entropy_timeseries = mean(ensemble_walk_lengths,dims=2) ./ steps
+	lyapunov_timeseries = var(ensemble_walk_lengths,dims=2,corrected=false) ./steps 
+	
+	return entropy_timeseries,lyapunov_timeseries
+end
+
 """
 Calculates analytically the Sinai-Kolmogorov entropy on a STN. The main input `graph_P` is a SimpleWeightedDiGraph
 object containg the occurence probability of each transition (Q_ij). The additional `graph_P` argument is another 
