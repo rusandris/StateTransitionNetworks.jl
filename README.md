@@ -53,7 +53,8 @@ entropy = zeros(length(a_values))
 lyapunov = zeros(length(a_values))
 
 for (i,a) in enumerate(a_values)
-    system = Systems.henon([0.0, 0.0]; a=a, b=b);
+    system = Systems.henon([0.0, 0.0]; a=a, b=b)
+    @show a
     timeseries = trajectory(system, traj_length, [0, 0]; Ttr=trans)
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid);
     stn_q, stn_p = create_STN(discrete_timeseries, vertex_names)
@@ -94,6 +95,9 @@ T = 500
 psection = poincaresos(ds, plane, T; Ttr=300, direction=+1); 
 traj = psection[:,2:end] #select y,z variables only
 ```
+
+> **_NOTE:_** The default tolerances for the `poincaresos` are `rootkw = (xrtol = 1e-6, atol = 1e-6)`. These might not be low enough for all purposes (for ex. periodic attractors).
+
 This can be treated as a 2D map:
 ```julia
 traj_grid, vertex_names = timeseries_to_grid(traj,20) # 20x20 grid
@@ -102,22 +106,21 @@ stn_q, stn_p = create_STN(traj_grid,vertex_names)
 We can also study the network measures for different parameters. With `PSOS`, the resulting network is not necesarrily strongly connected (not every vertex is reachable from every other vertex) in which case a random walk process would fail (we need ergodicity for the network measures). 
 
 ```julia
-using Graphs
 rho_values = 180:0.003:182;
-grid = 20
+T = 5000
+grid_size = 20
 ensemble = 100
 N_steps = 10000
-lyapunov = zeros(length(rho_values))
-entropy = zeros(length(rho_values))
+lyap_measures = zeros(length(rho_values))
+entropy_measures = zeros(length(rho_values))
 for (i,ρ) in enumerate(rho_values)
     ds = Systems.lorenz(ρ=ρ)
-    psection = poincaresos(ds, plane, 500; Ttr=300, direction=+1)
+    @show ρ
+    psection = poincaresos(ds, plane, T; Ttr=500, direction=+1,rootkw = (xrtol = 1e-8, atol = 1e-8))
     timeseries = psection[:,2:end]
-    discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid)
+    discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size)
     _, stn_p = create_STN(discrete_timeseries, vertex_names)
-    if is_strongly_connected(stn_p)
-        entropy[i], lyapunov[i] = walk_statistics(ensemble, stn_p, N_steps)
-    end
+    entropy_measures[i], lyap_measures[i] = walk_statistics(ensemble, stn_p, N_steps)
 end
 ```
 
