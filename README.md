@@ -1,14 +1,21 @@
 # StateTransitionNetworks.jl
 Toolkit for dynamics on state-transition networks based on the paper Sándor et al. (2022).
 
-## Basic usage
 
-Using the package in REPL:
+## Installation
+Download a local copy, go to the directory and use the package in REPL:
 ```julia
 pkg> activate .
 using StateTransitionNetworks
 ```
+Or download and install automatically to your global `julia` environment with:
+```julia
+pkg> add https://github.com/rusandris/StateTransitionNetworks.jl.git
+using StateTransitionNetworks
+```
 
+
+## Basic usage
 ### Discrete example: Henon map
 
 Constructing state-transition network for the [Henon map](https://juliadynamics.github.io/DynamicalSystems.jl/dev/ds/predefined/#DynamicalSystemsBase.Systems.henon) (2D discrete dynamical system):
