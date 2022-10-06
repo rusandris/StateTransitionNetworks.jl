@@ -1,10 +1,10 @@
-function timeseries_to_grid(timeseries, grid)
-    """
-    Discretizes a 2D timeseries/trajectory on a grid. Returns
-    a discrete timeseries containing the the cell coordinates and the list
-    of vertices with cell coordinates. 
-    """
-    
+"""
+	timeseries_to_grid(timeseries, grid) -> cell_coordinates,vertex_names
+Discretizes a 2D timeseries/trajectory on a grid. Returns
+a discrete timeseries containing the the cell coordinates and the list
+of vertices with cell coordinates. 
+"""
+function timeseries_to_grid(timeseries, grid)    
     M = zeros(grid,grid)
     T = length(timeseries[:,1])
     x_min = minimum(timeseries[:, 1])
@@ -40,13 +40,14 @@ function timeseries_to_grid(timeseries, grid)
 end
 
 
+"""
+	create_STN(discrete_timeseries, vertex_names) -> stn_q,stn_p
+Creates a state transition network (STN) using the discrete timeseries and vertex list.
+The network is a SimpleWeightedDiGraph object. Two graphs are returned,
+one with occurence probability (Q[i,j]) and one with the transition probability
+as weights (P[i,j]). 
+"""
 function create_STN(discrete_timeseries, vertex_names)
-    """
-    Creates a state transition network (STN) using the discrete timeseries and vertex list.
-    The network is a SimpleWeightedDiGraph object. Two graphs are returned,
-    one with occurence probability (Q_ij) and one with the transition probability
-    as weights (P_ij) 
-    """
     steps = []
 
     for row in eachrow(discrete_timeseries)
