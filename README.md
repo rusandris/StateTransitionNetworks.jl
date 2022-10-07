@@ -8,7 +8,7 @@ Download a local copy, go to the directory and use the package in REPL:
 pkg> activate .
 using StateTransitionNetworks
 ```
-Or download and install automatically to your global `julia` environment with:
+Or download and install automatically to your local/global `julia` environment with:
 ```julia
 pkg> add https://github.com/rusandris/StateTransitionNetworks.jl.git
 using StateTransitionNetworks
