@@ -33,8 +33,7 @@ Use `create_STN` to construct the graph object that corresponds to the STN:
 ```julia
 stn_q, stn_p = create_STN(traj_grid,vertex_names)
 ```
-The network is a SimpleWeightedDiGraph object. Two graphs are returned,one with occurence probability (`Q_ij`) and one with the transition probability
-as weights (`P_ij`). 
+The network is a SimpleWeightedDiGraph object. Two graphs are returned with a different set of weights: one with occurence probability weights (`Q_ij`) and one with the transition probability weights (`P_ij`). 
 
 Calculate entropy and lyapunov measures with `walk_statistics`:
 ```julia
