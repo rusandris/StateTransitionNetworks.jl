@@ -41,50 +41,59 @@ end
 
 
 """
-	create_STN(discrete_timeseries, vertex_names) -> stn_q,stn_p
+	create_stn(discrete_timeseries, vertex_names) -> stn
 Creates a state transition network (STN) using the discrete timeseries and vertex list.
-The network is a SimpleWeightedDiGraph object. Two graphs are returned,
-one with occurence probability (Q[i,j]) and one with the transition probability
-as weights (P[i,j]). 
+The network is a directed metagraph object
+## Vertex properties
+* `:pos` : Position of vertex point is the discretized phase space
+## Edge properties
+* `:weight` : Occurence probability of the transition `i -> j`
+* `:prob` : Conditional transition probability of `i -> j`
 """
-function create_STN(discrete_timeseries, vertex_names)
-    steps = []
-
-    for row in eachrow(discrete_timeseries)
-        index = Int[ row == vertex_names[i,2:end] for i in eachindex(vertex_names[:,1])]
-        step = vertex_names[findfirst(x -> x == 1, index),1]  
-        push!(steps,step)
+function create_stn(discrete_timeseries,vertex_names)
+	nr_vertices = length(vertex_names[:,1])
+	states = zeros(Int32,length(discrete_timeseries[:,1])) #discrete timeseries but only with vertex indices
+	
+	for v in 1:nr_vertices
+		timepoints_at_v = findall(x -> x == vertex_names[v,2:end],[eachrow(discrete_timeseries)...]) #find all times when state was v
+		states[timepoints_at_v] .= v  
+	end		
+	
+	#weight and transition probability matrices
+	Q = zeros(nr_vertices, nr_vertices)
+    P = zeros(nr_vertices, nr_vertices)
+    
+    #count transitions
+    next_states = circshift(states,-1)
+    for i in eachindex(states[1:end-1])
+        Q[states[i],next_states[i]] += 1
     end
 
-    num_vertex = length(vertex_names[:,1])
-
-    Q = zeros(num_vertex, num_vertex);
-    P = zeros(num_vertex, num_vertex);
-    next_step = circshift(steps,-1)
-
-    for i in eachindex(steps[1:end-1])
-        Q[steps[i],next_step[i]] += 1
-    end
-
+	#normalize Q and fill P by normalizing rows
     Q = Q./sum(Q)
     for i in 1:size(Q)[1]
         P[i,:] = Q[i,:]./sum(Q[i,:])
     end
 
-    stn_weight = SimpleWeightedDiGraph(num_vertex)
-    stn_prob = SimpleWeightedDiGraph(num_vertex)
-
-    for i in 1:num_vertex
-        for j in 1:num_vertex
+	#create directed metagraph with default weight 0
+	stn = MetaDiGraph(nr_vertices,0.0)
+	
+	#add edges and properties
+	#Properties: vertices -> :pos, edges -> :weight, :prob
+	
+	for v in 1:nr_vertices
+		position = tuple(vertex_names[v,2:end]...) 
+		set_prop!(stn,v,:pos,position)
+	end
+	
+	for i in 1:nr_vertices
+        for j in 1:nr_vertices
             if Q[i, j] != 0
-                add_edge!(stn_weight, i, j, Q[i,j])
-                add_edge!(stn_prob, i, j, P[i, j])
+				add_edge!(stn,i,j,Dict(:weight => Q[i,j],:prob => P[i,j]))
             end
         end
     end
-    
-    is_strongly_connected(stn_prob) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
 
-    return stn_weight, stn_prob
+	    return stn
 end
 
