@@ -93,7 +93,6 @@ function create_stn(discrete_timeseries,vertex_names)
             end
         end
     end
-
-	    return stn
+	return stn
 end
 
