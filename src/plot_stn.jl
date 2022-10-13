@@ -1,4 +1,4 @@
-function plot_stn(stn;filename="stn.pdf",lw_factor,nodesize=1,linetype="straight")
+function plot_stn(stn;filename="stn.pdf",nodesize=1,nodefillc="orange",linetype="straight",max_edgelinewidth=2)
 	nr_vertices = nv(stn)
 	x = zeros(Int32,nr_vertices)
 	y = zeros(Int32,nr_vertices)
@@ -10,7 +10,13 @@ function plot_stn(stn;filename="stn.pdf",lw_factor,nodesize=1,linetype="straight
 
 	w = [get_prop(stn,edge,:weight) for edge in collect(edges(stn))]
 	
-	gp = gplot(stn,x,y,edgelinewidth = w .* lw_factor,nodesize=nodesize,linetype=linetype,EDGELINEWIDTH=2)
+	gp = gplot(stn,x,y,
+	edgelinewidth = w,
+	nodesize=nodesize,
+	nodefillc=nodefillc,
+	linetype=linetype,
+	EDGELINEWIDTH=max_edgelinewidth)
+	
 	draw(PDF(filename),gp)
 
 end
