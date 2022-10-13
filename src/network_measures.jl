@@ -1,25 +1,26 @@
+function randomwalk_step(graph,source)
+	neigh = outneighbors(graph, source)
+	neigh_weights = [get_prop(graph,source,vertex,:prob) for vertex in neigh] 
+	destination = sample(neigh, Weights(neigh_weights))
+	
+	w = neigh_weights[indexin(destination,neigh)[1]]
+	return destination,-log(w)
+end
+
 """
-Conducts a random walk process on a weighted graph for `N_steps` discarding
-the first `transient` steps. Returns the normalized walk length.
+Conducts a random walk process on a weighted graph for `N_steps`.
+Returns the normalized walk length.
 """
-function random_walk_on_weighted_graph(graph, N_steps, transient)
-    n = 0;
+#took out transient, and uses randomwalk_step now
+function random_walk_on_weighted_graph(graph, N_steps)
     source = sample(1:nv(graph));
     walk_length = 0.0;
 
-    while n < N_steps
-        neigh = outneighbors(graph, source)
-        w = Vector{Float64}(undef, length(neigh))
-        for i in eachindex(neigh)
-            w[i] = get_weight(graph, source, neigh[i])
-        end
-        source = sample(neigh, Weights(w))
-        if n > transient
-            l = -log(w[indexin(source, neigh)][1])
-            walk_length = walk_length + l
-        end
-        n += 1
+    for n in 1:N_steps
+		source, l = randomwalk_step(graph,source)
+		walk_length = walk_length + l
     end
+    
     return walk_length
 end
 
@@ -29,29 +30,21 @@ Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
 by calculating the average walk length and the variance of walk lenghts
 over an ensemble of random walks on weighted graph
 """
-function walk_statistics(ensemble, graph, N_steps, transient=5000)
+function walk_statistics(graph, ensemble, N_steps)
     walk_length = Vector{Float64}(undef, ensemble)
     for i in 1:ensemble
-        walk_length[i] = random_walk_on_weighted_graph(graph, N_steps, transient)
+        walk_length[i] = random_walk_on_weighted_graph(graph, N_steps)
     end
-   	entropy = mean(walk_length)/(N_steps-transient)
-    lyapunov_measure = var(walk_length)/(N_steps-transient)
+   	entropy = mean(walk_length)/N_steps
+    lyapunov_measure = var(walk_length,corrected=false)/N_steps
     return entropy, lyapunov_measure
-end
-
-function randomwalk_step(graph,source)
-	neigh = outneighbors(graph, source)
-	neigh_weights = [get_weight(graph,source,vertex) for vertex in neigh] 
-	destination = sample(neigh, Weights(neigh_weights))
-	
-	w = neigh_weights[indexin(destination,neigh)[1]]
-	return destination,-log(w)
 end
 
 """
 	measure_convergence(graph::SimpleWeightedDiGraph,ensemble,N_max) -> entropy_timeseries,lyapunov_timeseries
 Calculates and returns network measures for an ensemble at every step in the random walk up to N_max.
 """
+#calc variance without correction
 function measure_convergence(graph,ensemble,N_max)
 	ensemble_walk_lengths = [] #container for walk lengths for every step for every random_walk
 	
