@@ -11,11 +11,11 @@ function plot_stn(stn;filename="stn.pdf",nodesize=1,nodefillc="orange",linetype=
 	w = [get_prop(stn,edge,:weight) for edge in collect(edges(stn))]
 	
 	gp = gplot(stn,x,y,
-	edgelinewidth = w,
-	nodesize=nodesize,
-	nodefillc=nodefillc,
-	linetype=linetype,
-	EDGELINEWIDTH=max_edgelinewidth)
+		edgelinewidth = w,
+		nodesize=nodesize,
+		nodefillc=nodefillc,
+		linetype=linetype,
+		EDGELINEWIDTH=max_edgelinewidth)
 	
 	draw(PDF(filename),gp)
 
