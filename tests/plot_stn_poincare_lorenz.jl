@@ -62,3 +62,5 @@ pl = gplot(
     linetype = "curve",
     nodefillc = "green"
     )
+
+display(pl)
