@@ -6,9 +6,8 @@ using GraphPlot
 using Random
 
 # Parameters, preliminary data for S_KS and Lyapunov measure plots
-timeseries = psection[:,2:end]
 grid = 20;
-
+plane = (1,15.0);
 rho_ensemble = 20; # Number of STNs for each value of ρ
 rho = 180:0.003:182;
 ensemble = 100; # Number of random walks
