@@ -96,11 +96,8 @@ function measure_convergence(graph,ensemble,N_max)
 end
 
 """
-	sinai_kolmogorov_entropy(graph_Q; graph_P=nothing) -> S
-Calculates analytically the Sinai-Kolmogorov entropy on a STN. The main input `graph_Q` is a SimpleWeightedDiGraph
-object containg the occurence probability of each transition (Q[i,j]). The additional `graph_P` argument is another 
-graph containg the normalized transition probabilities (P[i,j]). If this is not provided the function calculates automatically these transition
-probabilities.
+	sinai_kolmogorov_entropy(stn) -> S
+Calculates analytically the Sinai-Kolmogorov entropy on a STN by extracting the Q weight matrix and P transition probability matrix.
 """
 function sinai_kolmogorov_entropy(graph)
     Q = weight_matrix(graph)
@@ -110,6 +107,11 @@ function sinai_kolmogorov_entropy(graph)
     return entropy
 end
 
+"""
+	sinai_kolmogorov_entropy(Q,P) -> S
+Calculates analytically the Sinai-Kolmogorov entropy given the the Q weight matrix and P transition probability matrix of the STN. 
+
+"""
 function sinai_kolmogorov_entropy(Q,P)
     entropy = -sum(Q[Q .!=0] .* log.(P[P .!=0]))
 end
