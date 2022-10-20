@@ -22,26 +22,47 @@ Constructing state-transition network for the [Henon map](https://juliadynamics.
 ```julia
 using DynamicalSystems
 ds = Systems.henon()
-traj = trajectory(ds,10000;Ttr = 1500) #generate timeseries
+traj = trajectory(ds,10000;Ttr = 1000) #generate timeseries
 ```
 This can be fed into `timeseries_to_grid` which discretizes the timeseries and returns the name of the vertices:
 ```julia
 traj_grid, vertex_names = timeseries_to_grid(traj,20) # 20x20 grid
 ```
 These vertices (nodes) will be the states of our state-transition network. If the discretized trajectory contains a transition from state `i` to `j`, there will be an edge between two vertices `i -> j`.
-Use `create_STN` to construct the graph object that corresponds to the STN:
+Use `create_stn` to construct the graph object that corresponds to the STN:
 ```julia
-stn_q, stn_p = create_STN(traj_grid,vertex_names)
+stn = create_stn(traj_grid,vertex_names); #output might be long
 ```
-The network is a SimpleWeightedDiGraph object. Two graphs are returned with a different set of weights: one with occurence probability weights (`Q_ij`) and one with the transition probability weights (`P_ij`). 
+The network is a directed MetaGraph object which contains the vertices and edges of the STN which have metadata (attributes of predefined type) attached to them.
+
+```julia
+
+ MetaGraph(DiGraph(),
+            Label = Int64, 
+            VertexData = Tuple{Int64, Int64}, 
+            EdgeData = Tuple{Float64,Float64}, 
+            default_weight = 0.0)
+```
+
+#### Vertex properties
+* **Grid coordinates** (position of the vertex point in the discretized phase space) -> `stn[i] # returns tuple (x,y)` 
+#### Edge properties 
+* **Transition probabilities** and **weights**  -> `stn[i,j] # returns tuple (p,q)`
+
+Access the whole matrices `P[i,j]` and `Q[i,j]`
+```julia
+P = prob_matrix(stn)
+Q = weight_matrix(stn) #sparse adjacency matrices 
+```
 
 Calculate entropy and lyapunov measures with `walk_statistics`:
 ```julia
 ensemble = 100 #number of random walks on the network
 N_steps = 1e4 #number of steps taken in a random walk
 
-entropy, lyapunov = walk_statistics(ensemble, stn_p, N_steps)
+entropy, lyapunov = walk_statistics(stn,ensemble, N_steps)
 ```
+
 
 
 Calculate the network measures for different parameters (dynamics) of the Henon map:
@@ -63,8 +84,8 @@ for (i,a) in enumerate(a_values)
     @show a
     timeseries = trajectory(system, traj_length, [0, 0]; Ttr=trans)
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
-    stn_q, stn_p = create_STN(discrete_timeseries, vertex_names)
-    entropy_measures[i], lyapunov_measures[i] = walk_statistics(ensemble, stn_p, N_steps)
+    stn = create_stn(discrete_timeseries, vertex_names)
+    entropy_measures[i], lyapunov_measures[i] = walk_statistics(stn,ensemble, N_steps)
 end
 ```
 Plot results with:
@@ -107,7 +128,7 @@ traj = psection[:,2:end] #select y,z variables only
 This can be treated as a 2D map:
 ```julia
 traj_grid, vertex_names = timeseries_to_grid(traj,20) # 20x20 grid
-stn_q, stn_p = create_STN(traj_grid,vertex_names)
+stn = create_stn(traj_grid,vertex_names)
 ```
 We can also study the network measures for different parameters. With `PSOS`, the resulting network is not necesarrily strongly connected (not every vertex is reachable from every other vertex) in which case a random walk process would fail (we need ergodicity for the network measures). 
 
@@ -125,7 +146,7 @@ for (i,ρ) in enumerate(rho_values)
     psection = poincaresos(ds, plane, T; Ttr=500, direction=+1,rootkw = (xrtol = 1e-8, atol = 1e-8))
     timeseries = psection[:,2:end]
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size)
-    _, stn_p = create_STN(discrete_timeseries, vertex_names)
+    stn = create_stn(discrete_timeseries, vertex_names)
     entropy_measures[i], lyap_measures[i] = walk_statistics(ensemble, stn_p, N_steps)
 end
 ```
