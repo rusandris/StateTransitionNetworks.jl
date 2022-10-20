@@ -1,9 +1,32 @@
-function randomwalk_step(graph,source)
+function prob_matrix(graph)
+	nr_vertices = nv(graph)
+	P = spzeros(Float64,(nr_vertices,nr_vertices))
+	for edge in collect(edges(graph))
+		i = edge.src
+		j = edge.dst
+		P[i,j] = graph[i,j][1]
+	end
+	return P
+end
+
+function weight_matrix(graph)
+	nr_vertices = nv(graph)
+	Q = spzeros(Float64,(nr_vertices,nr_vertices))
+	for edge in collect(edges(graph))
+		i = edge.src
+		j = edge.dst
+		Q[i,j] = graph[i,j][2]
+	end
+	return Q
+
+end
+
+function randomwalk_step(graph,source,prob_matrix)
 	neigh = outneighbors(graph, source)
-	neigh_weights = [get_prop(graph,source,vertex,:prob) for vertex in neigh] 
-	destination = sample(neigh, Weights(neigh_weights))
+	neigh_weights = prob_matrix[source,:]
+	destination = sample(neigh, Weights(neigh_weights.nzval))
+	w = neigh_weights[destination]
 	
-	w = neigh_weights[indexin(destination,neigh)[1]]
 	return destination,-log(w)
 end
 
@@ -15,9 +38,10 @@ Returns the normalized walk length.
 function random_walk_on_weighted_graph(graph, N_steps)
     source = sample(1:nv(graph));
     walk_length = 0.0;
+    P = prob_matrix(graph)
 
     for n in 1:N_steps
-		source, l = randomwalk_step(graph,source)
+		source, l = randomwalk_step(graph,source,P)
 		walk_length = walk_length + l
     end
     
@@ -52,9 +76,10 @@ function measure_convergence(graph,ensemble,N_max)
 		source = sample(1:nv(graph));
 		walk_length_timeseries = zeros(N_max) #container for individual walk lengths for every step 
 		walk_length = 0
+		P = prob_matrix(graph)
 		
 		for n in 1:N_max
-			source, l = randomwalk_step(graph,source) #make one step in the graph
+			source, l = randomwalk_step(graph,source,P) #make one step in the graph
 			walk_length += l
 			walk_length_timeseries[n] = walk_length  
 		end
@@ -72,21 +97,20 @@ end
 
 """
 	sinai_kolmogorov_entropy(graph_Q; graph_P=nothing) -> S
-Calculates analytically the Sinai-Kolmogorov entropy on a STN. The main input `graph_P` is a SimpleWeightedDiGraph
+Calculates analytically the Sinai-Kolmogorov entropy on a STN. The main input `graph_Q` is a SimpleWeightedDiGraph
 object containg the occurence probability of each transition (Q[i,j]). The additional `graph_P` argument is another 
 graph containg the normalized transition probabilities (P[i,j]). If this is not provided the function calculates automatically these transition
 probabilities.
 """
-function sinai_kolmogorov_entropy(graph_Q; graph_P=nothing)
-    Q = Matrix(weights(graph_Q))
-    if isnothing(graph_P)
-        P = Matrix(weights(graph_Q))
-        for i in 1:size(Q)[1]
-            P[i,:]./=sum(Q[i,:])
-        end
-    else
-        P = Matrix(weights(graph_P))
-    end
+function sinai_kolmogorov_entropy(graph)
+    Q = weight_matrix(graph)
+    P = prob_matrix(graph)
+
     entropy = -sum(Q[Q .!=0] .* log.(P[P .!=0]))
     return entropy
 end
+
+function sinai_kolmogorov_entropy(Q,P)
+    entropy = -sum(Q[Q .!=0] .* log.(P[P .!=0]))
+end
+

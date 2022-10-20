@@ -45,10 +45,9 @@ end
 Creates a state transition network (STN) using the discrete timeseries and vertex list.
 The network is a directed metagraph object
 ## Vertex properties
-* `:pos` : Position of vertex point is the discretized phase space
-## Edge properties
-* `:weight` : Occurence probability of the transition `i -> j`
-* `:prob` : Conditional transition probability of `i -> j`
+	stn[i] -> position::Tuple{Int64, Int64}, 
+## Edge properties 
+	stn[i,j] -> (prob,weigth)::Tuple{Float64,Float64}
 """
 function create_stn(discrete_timeseries,vertex_names)
 	nr_vertices = length(vertex_names[:,1])
@@ -75,24 +74,29 @@ function create_stn(discrete_timeseries,vertex_names)
         P[i,:] = Q[i,:]./sum(Q[i,:])
     end
 
-	#create directed metagraph with default weight 0
-	stn = MetaDiGraph(nr_vertices,0.0)
+	#create directed metagraph with static label and metadata types and default weight 0
+	stn = MetaGraph(DiGraph(),Label = Int64, 
+		VertexData = Tuple{Int64, Int64}, 
+		EdgeData = Tuple{Float64,Float64}, 
+		default_weight = 0.0)
+
 	
 	#add edges and properties
-	#Properties: vertices -> :pos, edges -> :weight, :prob
+	#Properties: vertices -> position::Tuple{Int64, Int64}, edges -> (weigths,prob)::Tuple{Float64,Float64}
 	
 	for v in 1:nr_vertices
 		position = tuple(vertex_names[v,2:end]...) 
-		set_prop!(stn,v,:pos,position)
+		stn[v] = position
 	end
 	
 	for i in 1:nr_vertices
         for j in 1:nr_vertices
             if Q[i, j] != 0
-				add_edge!(stn,i,j,Dict(:weight => Q[i,j],:prob => P[i,j]))
+				stn[i,j] = (P[i,j],Q[i,j])
             end
         end
     end
+    
 	return stn
 end
 

@@ -886,6 +886,12 @@ git-tree-sha1 = "2af69ff3c024d13bde52b34a2a7d6887d4e7b438"
 uuid = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
 version = "0.7.1"
 
+[[MetaGraphsNext]]
+deps = ["Graphs", "JLD2"]
+git-tree-sha1 = "46f9e8e3e27ee71026751fa015ab9c441ba7d51d"
+uuid = "fa8bd995-216d-47f1-8a91-f3b68fbeb377"
+version = "0.4.0"
+
 [[Missings]]
 deps = ["DataAPI"]
 git-tree-sha1 = "bf210ce90b6c9eed32d25dbcae1ebc565df2687f"
