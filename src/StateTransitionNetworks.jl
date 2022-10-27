@@ -6,14 +6,17 @@ import StatsBase: sample, mean, var, Weights
 using MetaGraphsNext
 using GraphPlot,Cairo,Compose
 import SparseArrays: spzeros 
+import DelayEmbeddings: AbstractDataset
+import ChaosTools: poincaresos
 
 include("create_stn.jl")
 include("network_measures.jl")
 include("plot_stn.jl")
+include("timeseries_analysis.jl")
 
 export timeseries_to_grid, create_stn,prob_matrix,weight_matrix
-export walk_statistics, sinai_kolmogorov_entropy,measure_convergence
+export network_measures, sinai_kolmogorov_entropy,measure_convergence
 export plot_stn
-
+export stn_analysis
 
 end
