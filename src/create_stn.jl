@@ -59,8 +59,8 @@ function create_stn(discrete_timeseries,vertex_names)
 	end		
 	
 	#weight and transition probability matrices
-	Q = zeros(nr_vertices, nr_vertices)
-    P = zeros(nr_vertices, nr_vertices)
+	Q = spzeros(nr_vertices, nr_vertices)
+    P = spzeros(nr_vertices, nr_vertices)
     
     #count transitions
     next_states = circshift(states,-1)
@@ -72,6 +72,7 @@ function create_stn(discrete_timeseries,vertex_names)
     Q = Q./sum(Q)
     for i in 1:size(Q)[1]
         P[i,:] = Q[i,:]./sum(Q[i,:])
+       #all(i -> isfinite(i),P[i,:]) || @warn "Inf/NaN values in the transition matrix P[i,j]!"
     end
 
 	#create directed metagraph with static label and metadata types and default weight 0
@@ -91,12 +92,30 @@ function create_stn(discrete_timeseries,vertex_names)
 	
 	for i in 1:nr_vertices
         for j in 1:nr_vertices
-            if Q[i, j] != 0
+            if P[i, j] != 0
 				stn[i,j] = (P[i,j],Q[i,j])
             end
         end
     end
     
+    #is_strongly_connected(stn_prob) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
+	
+	check_stn(Q,P)
+	
 	return stn
 end
+
+function check_stn(Q,P)
+	nr_vertices = size(Q)[1]
+	for i in 1:nr_vertices
+		sum(Q[:,i]) == 0 && @warn "Vertex with no incoming edge detected! Length of transient/timeseries is insufficient!"
+		if sum(Q[i,:]) == 0 
+			@warn "Vertex with no outgoing edge detected! Length of timeseries is insufficient!"
+		elseif  P[i,i] == 1
+			@warn "Deadend (self-loop edge) detected!"
+		end
+	end
+end
+
+
 
