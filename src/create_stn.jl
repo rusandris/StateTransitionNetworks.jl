@@ -77,44 +77,50 @@ function create_stn(discrete_timeseries,vertex_names)
 
 	#create directed metagraph with static label and metadata types and default weight 0
 	stn = MetaGraph(DiGraph(),Label = Int64, 
-		VertexData = Tuple{Int64, Int64}, 
-		EdgeData = Tuple{Float64,Float64}, 
+		VertexData = Dict{Symbol, Int64}, 
+		EdgeData = Dict{Symbol,Float64}, 
 		default_weight = 0.0)
 
 	
 	#add edges and properties
-	#Properties: vertices -> position::Tuple{Int64, Int64}, edges -> (weigths,prob)::Tuple{Float64,Float64}
+	#Properties: vertices ->  Dict{Symbol,Int64}, edges -> Dict{Symbol,Float64}
 	
 	for v in 1:nr_vertices
-		position = tuple(vertex_names[v,2:end]...) 
-		stn[v] = position
+		x,y = vertex_names[v,2:end] 
+		stn[v] = Dict(:x => x,:y => y)
 	end
 	
 	for i in 1:nr_vertices
         for j in 1:nr_vertices
             if P[i, j] != 0
-				stn[i,j] = (P[i,j],Q[i,j])
+				stn[i,j] = Dict(:prob => P[i,j],:weight => Q[i,j])
             end
         end
     end
     
-    #is_strongly_connected(stn_prob) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
+    #is_strongly_connected(stn) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
 	
-	check_stn(Q,P)
+	retcode = check_stn(Q,P)
 	
-	return stn
+	return stn,retcode
 end
 
 function check_stn(Q,P)
 	nr_vertices = size(Q)[1]
+	default_retcode =:Success
 	for i in 1:nr_vertices
-		sum(Q[:,i]) == 0 && @warn "Vertex with no incoming edge detected! Length of transient/timeseries is insufficient!"
-		if sum(Q[i,:]) == 0 
+		if	sum(Q[:,i]) == 0 
+			@warn "Vertex with no incoming edge detected! Length of transient/timeseries is insufficient!"
+			return :NoIncoming
+		elseif sum(Q[i,:]) == 0 
 			@warn "Vertex with no outgoing edge detected! Length of timeseries is insufficient!"
+			return :NoOutgoing
 		elseif  P[i,i] == 1
-			@warn "Deadend (self-loop edge) detected!"
+			@warn "Dead-end (self-loop edge) detected!"
+			return :DeadEnd
 		end
 	end
+	return default_retcode
 end
 
 

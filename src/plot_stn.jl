@@ -4,9 +4,8 @@ function plot_stn(stn;filename="stn.pdf",nodesize=1,nodefillc="orange",linetype=
 	y = []
 		
 	for i in 1:nr_vertices
-		pos = stn[i]
-		push!(x,pos[1])
-		push!(y,pos[2])
+		push!(x,stn[i][:x])
+		push!(y,stn[i][:y])
 	end
 	x = Int32.(x)
 	y = Int32.(y)

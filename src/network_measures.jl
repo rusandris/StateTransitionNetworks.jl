@@ -4,7 +4,7 @@ function prob_matrix(stn)
 	for edge in collect(edges(stn))
 		i = edge.src
 		j = edge.dst
-		P[i,j] = stn[i,j][1]
+		P[i,j] = stn[edge.src,edge.dst][:prob]
 	end
 	return P
 end
@@ -15,10 +15,9 @@ function weight_matrix(stn)
 	for edge in collect(edges(stn))
 		i = edge.src
 		j = edge.dst
-		Q[i,j] = stn[i,j][2]
+		Q[i,j] = stn[i,j][:weight]
 	end
 	return Q
-
 end
 
 function randomwalk_step(stn,source,prob_matrix)
