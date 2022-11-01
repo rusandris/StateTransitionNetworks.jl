@@ -45,9 +45,9 @@ end
 Creates a state transition network (STN) using the discrete timeseries and vertex list.
 The network is a directed metagraph object
 ## Vertex properties
-	stn[i] -> position::Tuple{Int64, Int64}, 
+	stn[i] -> (:x => x,:y => y)
 ## Edge properties 
-	stn[i,j] -> (prob,weigth)::Tuple{Float64,Float64}
+	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
 function create_stn(discrete_timeseries,vertex_names)
 	nr_vertices = length(vertex_names[:,1])
