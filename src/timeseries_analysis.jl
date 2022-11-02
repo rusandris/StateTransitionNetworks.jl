@@ -5,13 +5,13 @@ Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created fr
 ## Keyword arguments
 * `grid` : size of grid used for discretization 
 * `plane` : PSOS plane propagated to `poincaresos` from ChaosTools
+* `idxs` : choose which variables to save
 * `ensemble` : number of individual random walks on the STN
 * `N_steps` : number of steps in each random walk
 """
-function stn_analysis(timeseries::Dataset;grid,plane,ensemble=100,N_steps=1000,return_stn=false)
+function stn_analysis(timeseries::Dataset;grid,plane,idxs,ensemble=100,N_steps=1000,return_stn=false)
 	dim = size(timeseries)[2]
-	psection = poincaresos(timeseries, plane); 
-	psection = psection[:,filter(x -> x != plane[1],1:dim)]
+	psection = poincaresos(timeseries, plane;idxs=idxs); 
 	
 	discrete_timeseries, vertex_names = timeseries_to_grid(psection,grid)
 	stn,retcode = create_stn(discrete_timeseries,vertex_names)
@@ -27,7 +27,7 @@ function stn_analysis(timeseries::Dataset;grid,plane,ensemble=100,N_steps=1000,r
 	end
 end
 
-stn_analysis(timeseries::Matrix;grid,plane,ensemble=100,N_steps=1000,return_stn=false) = stn_analysis(Dataset(timeseries);grid=grid,plane=plane,ensemble=ensemble,N_steps=N_steps,return_stn=return_stn)
+stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,return_stn=false) = stn_analysis(Dataset(timeseries);grid=grid,plane=plane,idxs=idxs,ensemble=ensemble,N_steps=N_steps,return_stn=return_stn)
 
 """
 	read_bin(filename::String,T::DataType,dim) -> Matrix
@@ -38,8 +38,3 @@ function read_bin(filename::String,T::DataType,dim)
 	data = reinterpret(T,read(filename))
 	return Matrix(reshape(data,(dim,:))')
 end
-
-
-
-
-
