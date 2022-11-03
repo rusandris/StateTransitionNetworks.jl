@@ -8,6 +8,7 @@ using GraphPlot,Cairo,Compose
 import SparseArrays: spzeros 
 import DelayEmbeddings: Dataset,AbstractDataset
 import ChaosTools: poincaresos
+import Suppressor: @suppress
 
 include("create_stn.jl")
 include("network_measures.jl")

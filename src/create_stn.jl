@@ -76,7 +76,7 @@ function create_stn(discrete_timeseries,vertex_names)
     end
 
 	#create directed metagraph with static label and metadata types and default weight 0
-	stn = MetaGraph(DiGraph(),Label = Int64, 
+	stn = @suppress MetaGraph(DiGraph(),Label = Int64, 
 		VertexData = Dict{Symbol, Int64}, 
 		EdgeData = Dict{Symbol,Float64}, 
 		default_weight = 0.0)
