@@ -11,8 +11,8 @@ stn,retcode = stn_analysis(eeg_data;grid=grid,plane=plane,idxs=[2,3],return_stn=
 
 @show retcode
 
-lyap, entr = network_measures(stn,ens,steps)
-@show lyap, entr
+entr, lyap = network_measures(stn,ens,steps)
+@show entr, lyap
 
 fn, ext = splitext(filename)
 plot_stn(stn;filename=fn*".pdf",linetype="curve")
