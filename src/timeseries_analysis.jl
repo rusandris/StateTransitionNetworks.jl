@@ -1,13 +1,14 @@
 """
 	stn_analysis(timeseries::AbstractDataset;grid,plane,ensemble,N_steps) ->  S, Λ
 	
-Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created from `timeseries`.
+Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created from `timeseries`. If the retcode is other than `:Success`, 'NaN's are returned.
 ## Keyword arguments
 * `grid` : size of grid used for discretization 
 * `plane` : PSOS plane propagated to `poincaresos` from ChaosTools
 * `idxs` : choose which variables to save
 * `ensemble` : number of individual random walks on the STN
 * `N_steps` : number of steps in each random walk
+* `return_stn` : returns only the `stn` and the `retcode`
 """
 function stn_analysis(timeseries::Dataset;grid,plane,idxs,ensemble=100,N_steps=1000,return_stn=false)
 	dim = size(timeseries)[2]
