@@ -1,7 +1,6 @@
 module StateTransitionNetworks
 
-import Graphs: DiGraph,add_edge!, outneighbors, nv, weights, is_strongly_connected,edges
-import SimpleWeightedGraphs: SimpleWeightedDiGraph, get_weight
+import Graphs: DiGraph,add_edge!, outneighbors, nv, ne, weights, is_strongly_connected,edges,degree_histogram
 import StatsBase: sample, mean, var, Weights
 using MetaGraphsNext
 using GraphPlot,Cairo,Compose
@@ -18,6 +17,6 @@ include("timeseries_analysis.jl")
 export timeseries_to_grid, create_stn,prob_matrix,weight_matrix
 export network_measures, sinai_kolmogorov_entropy,measure_convergence
 export plot_stn
-export stn_analysis,read_bin
+export stn_analysis,read_bin,ndensity
 
 end

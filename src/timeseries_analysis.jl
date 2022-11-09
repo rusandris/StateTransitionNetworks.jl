@@ -39,3 +39,11 @@ function read_bin(filename::String,T::DataType,dim)
 	data = reinterpret(T,read(filename))
 	return Matrix(reshape(data,(dim,:))')
 end
+
+function ndensity(stn)
+	nr_vertices = nv(stn)
+	ne(stn)/(nr_vertices*(nr_vertices-1))
+end
+
+
+
