@@ -105,6 +105,40 @@ function create_stn(discrete_timeseries,vertex_names)
 	return stn,retcode
 end
 
+"""
+	create_stn(P) -> stn
+Creates a state transition network (STN) using a transition probability matrix.
+The network is a directed metagraph object. No error checking in this case.
+## Edge properties 
+	stn[i,j] -> (:prob => P[i,j])
+"""
+function create_stn(P)
+	nr_vertices = size(P)[1]
+
+	#create directed metagraph with static label and metadata types and default weight 0
+	stn = @suppress MetaGraph(DiGraph(),Label = Int64, 
+		EdgeData = Dict{Symbol,Float64}, 
+		default_weight = 0.0)
+
+	for v in 1:nr_vertices
+		stn[v] = nothing
+	end
+	
+	for i in 1:nr_vertices
+        for j in 1:nr_vertices
+            if P[i, j] != 0
+				stn[i,j] = Dict(:prob => P[i,j])
+            end
+        end
+    end
+    
+    #is_strongly_connected(stn) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
+	
+	#retcode = check_stn(Q,P)
+	
+	return stn	
+end
+
 function check_stn(Q,P)
 	nr_vertices = size(Q)[1]
 	default_retcode =:Success
