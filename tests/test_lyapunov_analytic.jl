@@ -12,8 +12,12 @@ using LinearAlgebra
 Δt = 0.001;
 plane = (1,15.0);
 grid = 20;
-ρ=180.867;
+ρ=180.9;
 u0 = rand(Float64,3).*50 .-25;
+# ρ = 180.91
+# u0 = [19.208757974895896, 8.16404896961214, 22.003233673468387]
+# # u0 = [-6.415632455803806, 22.288031139971572, -0.19849359973168035]
+# # u0 = [-3.7172591949410076, 19.267269973658813, -10.673236379143875]
 T = 3000;
 system = Systems.lorenz(u0; ρ=ρ);
 timeseries = trajectory(system, T; Δt=Δt, Ttr=500);
@@ -27,15 +31,15 @@ P = prob_matrix(stn);
 Q = weight_matrix(stn);
 
 λ, v = eigen(Matrix(P));
-λ
+if real(λ[end]) ≈ 1
+   λ[end] = 1.0 + 0.0im
+end
 
 λ2 = (1 .-λ)
 
 λ2 = λ2.^-1
 
-#This needs better solution
-λ2[abs.(λ2).>1e10] .= 0.0 + 0.0im;
-
+replace!(λ2, NaN+NaN*im=>0.0);
 Ω = Diagonal(λ2)
 
 
@@ -65,9 +69,10 @@ l /= 20
 
 # Analytic Lyapunov measure over an interval ======================================================================================
 
-rho = 180:0.01:182;
+rho = 180:0.005:182;
 T = 3000;
 ensemble = 100;
+N_steps = 10000;
 data = [];
 data2 = [];
 data3 = [];
@@ -94,13 +99,13 @@ for ρ in rho
          break
       end
    end
-
+   if real(λ[end]) ≈ 1
+      λ[end] = 1.0 + 0.0im
+   end
    λ2 = (1 .-λ)
 
    λ2 = λ2.^-1
-
-   # This needs better solution
-   λ2[abs.(λ2).>1e10] .= 0.0 + 0.0im;
+   replace!(λ2, NaN+NaN*im=>0.0);
 
    Ω = Diagonal(λ2)
 
@@ -114,6 +119,9 @@ for ρ in rho
    sq_avg = sum(Q[Q .!=0] .* (log.(P[P .!=0])).^2)
 
    lyapunov = real(sq_avg - avg^2 + 2*covariance)
+   if lyapunov < 0
+      @show u0
+   end
    push!(data, lyapunov)
 
    S, L = network_measures(stn, ensemble, N_steps)
@@ -122,7 +130,9 @@ for ρ in rho
    
 end
 
-plot(rho, data, label = "Analytic", xlabel = "ρ", ylabel = "Λ")
+plot(rho[data .>= 0], data[data .>= 0], label = "Analytic", xlabel = "ρ", ylabel = "Λ")
 
-plot!(rho, data2, label = "Random walk")
-plot!(legend = :bottomleft)
+plot!(rho[data .>= 0], data2[data .>= 0], label = "Random walk")
+plot!(legend = :topleft)
+data[data .< 0]
+rho[data .< 0]
