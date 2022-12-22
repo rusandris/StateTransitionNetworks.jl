@@ -34,7 +34,7 @@ function analytic_lyapunov(P,Q)
    λ, v = eigen(Matrix(P))
    @show det(v)
    if isapprox(det(v),0) 
-      return -1, -1, :SingularityError
+      return -1, -1, -1, :SingularityError
    end
 
    λt, vt = eigen(transpose(Matrix(P)))
@@ -63,12 +63,13 @@ function analytic_lyapunov(P,Q)
    avg = sinai_kolmogorov_entropy(Q,P)
    sq_avg = sum(Q[Q .!=0] .* (log.(P[P .!=0])).^2)
 
-   lyapunov = sq_avg - avg^2 + 2*real(covariance)
+   variance = sq_avg - avg^2
+   lyapunov =  variance + 2*real(covariance)
    if imag(covariance) < 1.0e-3
-      return lyapunov, real(covariance), :Success
+      return lyapunov, variance, real(covariance), :Success
    else
       @show covariance
-      return lyapunov, real(covariance), :ComplexCovariancveWarning
+      return lyapunov, variance, real(covariance), :ComplexCovariancveWarning
    end
 end
 
@@ -79,13 +80,14 @@ network_measures(stn, 1000, 10^4)[2]
 # Analytic Lyapunov measure over an interval ======================================================================================
 
 rho = 180:0.005:182;
-T = 3000;
-ensemble = 100;
+T = 5000;
+ensemble = 1000;
 N_steps = 10000;
 data0 = [];
 data1 = [];
 data2 = [];
 data3 = [];
+data4 = [];
 for ρ in rho
       @show ρ
       while true # STN must be 'healthy'
@@ -103,24 +105,24 @@ for ρ in rho
       P = prob_matrix(stn);
       Q = weight_matrix(stn);
 
-      λ, v = eigen(Matrix(P));
-
-      lyapunov, covariance, ret_code_lyap = analytic_lyapunov(P,Q)
+      lyapunov, variance, covariance, ret_code_lyap = analytic_lyapunov(P,Q)
       if ret_code_lyap != :Success
          @show ret_code_lyap, lyapunov, u0
       end
 
       push!(data0, lyapunov)
-      push!(data1, covariance)
+      push!(data1, variance)
+      push!(data2, covariance)
    
       S, L = network_measures(stn, ensemble, N_steps)
-      push!(data2, L)
-      push!(data3, S)
+      push!(data3, L)
+      push!(data4, S)
 end
 
-plot(rho, data2, label = "Random walk")
+plot(rho, data3, label = "Random walk")
 plot!(rho, data0, label = "Analytic")
-plot!(rho, data1, label = "Covariance")
+plot!(rho, data1, label = "Variance")
+plot!(rho, data2, label = "Covariance")
 plot!(xlabel = "ρ", ylabel = "Λ", ylim=[-0.5,3.], xlim=[180.,182.], legend = :topleft)
 
 
