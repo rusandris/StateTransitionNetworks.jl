@@ -12,7 +12,7 @@ using LinearAlgebra
 Δt = 0.001;
 plane = (1,15.0);
 grid = 20;
-ρ=180.9;
+ρ= 181.02; #180.9;
 u0 = rand(Float64,3).*50 .-25;
 # ρ = 180.91
 # u0 = [19.208757974895896, 8.16404896961214, 22.003233673468387]
@@ -30,42 +30,51 @@ ret_code
 P = prob_matrix(stn);
 Q = weight_matrix(stn);
 
-λ, v = eigen(Matrix(P));
-if real(λ[end]) ≈ 1
-   λ[end] = 1.0 + 0.0im
+function analytic_lyapunov(P,Q)
+   λ, v = eigen(Matrix(P))
+   @show det(v)
+   if isapprox(det(v),0) 
+      return -1, -1, :SingularityError
+   end
+
+   λt, vt = eigen(transpose(Matrix(P)))
+
+   if real(λ[end]) ≈ 1
+      λ[end] = 1.0 + 0.0im
+   end
+
+   if real(λt[end]) ≈ 1
+      λt[end] = 1.0 + 0.0im
+      x = (vt[:,end]./sum(vt[:,end]))'
+   end
+
+   Ω = Diagonal(1 ./ (1 .- λ))
+   replace!(Ω, NaN+NaN*im=>0.0)
+
+   L = Matrix(-log.(P))
+   replace!(L, Inf=>0.0)
+   L = P.*L
+
+   v*inv(v)
+   det(v)
+   det(v)≈ 0.0+0.0im
+   covariance = x*L*v*Ω*inv(v)*L*ones(length(λ))
+
+   avg = sinai_kolmogorov_entropy(Q,P)
+   sq_avg = sum(Q[Q .!=0] .* (log.(P[P .!=0])).^2)
+
+   lyapunov = sq_avg - avg^2 + 2*real(covariance)
+   if imag(covariance) < 1.0e-3
+      return lyapunov, real(covariance), :Success
+   else
+      @show covariance
+      return lyapunov, real(covariance), :ComplexCovariancveWarning
+   end
 end
 
-λ2 = (1 .-λ)
+analytic_lyapunov(P,Q)
+network_measures(stn, 1000, 10^4)[2]
 
-λ2 = λ2.^-1
-
-replace!(λ2, NaN+NaN*im=>0.0);
-Ω = Diagonal(λ2)
-
-
-L = Matrix(-log.(P));
-replace!(L, Inf=>0.0);
-L = P.*L;
-
-covariance = (v[:,end]./sum(v[:,end]))'*L*v*Ω*inv(v)*L*ones(length(λ))
-
-
-avg = sinai_kolmogorov_entropy(Q,P)
-
-sq_avg = sum(Q[Q .!=0] .* (log.(P[P .!=0])).^2)
-
-sq_avg - avg^2 + 2*covariance
-
-# Random walk Lyapunov
-ensemble = 100;
-N_steps = 10000;
-l = 0;
-for i in 1:20
-   @show l
-   S, L = network_measures(stn, ensemble, N_steps)
-   l += L
-end
-l /= 20
 
 # Analytic Lyapunov measure over an interval ======================================================================================
 
@@ -73,20 +82,20 @@ rho = 180:0.005:182;
 T = 3000;
 ensemble = 100;
 N_steps = 10000;
-data = [];
+data0 = [];
+data1 = [];
 data2 = [];
 data3 = [];
 for ρ in rho
-   @show ρ
-   while true # V matrix should not be singular
+      @show ρ
       while true # STN must be 'healthy'
          u0 = rand(Float64,3).*50 .-25;
          system = Systems.lorenz(u0; ρ=ρ);
          timeseries = trajectory(system, T; Δt=Δt, Ttr=500);
          psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
          d_traj, v_names = timeseries_to_grid(psection, grid);
-         stn, ret_code = create_stn(d_traj, v_names);
-         if ret_code == :Success
+         stn, ret_code_stn = create_stn(d_traj, v_names);
+         if ret_code_stn == :Success
             break
          end
       end
@@ -95,44 +104,25 @@ for ρ in rho
       Q = weight_matrix(stn);
 
       λ, v = eigen(Matrix(P));
-      if det(v) != 0.0+0.0im
-         break
+
+      lyapunov, covariance, ret_code_lyap = analytic_lyapunov(P,Q)
+      if ret_code_lyap != :Success
+         @show ret_code_lyap, lyapunov, u0
       end
-   end
-   if real(λ[end]) ≈ 1
-      λ[end] = 1.0 + 0.0im
-   end
-   λ2 = (1 .-λ)
 
-   λ2 = λ2.^-1
-   replace!(λ2, NaN+NaN*im=>0.0);
-
-   Ω = Diagonal(λ2)
-
-   L = Matrix(-log.(P));
-   replace!(L, Inf=>0.0);
-   L = P.*L;
-
-   covariance = (v[:,end]./sum(v[:,end]))'*L*v*Ω*inv(v)*L*ones(length(λ))
-   avg = sinai_kolmogorov_entropy(Q,P)
-
-   sq_avg = sum(Q[Q .!=0] .* (log.(P[P .!=0])).^2)
-
-   lyapunov = real(sq_avg - avg^2 + 2*covariance)
-   if lyapunov < 0
-      @show u0
-   end
-   push!(data, lyapunov)
-
-   S, L = network_measures(stn, ensemble, N_steps)
-   push!(data2, L)
-   push!(data3, S)
+      push!(data0, lyapunov)
+      push!(data1, covariance)
    
+      S, L = network_measures(stn, ensemble, N_steps)
+      push!(data2, L)
+      push!(data3, S)
 end
 
-plot(rho[data .>= 0], data[data .>= 0], label = "Analytic", xlabel = "ρ", ylabel = "Λ")
+plot(rho, data2, label = "Random walk")
+plot!(rho, data0, label = "Analytic")
+plot!(rho, data1, label = "Covariance")
+plot!(xlabel = "ρ", ylabel = "Λ", ylim=[-0.5,3.], xlim=[180.,182.], legend = :topleft)
 
-plot!(rho[data .>= 0], data2[data .>= 0], label = "Random walk")
-plot!(legend = :topleft)
+
 data[data .< 0]
 rho[data .< 0]
