@@ -14,8 +14,8 @@ include("network_measures.jl")
 include("plot_stn.jl")
 include("timeseries_analysis.jl")
 
-export timeseries_to_grid, create_stn,prob_matrix,weight_matrix
-export network_measures, sinai_kolmogorov_entropy,measure_convergence
+export timeseries_to_grid, create_stn, prob_matrix, weight_matrix, random_walk_on_stn, randomwalk_step
+export network_measures, sinai_kolmogorov_entropy, measure_convergence
 export plot_stn
 export stn_analysis,read_bin,ndensity
 
