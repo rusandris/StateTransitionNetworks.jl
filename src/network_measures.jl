@@ -64,14 +64,14 @@ function network_measures(stn, ensemble, N_steps)
 end
 
 """
-	network_measures(stn::MetaDiGraph) -> S, Λ
+	network_measures(P::AbstractMatrix) -> S, Λ
 Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
 by using the analytical definitions of both quantities
 """
-function network_measures(stn)
-    P = prob_matrix(stn);
+function network_measures(P::AbstractMatrix)
    	entropy = sinai_kolmogorov_entropy(P)
-    lyapunov_measure, variance, covariance, ret_code_lyap = lapunov_measure(P)
+    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P)
+	return entropy, lyapunov
 end
 
 """
@@ -131,7 +131,7 @@ end
 Calculates analytically the Sinai-Kolmogorov entropy given the P transition probability matrix of the STN. 
 
 """
-function sinai_kolmogorov_entropy(P)
+function sinai_kolmogorov_entropy(P::AbstractMatrix)
 	λ, V = eigen(Matrix(P))
 	λ, X = eigen(transpose(Matrix(P)))
 	
@@ -144,7 +144,9 @@ function sinai_kolmogorov_entropy(P)
 
 	L = Matrix(-log.(P))
 	replace!(L, Inf=>0.0)
+	L = P.*L
 	entropy = x*L*v
+	return real(entropy)
 end
 
 
@@ -153,7 +155,7 @@ end
 Calculates analytically the Lyapunov measure given the the P transition probability matrix of the STN. 
 
 """
-function lyapunov_measure(P)
+function lyapunov_measure(P::AbstractMatrix)
 	λ, V = eigen(Matrix(P))
 	λ, X = eigen(transpose(Matrix(P)))
 	
@@ -174,10 +176,10 @@ function lyapunov_measure(P)
 	variance = x*L2*v-(x*L*v)^2
 	lyapunov =  variance + 2*real(covariance)
 	if imag(covariance) < 1.0e-3
-	   return lyapunov, variance, real(covariance), :Success
+	   return real(lyapunov), real(variance), real(covariance), :Success
 	else
 	   @show covariance
-	   return lyapunov, variance, real(covariance), :ComplexCovariancveWarning
+	   return real(lyapunov), real(variance), real(covariance), :ComplexCovariancveWarning
 	end
  end
  
