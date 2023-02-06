@@ -64,6 +64,18 @@ function network_measures(stn, ensemble, N_steps)
 end
 
 """
+	network_measures(stn::MetaDiGraph) -> S, Λ
+Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
+by using the analytical definitions of both quantities
+"""
+function network_measures(stn)
+    P = prob_matrix(stn);
+	Q = weight_matrix(stn);
+   	entropy = sinai_kolmogorov_entropy(Q,P)
+    lyapunov_measure, variance, covariance, ret_code_lyap = lapunov_measure(P)
+end
+
+"""
 	measure_convergence(stn::MetaDiGraph,ensemble,N_max) -> entropy_timeseries,lyapunov_timeseries
 Calculates and returns network measures for an ensemble at every step in the random walk up to N_max.
 """
@@ -115,3 +127,36 @@ function sinai_kolmogorov_entropy(Q,P)
     entropy = -sum(Q[Q .!=0] .* log.(P[P .!=0]))
 end
 
+"""
+	lyapunov_measure(P) -> Λ
+Calculates analytically the Lyapunov measure given the the P transition probability matrix of the STN. 
+
+"""
+function lyapunov_measure(P)
+	λ, V = eigen(Matrix(P))
+	λ, X = eigen(transpose(Matrix(P)))
+	
+	if real(λ[end]) ≈ 1
+	   x = transpose(X[:,end]./sum(X[:,end]))
+	   v = V[:,end]./V[1,end]
+	else
+	   return -1, -1, -1, :StochasticMatrixError
+	end
+ 
+	L = Matrix(-log.(P))
+	replace!(L, Inf=>0.0)
+	L2 = P.*L.^2
+	L = P.*L
+	I = Diagonal(ones(length(x)))
+	S = (I-v*x)+(P-v*x)*inv(I-P+v*x)
+	covariance = x*L*S*L*v
+	variance = x*L2*v-(x*L*v)^2
+	lyapunov =  variance + 2*real(covariance)
+	if imag(covariance) < 1.0e-3
+	   return lyapunov, variance, real(covariance), :Success
+	else
+	   @show covariance
+	   return lyapunov, variance, real(covariance), :ComplexCovariancveWarning
+	end
+ end
+ 
