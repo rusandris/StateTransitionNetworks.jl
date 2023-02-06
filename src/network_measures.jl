@@ -120,12 +120,34 @@ end
 
 """
 	sinai_kolmogorov_entropy(Q,P) -> S
-Calculates analytically the Sinai-Kolmogorov entropy given the the Q weight matrix and P transition probability matrix of the STN. 
+Calculates analytically the Sinai-Kolmogorov entropy given the Q weight matrix and P transition probability matrix of the STN. 
 
 """
 function sinai_kolmogorov_entropy(Q,P)
     entropy = -sum(Q[Q .!=0] .* log.(P[P .!=0]))
 end
+
+"""
+	sinai_kolmogorov_entropy(P) -> S
+Calculates analytically the Sinai-Kolmogorov entropy given the P transition probability matrix of the STN. 
+
+"""
+function sinai_kolmogorov_entropy(P)
+	λ, V = eigen(Matrix(P))
+	λ, X = eigen(transpose(Matrix(P)))
+	
+	if real(λ[end]) ≈ 1
+	   x = transpose(X[:,end]./sum(X[:,end]))
+	   v = V[:,end]./V[1,end]
+	else
+	   return -1, :StochasticMatrixError
+	end
+
+	L = Matrix(-log.(P))
+	replace!(L, Inf=>0.0)
+	entropy = x*L*v
+end
+
 
 """
 	lyapunov_measure(P) -> Λ
