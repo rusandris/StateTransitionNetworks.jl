@@ -70,8 +70,7 @@ by using the analytical definitions of both quantities
 """
 function network_measures(stn)
     P = prob_matrix(stn);
-	Q = weight_matrix(stn);
-   	entropy = sinai_kolmogorov_entropy(Q,P)
+   	entropy = sinai_kolmogorov_entropy(P)
     lyapunov_measure, variance, covariance, ret_code_lyap = lapunov_measure(P)
 end
 
