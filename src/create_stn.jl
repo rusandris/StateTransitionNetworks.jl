@@ -139,6 +139,32 @@ function create_stn(P)
 	return stn	
 end
 
+function prob_matrix(stn)
+	nr_vertices = nv(stn)
+	P = spzeros(Float64,(nr_vertices,nr_vertices))
+	for edge in collect(edges(stn))
+		i = edge.src
+		j = edge.dst
+		ilabel = label_for(stn,i)
+		jlabel = label_for(stn,j)
+		P[i,j] = stn[ilabel,jlabel][:prob]
+	end
+	return P
+end
+
+function weight_matrix(stn)
+	nr_vertices = nv(stn)
+	Q = spzeros(Float64,(nr_vertices,nr_vertices))
+	for edge in collect(edges(stn))
+		i = edge.src
+		j = edge.dst
+		ilabel = label_for(stn,i)
+		jlabel = label_for(stn,j)
+		Q[i,j] = stn[ilabel,jlabel][:weight]
+	end
+	return Q
+end
+
 function check_stn(Q,P)
 	nr_vertices = size(Q)[1]
 	default_retcode =:Success
