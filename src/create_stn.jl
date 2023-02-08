@@ -42,14 +42,15 @@ end
 
 """
 	create_stn(discrete_timeseries, vertex_names) -> stn
-Creates a state transition network (STN) using the discrete timeseries and vertex list.
-The network is a directed metagraph object
+Creates a state transition network (STN) using the discrete timeseries and vertex list. The network is a directed metagraph object. \\
+`make_ergodic=true` returns an STN with no defective vertices (vertices with no ingoing/outgoing edges and deadends are deleted). Defaults to `false`.  
+
 ## Vertex properties
 	stn[i] -> (:x => x,:y => y)
 ## Edge properties 
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
-function create_stn(discrete_timeseries,vertex_names)
+function create_stn(discrete_timeseries,vertex_names;make_ergodic=false)
 	nr_vertices = length(vertex_names[:,1])
 	states = zeros(Int32,length(discrete_timeseries[:,1])) #discrete timeseries but only with vertex indices
 	
@@ -100,7 +101,7 @@ function create_stn(discrete_timeseries,vertex_names)
     
     #is_strongly_connected(stn) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
 	
-	retcode = check_stn(Q,P)
+	retcode = check_stn!(stn,make_ergodic=make_ergodic)
 	
 	return stn,retcode
 end
@@ -165,23 +166,76 @@ function weight_matrix(stn)
 	return Q
 end
 
-function check_stn(Q,P)
-	nr_vertices = size(Q)[1]
+function renormalize!(stn)
+	nr_vertices = nv(stn)
+	Q = weight_matrix(stn)
+	Q = Q ./sum(Q)
+	P = spzeros(Float64,(nr_vertices,nr_vertices))
+    
+    for i in 1:nr_vertices
+    	P[i,:] = Q[i,:]./sum(Q[i,:])
+        for j in 1:nr_vertices
+            if P[i, j] != 0
+            	ilabel = label_for(stn,i)
+				jlabel = label_for(stn,j)
+				stn[ilabel,jlabel] = Dict(:prob => P[i,j],:weight => Q[i,j])
+            end
+        end
+    end
+
+end
+
+function check_stn!(stn;make_ergodic=true)
+	P = prob_matrix(stn)
+
+	nr_vertices = size(P)[1]
 	default_retcode =:Success
+	
 	for i in 1:nr_vertices
-		if	sum(Q[:,i]) == 0 
+		if	sum(P[:,i]) == 0 
 			@warn "Vertex with no incoming edge detected! Length of transient/timeseries is insufficient!"
-			return :NoIncoming
-		elseif sum(Q[i,:]) == 0 
+			if make_ergodic
+				vertex_label = label_for(stn,i)
+				nr_ingoing = length(inneighbors(stn,i))
+				nr_outgoing = length(outneighbors(stn,i))
+
+				@info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
+				delete!(stn,i)
+				renormalize!(stn)
+				check_stn!(stn)
+			else
+				return :NoIncoming
+			end
+		elseif sum(P[i,:]) == 0 
 			@warn "Vertex with no outgoing edge detected! Length of timeseries is insufficient!"
-			return :NoOutgoing
+			if make_ergodic
+				vertex_label = label_for(stn,i)
+				nr_ingoing = length(inneighbors(stn,i))
+				nr_outgoing = length(outneighbors(stn,i))
+				
+				@info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
+				delete!(stn,i)
+				renormalize!(stn)
+				check_stn!(stn)
+			else
+				return :NoOutgoing
+			end
 		elseif  P[i,i] == 1
 			@warn "Dead-end (self-loop edge) detected!"
-			return :DeadEnd
+			if make_ergodic
+				vertex_label = label_for(stn,i)
+				nr_ingoing = length(inneighbors(stn,i))
+				nr_outgoing = length(outneighbors(stn,i))
+				@info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
+				delete!(stn,i)
+				renormalize!(stn)
+				check_stn!(stn)
+			else
+				return :DeadEnd
+			end
 		end
 	end
 	return default_retcode
 end
-
 
 
