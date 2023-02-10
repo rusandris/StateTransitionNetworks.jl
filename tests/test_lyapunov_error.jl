@@ -7,7 +7,6 @@ using StatsBase
 using LaTeXStrings
 using DelimitedFiles
 
-import StateTransitionNetworks.check_stn!
 import StateTransitionNetworks.lyapunov_measure
 
 Δt = 0.001;
@@ -15,7 +14,7 @@ plane = (1,15.0);
 grid = 20;
 rho = [180.1, 180.7, 180.78];
 labels = ["chaos1", "chaos2", "ppchaos"];
-ensemble = 10^4;
+ensemble = 10^5;
 
 # Equidistant on log scale
 T = [
@@ -39,15 +38,9 @@ for i in eachindex(rho)
             timeseries = trajectory(system, T[t]; Δt=Δt, Ttr=1000);
             psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
             d_traj, v_names = timeseries_to_grid(psection, grid);
-            stn, ret_code_stn = create_stn(d_traj, v_names);
-            while true # STN must be 'healthy'
-                ret_code_check = check_stn!(stn)
-                if ret_code_check == :Success
-                    P = prob_matrix(stn);
-                    Q = weight_matrix(stn);
-                    break
-                end
-            end
+            stn, ret_code_stn = create_stn(d_traj, v_names, make_ergodic=true);
+            P = prob_matrix(stn);
+            Q = weight_matrix(stn);
             if !any(isnan, P)
                 lyapunov = lyapunov_measure(P)[1]
                 push!(L, lyapunov)
