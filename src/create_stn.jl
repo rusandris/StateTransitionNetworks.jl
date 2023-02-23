@@ -71,10 +71,7 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 
 	#normalize Q and fill P by normalizing rows
     Q = Q./sum(Q)
-    for i in 1:size(Q)[1]
-        P[i,:] = Q[i,:]./sum(Q[i,:])
-       #all(i -> isfinite(i),P[i,:]) || @warn "Inf/NaN values in the transition matrix P[i,j]!"
-    end
+	P = renormalize(Q)
 
 	#create directed metagraph with static label and metadata types and default weight 0
 	stn = @suppress MetaGraph(DiGraph(),Label = Int64, 
@@ -115,6 +112,8 @@ The network is a directed metagraph object. No error checking in this case.
 	stn[i,j] -> (:prob => P[i,j])
 """
 function create_stn(P)
+	renormalize!(P)
+
 	nr_vertices = size(P)[1]
 
 	#create directed metagraph with static label and metadata types and default weight 0
@@ -184,6 +183,22 @@ function renormalize!(stn)
         end
     end
 
+end
+
+function renormalize!(P::AbstractMatrix)
+	for i in 1:size(P)[1]
+    	P[i,:] = P[i,:]./sum(P[i,:])
+        all(i -> isfinite(i),P[i,:]) || @warn "Inf/NaN values in the transition matrix P[i,j]!"
+    end
+end
+
+function renormalize(Q::AbstractMatrix)
+	P = similar(Q)
+	for i in 1:size(Q)[1]
+    	P[i,:] = Q[i,:]./sum(Q[i,:])
+        all(i -> isfinite(i),P[i,:]) || @warn "Inf/NaN values in the transition matrix P[i,j]!"
+    end
+    return P
 end
 
 function check_stn!(stn;make_ergodic=true,verbose=false)
