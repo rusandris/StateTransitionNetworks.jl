@@ -50,7 +50,7 @@ Creates a state transition network (STN) using the discrete timeseries and verte
 ## Edge properties 
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
-function create_stn(discrete_timeseries,vertex_names;make_ergodic=false)
+function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=false)
 	nr_vertices = length(vertex_names[:,1])
 	states = zeros(Int32,length(discrete_timeseries[:,1])) #discrete timeseries but only with vertex indices
 	
@@ -100,8 +100,9 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false)
     end
     
     #is_strongly_connected(stn) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
+    
 	
-	retcode = check_stn!(stn,make_ergodic=make_ergodic)
+	retcode = check_stn!(stn,make_ergodic=make_ergodic,verbose=verbose)
 	
 	return stn,retcode
 end
@@ -185,57 +186,61 @@ function renormalize!(stn)
 
 end
 
-function check_stn!(stn;make_ergodic=true)
+function check_stn!(stn;make_ergodic=true,verbose=false)
+	
+	nr_vertices = nv(stn)
+	if nr_vertices == 0
+		return :Success
+	end
+	
 	P = prob_matrix(stn)
 
-	nr_vertices = size(P)[1]
-	default_retcode =:Success
-	
+
 	for i in 1:nr_vertices
 		if	sum(P[:,i]) == 0 
-			@warn "Vertex with no incoming edge detected! Length of transient/timeseries is insufficient!"
+			verbose && @warn "Vertex with no incoming edge detected! Length of transient/timeseries is insufficient!"
 			if make_ergodic
 				vertex_label = label_for(stn,i)
 				nr_ingoing = length(inneighbors(stn,i))
 				nr_outgoing = length(outneighbors(stn,i))
 
-				@info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
-				delete!(stn,i)
+				verbose && @info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
+				delete!(stn,vertex_label)
 				renormalize!(stn)
-				check_stn!(stn)
+				return check_stn!(stn)
 			else
 				return :NoIncoming
 			end
 		elseif sum(P[i,:]) == 0 
-			@warn "Vertex with no outgoing edge detected! Length of timeseries is insufficient!"
+			verbose && @warn "Vertex with no outgoing edge detected! Length of timeseries is insufficient!"
 			if make_ergodic
 				vertex_label = label_for(stn,i)
 				nr_ingoing = length(inneighbors(stn,i))
 				nr_outgoing = length(outneighbors(stn,i))
 				
-				@info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
-				delete!(stn,i)
+				verbose && @info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
+				delete!(stn,vertex_label)
 				renormalize!(stn)
-				check_stn!(stn)
+				return check_stn!(stn)
 			else
 				return :NoOutgoing
 			end
 		elseif  P[i,i] == 1
-			@warn "Dead-end (self-loop edge) detected!"
+			verbose && @warn "Dead-end (self-loop edge) detected!"
 			if make_ergodic
 				vertex_label = label_for(stn,i)
 				nr_ingoing = length(inneighbors(stn,i))
 				nr_outgoing = length(outneighbors(stn,i))
-				@info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
-				delete!(stn,i)
+				verbose && @info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
+				delete!(stn,vertex_label)
 				renormalize!(stn)
-				check_stn!(stn)
+				return check_stn!(stn)
 			else
 				return :DeadEnd
 			end
 		end
 	end
-	return default_retcode
+	return :Success
 end
 
 
