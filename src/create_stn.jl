@@ -197,7 +197,7 @@ function check_stn!(stn;make_ergodic=true,verbose=false)
 
 
 	for i in 1:nr_vertices
-		if	sum(P[:,i]) == 0 
+		if	(isnan(sum(P[:,i]))) || (sum(P[:,i]) == 0) 
 			verbose && @warn "Vertex with no incoming edge detected! Length of transient/timeseries is insufficient!"
 			if make_ergodic
 				vertex_label = label_for(stn,i)
