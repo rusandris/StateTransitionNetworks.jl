@@ -38,7 +38,7 @@ for i in eachindex(rho)
             timeseries = trajectory(system, T[t]; Δt=Δt, Ttr=1000);
             psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
             d_traj, v_names = timeseries_to_grid(psection, grid);
-            stn, ret_code_stn = create_stn(d_traj, v_names, make_ergodic=true,verbose=false);
+            stn, ret_code_stn = create_stn(d_traj, v_names; make_ergodic=true,verbose=false);
             P = prob_matrix(stn);
             Q = weight_matrix(stn);
             if !any(isnan, P)
