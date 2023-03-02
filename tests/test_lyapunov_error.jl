@@ -39,12 +39,15 @@ for i in eachindex(rho)
             psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
             d_traj, v_names = timeseries_to_grid(psection, grid);
             stn, ret_code_stn = create_stn(d_traj, v_names; make_ergodic=true,verbose=false);
-            P = prob_matrix(stn);
-            Q = weight_matrix(stn);
-            if !any(isnan, P)
-                lyapunov = lyapunov_measure(P)[1]
-                push!(L, lyapunov)
-            end
+            
+            if ret_code_stn == :Success
+		        P = prob_matrix(stn);
+		        Q = weight_matrix(stn);
+		        if !any(isnan, P)
+		            lyapunov = lyapunov_measure(P)[1]
+		            push!(L, lyapunov)
+		        end
+			end
         end
         push!(L_data, std(L))
         push!(L_value, mean(L))
