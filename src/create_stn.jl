@@ -40,6 +40,11 @@ function timeseries_to_grid(timeseries, grid)
 end
 
 
+function create_stn(timeseries,grid::Int64; make_ergodic=false, verbose=false)
+	discrete_timeseries,vertex_names = timeseries_to_grid(timeseries,grid)
+	create_stn(discrete_timeseries,vertex_names;make_ergodic=make_ergodic,verbose=verbose)
+end
+
 """
 	create_stn(discrete_timeseries, vertex_names) -> stn
 Creates a state transition network (STN) using the discrete timeseries and vertex list. The network is a directed metagraph object. \\
@@ -95,10 +100,7 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
             end
         end
     end
-    
-    #is_strongly_connected(stn) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
-    
-	
+
 	retcode = check_stn!(stn,make_ergodic=make_ergodic,verbose=verbose)
 	
 	return stn,retcode
@@ -111,7 +113,7 @@ The network is a directed metagraph object. No error checking in this case.
 ## Edge properties 
 	stn[i,j] -> (:prob => P[i,j])
 """
-function create_stn(P)
+function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
 	renormalize!(P)
 
 	nr_vertices = size(P)[1]
@@ -125,19 +127,19 @@ function create_stn(P)
 		stn[v] = nothing
 	end
 	
+	Q = calculate_weight_matrix(P)
+	
 	for i in 1:nr_vertices
         for j in 1:nr_vertices
             if P[i, j] != 0
-				stn[i,j] = Dict(:prob => P[i,j])
+				stn[i,j] = Dict(:prob => P[i,j], :weight => Q[i,j])
             end
         end
     end
     
-    #is_strongly_connected(stn) || @warn "The graph is not strongly connected. Increase the length of your timeseries!"
+	retcode = check_stn!(stn;make_ergodic=make_ergodic,verbose=verbose)
 	
-	#retcode = check_stn(Q,P)
-	
-	return stn	
+	return stn,retcode	
 end
 
 function prob_matrix(stn)
@@ -168,12 +170,10 @@ end
 
 function renormalize!(stn)
 	nr_vertices = nv(stn)
-	Q = weight_matrix(stn)
-	Q = Q ./sum(Q)
-	P = spzeros(Float64,(nr_vertices,nr_vertices))
-    
+	P = prob_matrix(stn)
+	renormalize!(P)
+	Q = calculate_weight_matrix(P)
     for i in 1:nr_vertices
-    	P[i,:] = Q[i,:]./sum(Q[i,:])
         for j in 1:nr_vertices
             if P[i, j] != 0
             	ilabel = label_for(stn,i)
@@ -187,75 +187,83 @@ end
 
 function renormalize!(P::AbstractMatrix)
 	for i in 1:size(P)[1]
-    	P[i,:] = P[i,:]./sum(P[i,:])
-        all(i -> isfinite(i),P[i,:]) || @warn "Inf/NaN values in the transition matrix P[i,j]!"
+		sumPi = sum(P[i,:])
+		if sumPi != 0
+    		P[i,:] = P[i,:]./sumPi
+    	else
+    		@warn "Stochastic matrix cannot be normalized."
+    	end
+        all(i -> isfinite(i),P[i,:]) || @warn "Stochastic matrix cannot be normalized. Inf/NaN values in the transition matrix P[i,j]!"
     end
 end
 
 function renormalize(Q::AbstractMatrix)
-	P = similar(Q)
+	P = spzeros(size(Q))
 	for i in 1:size(Q)[1]
-    	P[i,:] = Q[i,:]./sum(Q[i,:])
-        all(i -> isfinite(i),P[i,:]) || @warn "Inf/NaN values in the transition matrix P[i,j]!"
+		sumQi = sum(Q[i,:])
+		if sumQi != 0
+    		P[i,:] = Q[i,:]./sumQi
+    	else
+    		P[i,:] = Q[i,:]
+    		@warn "Stochastic matrix cannot be normalized."
+    	end
+        all(i -> isfinite(i),P[i,:]) || @warn "Stochastic matrix cannot be normalized. Inf/NaN values in the transition matrix P[i,j]!"
     end
     return P
 end
 
-function check_stn!(stn;make_ergodic=true,verbose=false)
-	
-	nr_vertices = nv(stn)
-	if nr_vertices == 0
-		return :Success
+function calculate_weight_matrix(P::AbstractMatrix)
+	Q = spzeros(size(P))
+	λ, X = eigen(transpose(Matrix(P)))
+	if real(λ[end]) ≈ 1  
+		x = real(transpose(X[:,end]./sum(X[:,end])))
+	else
+		return Q  
 	end
 	
-	P = prob_matrix(stn)
-
-
-	for i in 1:nr_vertices
-		if	(isnan(sum(P[:,i]))) || (sum(P[:,i]) == 0) 
-			verbose && @warn "Vertex with no incoming edge detected! Length of transient/timeseries is insufficient!"
-			if make_ergodic
-				vertex_label = label_for(stn,i)
-				nr_ingoing = length(inneighbors(stn,i))
-				nr_outgoing = length(outneighbors(stn,i))
-
-				verbose && @info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
-				delete!(stn,vertex_label)
-				renormalize!(stn)
-				return check_stn!(stn)
-			else
-				return :NoIncoming
-			end
-		elseif sum(P[i,:]) == 0 
-			verbose && @warn "Vertex with no outgoing edge detected! Length of timeseries is insufficient!"
-			if make_ergodic
-				vertex_label = label_for(stn,i)
-				nr_ingoing = length(inneighbors(stn,i))
-				nr_outgoing = length(outneighbors(stn,i))
-				
-				verbose && @info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
-				delete!(stn,vertex_label)
-				renormalize!(stn)
-				return check_stn!(stn)
-			else
-				return :NoOutgoing
-			end
-		elseif  P[i,i] == 1
-			verbose && @warn "Dead-end (self-loop edge) detected!"
-			if make_ergodic
-				vertex_label = label_for(stn,i)
-				nr_ingoing = length(inneighbors(stn,i))
-				nr_outgoing = length(outneighbors(stn,i))
-				verbose && @info "Deleting vertex $vertex_label with $nr_ingoing ingoing and $nr_outgoing outgoing edges!"
-				delete!(stn,vertex_label)
-				renormalize!(stn)
-				return check_stn!(stn)
-			else
-				return :DeadEnd
-			end
-		end
+	for i in 1:size(P)[1]
+		Q[i,:] = x[i] .* P[i,:]
 	end
-	return :Success
+	Q
 end
 
+function check_stn!(stn;make_ergodic=false,verbose=false)
+	comps = strongly_connected_components(stn) #components list 
+	comps_labels = [label_for.(Ref(stn),comp) for comp in comps] #components list with labels from metagraph
+	
+	nr_comps = length(comps)
+	nr_vertices0 = nv(stn)
+	if nr_comps == 1
+		return :Success
+	else
+		verbose && @warn "STN is not strongly connected! $nr_comps"*" strongly connected components were found."
+		if make_ergodic
+			lengths_of_comps = length.(comps)
+			largest_component_nrvertices,largest_component_index = findmax(lengths_of_comps)
+			
+			nr_deleted_vertices = 0 
+			for (i,comp) in enumerate(comps_labels)
+				if i == largest_component_index
+					continue
+				else
+					for v in comp
+						delete!(stn,v)
+						nr_deleted_vertices += 1
+					end
+				end
+			end
+			remaining_percentage = round((nr_vertices0 - nr_deleted_vertices)/nr_vertices0 * 100; digits=2)
+			verbose &&  @info "Using component with $largest_component_nrvertices vertices. Deleted $nr_deleted_vertices"*" out of $nr_vertices0"*" vertices"*" (remaining $remaining_percentage"*"%)"
+			if nr_vertices0 - nr_deleted_vertices <= nr_deleted_vertices 
+				@warn "Too many deleted vertices! Unusable STN."
+				return :Unusable
+			end
+			
+			#rebuild, renormalize here!!!!
+			return :Success
+		else
+			return :NotConnected
+		end
+	end	
+end
 
