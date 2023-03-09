@@ -1,3 +1,4 @@
+using Random
 using StateTransitionNetworks
 using DynamicalSystems
 using ChaosTools
@@ -9,9 +10,9 @@ using LaTeXStrings
 using DelimitedFiles
 
 # ===============================================================================================
-# CUTTING TIMESERIES INTO SEGMENTS, DISCARDING EVERY 2ND SEGMENT
-# NUMBER OF CUTS IS INCREASED AND NETWORK MEASURES ARE CALCULATED
+# CUTS WITH REORDERING
 # ===============================================================================================
+
 
 Δt = 0.001;
 plane = (1,15.0);
@@ -19,39 +20,42 @@ grid = 20;
 rho = [180.1, 180.7, 180.78, 181.1];
 labels = ["chaos1", "chaos2", "ppchaos", "periodic"];
 T = 13107.2;
+max_period = 1.024;
+cuts = [2, 2^2, 2^4, 2^6] #, 2^8, 2^10, 2^12, 2^14];
+n_ens = 5;
 
-cuts = [2, 2^2, 2^4, 2^6, 2^8, 2^10, 2^12, 2^14];
-
-n_ens = 100;
 
 for index in eachindex(rho)
     label = labels[index]
     @show label
     ρ = rho[index]
-    @time for j in 1:n_ens
+    for j in 1:n_ens
         @show j
-        stream = open("lorenz_cut_$label.txt", "a")
         u0 = rand(Float64,3).*50 .-25;
         system = Systems.lorenz(u0; ρ=ρ);
         timeseries = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
         L = length(timeseries);
-        timeseries = Matrix(timeseries);
+        stream = open("lorenz_rearrange_$label.txt", "a")
         S_data = []
         L_data = []
         V_data = []
         C_data = []
         for n in eachindex(cuts)
             len = div(L,cuts[n]+1)
-            new_timeseries = timeseries[1:len, :]
-            for i in 1:cuts[n]
-                if i % 2 == 0
-                    new_timeseries = vcat(new_timeseries, timeseries[(len*i+1):(len*(i+1)), :])
-                end
+
+            u = timeseries[len,:]
+            system = Systems.lorenz(u; ρ=ρ);
+            new_timeseries = Matrix(trajectory(system, len*Δt; Δt=Δt))
+            for i in shuffle(2:cuts[n])
+                u = timeseries[i*len,:]
+                system = Systems.lorenz(u; ρ=ρ);
+                new_timeseries = vcat(new_timeseries, Matrix(trajectory(system, len*Δt; Δt=Δt)))
             end
+
             new_timeseries = Dataset(new_timeseries)
             psection = ChaosTools.poincaresos(new_timeseries, plane; direction=+1, idxs=[2,3])
             d_traj, v_names = timeseries_to_grid(psection, grid);
-            stn, ret_code = create_stn(d_traj, v_names; make_ergodic=true, verbose=true);
+            stn, ret_code = create_stn(d_traj, v_names; make_ergodic=true, verbose=true)
             if ret_code == :Success
                 P = prob_matrix(stn);
                 push!(S_data, sinai_kolmogorov_entropy(P))
@@ -65,23 +69,6 @@ for index in eachindex(rho)
         close(stream)
     end
 end
-# ===========================================================================================
-# CALCULATION ENDS HERE
-# EVERYTHING IS WRITTEN OUT TO FILES
-# ===========================================================================================
-
-
-# ===========================================================================================
-# PLOTTING STARTS HERE
-# ===========================================================================================
-
-Δt = 0.001;
-plane = (1,15.0);
-grid = 20;
-rho = [180.1, 180.7, 180.78, 181.1];
-labels = ["chaos1", "chaos2", "ppchaos", "periodic"];
-T = 13107.2;
-max_period = 1.024;
 
 # CALCULATING REFERENCE VALUES
 measures = zeros(Float64, (4,4));
@@ -94,6 +81,7 @@ for index in eachindex(rho)
     variance = 0.0
     covariance = 0.0
     for i in 1:ensemble
+        @show i
         u0 = rand(Float64,3).*50 .-25;
         system = Systems.lorenz(u0; ρ=ρ);
         timeseries = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
@@ -111,17 +99,19 @@ for index in eachindex(rho)
             i = i-1
         end
     end
-    measures[index, :] = [entropy, lyapunov, variance, covariance]./ensemble
+    measures[1, :] = [entropy, lyapunov, variance, covariance]./ensemble
 end
 
 measures
+
+
 
 # ACTUAL PLOTTING
 
 for index in eachindex(rho)
     label = labels[index]
     ρ = rho[index]
-    data = readdlm("lorenz_cut_$label.txt", '\t', Float64, '\n')
+    data = readdlm("lorenz_rearrange_$label.txt", '\t', Float64, '\n')
 
     cuts = data[:, 1]
     sort!(cuts)
@@ -149,7 +139,7 @@ for index in eachindex(rho)
         fillcolor=:skyblue2)
 
     vline!(splot,[max_period], linewidth = 3, linecolor=:green, label=L"\Delta t_P^{(max)}=1.024", legend=:best)
-    savefig(splot, "lorenz_cut_plot_entropy_$label.svg")
+    savefig(splot, "lorenz_rearrange_plot_entropy_$label.svg")
 
     lplot = hline([lyapunov], linewidth = 3, linecolor=:red, label="Reference value")
     boxplot!( lplot,
@@ -162,7 +152,7 @@ for index in eachindex(rho)
         fillalpha=0.75,
         fillcolor=:gray69)
     vline!(lplot,[max_period], linewidth = 3, linecolor=:green, label=L"\Delta t_P^{(max)}=1.024", legend=:best)
-    savefig(lplot, "lorenz_cut_plot_lyapunov_$label.svg")
+    savefig(lplot, "lorenz_rearrange_plot_lyapunov_$label.svg")
 
     lyap = boxplot(
         ticks_place, L, 
@@ -185,5 +175,5 @@ for index in eachindex(rho)
         fillcolor=:palegreen)
     hline!(lyap, [lyapunov], linewidth = 3, linecolor=:red, label="Reference value")
     vline!(lyap,[max_period], linewidth = 3, linecolor=:green, label=L"\Delta t_P^{(max)}=1.024", legend=:best)
-    savefig(lyap, "lorenz_cut_plot_lyapunov_co_variance_$label.svg")
+    savefig(lyap, "lorenz_rearrange_plot_lyapunov_co_variance_$label.svg")
 end
