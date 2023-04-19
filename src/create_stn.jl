@@ -40,8 +40,8 @@ function timeseries_to_grid(timeseries, grid)
 end
 
 
-function create_stn(timeseries,grid::Int64; make_ergodic=false, verbose=false)
-	discrete_timeseries,vertex_names = timeseries_to_grid(timeseries,grid)
+function create_stn(psection,grid::Int64; make_ergodic=false, verbose=false)
+	discrete_timeseries,vertex_names = timeseries_to_grid(psection,grid)
 	create_stn(discrete_timeseries,vertex_names;make_ergodic=make_ergodic,verbose=verbose)
 end
 
@@ -218,6 +218,7 @@ function calculate_weight_matrix(P::AbstractMatrix)
 	if real(λ[end]) ≈ 1  
 		x = real(transpose(X[:,end]./sum(X[:,end])))
 	else
+		@warn "No eigenvalues close to 1. Couldn't calculate the weight matrix."
 		return Q  
 	end
 	
@@ -226,6 +227,14 @@ function calculate_weight_matrix(P::AbstractMatrix)
 	end
 	Q
 end
+
+function isnormalized(P::AbstractMatrix)
+	for r in eachrow(P)
+		!(sum(r) ≈ 1) && return false
+	end
+	return true
+end
+
 
 function check_stn!(stn;make_ergodic=false,verbose=false)
 	comps = strongly_connected_components(stn) #components list 
@@ -260,6 +269,7 @@ function check_stn!(stn;make_ergodic=false,verbose=false)
 			end
 			
 			#rebuild, renormalize here!!!!
+			renormalize!(stn)
 			return :Success
 		else
 			return :NotConnected
