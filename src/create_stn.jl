@@ -119,7 +119,7 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
 	nr_vertices = size(P)[1]
 
 	#create directed metagraph with static label and metadata types and default weight 0
-	stn = @suppress MetaGraph(DiGraph(),Label = Int64, 
+	stn = MetaGraph(DiGraph(),Label = Int64, 
 		EdgeData = Dict{Symbol,Float64}, 
 		default_weight = 0.0)
 
