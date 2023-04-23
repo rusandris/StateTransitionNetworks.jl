@@ -7,7 +7,6 @@ using GraphPlot,Cairo,Compose
 import SparseArrays: spzeros 
 import DelayEmbeddings: Dataset,AbstractDataset
 import ChaosTools: poincaresos
-import Suppressor: @suppress
 import LinearAlgebra: eigen, Diagonal
 
 include("create_stn.jl")
