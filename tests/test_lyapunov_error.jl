@@ -63,8 +63,8 @@ for i in eachindex(rho)
     T = data[:, 1] 
     L_mean = data[:, 2]
     L_std = data[:, 3]
-    error_plot = scatter(T, real(L_std./L_mean), xlabel = L"T", ylabel = L"σ_{Λ}/⟨Λ⟩", xaxis=:log, label="", title="ρ=$(rho[i])")
-    mean_plot = scatter(T, L_mean, yerr=L_std./L_mean, xaxis=:log, xlabel=L"T", yaxis=L"Λ", title="ρ=$(rho[i])", label="")
+    error_plot = plot(xticks=[10^1, 10^2, 10^3, 10^4, 10^5]) #, xlim=[10^2,10^5], ylim=[0,3])
+    plot!(error_plot, T, real(L_std./L_mean), xlabel = L"T", marker = 5, ylabel = L"σ_{Λ}/⟨Λ⟩", xaxis=:log, label=L"σ_{Λ}/⟨Λ⟩", title="ρ=$(rho[i])")
+    plot!(error_plot, T, L_mean, yerr=L_std./L_mean,  marker = 5, xaxis=:log, xlabel=L"T", yaxis=L"Λ", title="ρ=$(rho[i])", label=L"⟨Λ⟩")
     savefig(error_plot, "lorenz_error_$(labels[i]).svg")
-    savefig(mean_plot, "lorenz_mean_$(labels[i]).svg")
 end
