@@ -7,6 +7,7 @@ using Random
 using Statistics
 
 using LinearAlgebra
+using DelimitedFiles
 
 function uniquetol(A; kws...)
    S = []
@@ -131,7 +132,7 @@ analytic_lyapunov(P)
 network_measures(stn, 1000, 10^4)[2]
 
 
-# Analytic Lyapunov measure over an interval ======================================================================================
+# Analytic Lyapunov measure over an interval for the Lorenz system ======================================================================================
 
 rho = 180.:0.001:182.;
 T = 100000;
@@ -176,10 +177,63 @@ end
 plot(rho, data3, label = "Random walk")
 plot!(rho, data0, label = "Analytic")
 plot!(rho, data1, label = "Variance")
-plot!(rho, data2, label = "Covariance")
-plot!(xlabel = "ρ", ylabel = "Λ", ylim=[-0.5,3.], xlim=[180.,182.], legend = :topleft)
+plot!(rho, 2 .* data2, label = "2 x Covariance")
+plot!(xlabel = "ρ", ylabel = "Λ", ylim=[-1.,3.], xlim=[180.,182.], legend = :topleft)
 #plot!(xlabel = "ρ", ylabel = "Λ", ylim=[-0.5,3.], xlim=[180.85,181.], legend = :topleft)
 
+data = hcat(rho, data3, data0, data1, data2)
+writedlm("lorenz_analytic_lyapunov_rho=180-182_drho=0.001_t=10^5.dat",data)
 
-data[data .< 0]
-rho[data .< 0]
+# Analytic Lyapunov measure over an interval for the Henon system ======================================================================================
+
+a_values = 1:0.001:1.4;
+b = 0.3;
+T = 10000;
+ensemble = 10000;
+N_steps = 10000;
+data0 = [];
+data1 = [];
+data2 = [];
+data3 = [];
+data4 = [];
+for a in a_values
+      @show a
+      while true # STN must be 'healthy'
+         #u0 = rand(Float64,2);
+         system = Systems.henon([0.,0.]; a=a, b=b);
+         timeseries = trajectory(system, T; Ttr=1000);
+         d_traj, v_names = timeseries_to_grid(timeseries, grid);
+         stn, ret_code_stn = create_stn(d_traj, v_names);
+         if ret_code_stn == :Success
+            break
+         end
+      end
+
+      P = prob_matrix(stn);
+      Q = weight_matrix(stn);
+
+      lyapunov, variance, covariance, ret_code_lyap = analytic_lyapunov(P)
+      if ret_code_lyap != :Success
+         @show ret_code_lyap, lyapunov, u0
+      end
+
+      push!(data0, lyapunov)
+      push!(data1, variance)
+      push!(data2, covariance)
+   
+      S, L = network_measures(stn, ensemble, N_steps)
+      push!(data3, L)
+      push!(data4, S)
+end
+
+plot(a_values, data3, label = "Random walk")
+plot!(a_values, data0, label = "Analytic")
+plot!(a_values, data1, label = "Variance")
+plot!(a_values, 2 .* data2, label = "2 x Covariance")
+plot!(xlabel = "a", ylabel = "Λ", ylim=[-0.25,1.], xlim=[1.,1.4], legend = :topleft)
+
+plot(a_values, data4, label = "Entropy")
+plot!(a_values, data1, label = "Variance")
+
+data = hcat(a_values, data3, data0, data1, data2, data4)
+writedlm("henon_analytic_lyapunov_a=1.0-1.4_da=0.001_t=10^5.dat",data)
