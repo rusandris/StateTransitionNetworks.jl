@@ -21,8 +21,8 @@ rho = [180.1, 180.7, 180.78, 181.1];
 labels = ["chaos1", "chaos2", "ppchaos", "periodic"];
 T = 13107.2;
 max_period = 1.024;
-cuts = [2, 2^2, 2^4, 2^6] #, 2^8, 2^10, 2^12, 2^14];
-n_ens = 5;
+cuts = [2, 2^2, 2^4, 2^6, 2^8, 2^10, 2^12, 2^14];
+n_ens = 100;
 
 
 for index in eachindex(rho)
@@ -81,7 +81,6 @@ for index in eachindex(rho)
     variance = 0.0
     covariance = 0.0
     for i in 1:ensemble
-        @show i
         u0 = rand(Float64,3).*50 .-25;
         system = Systems.lorenz(u0; ρ=ρ);
         timeseries = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
@@ -99,11 +98,10 @@ for index in eachindex(rho)
             i = i-1
         end
     end
-    measures[1, :] = [entropy, lyapunov, variance, covariance]./ensemble
+    measures[index, :] = [entropy, lyapunov, variance, covariance]./ensemble
 end
 
 measures
-
 
 
 # ACTUAL PLOTTING
