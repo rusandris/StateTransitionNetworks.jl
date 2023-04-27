@@ -75,14 +75,19 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
     end
 
 	#normalize Q and fill P by normalizing rows
+	print(sum(Q))
     Q = Q./sum(Q)
 	P = renormalize(Q)
 
 	#create directed metagraph with static label and metadata types and default weight 0
-	stn = MetaGraph(DiGraph(),Label = Int64, 
-		VertexData = Dict{Symbol, Int64}, 
-		EdgeData = Dict{Symbol,Float64}, 
-		default_weight = 0.0)
+	stn = MetaGraph(
+        DiGraph(),
+        Int64,
+        Dict{Symbol, Int64},
+        Dict{Symbol, Float64},
+        nothing,
+        edge_data -> 1.0,
+        0.0)
 
 	
 	#add edges and properties
@@ -119,12 +124,17 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
 	nr_vertices = size(P)[1]
 
 	#create directed metagraph with static label and metadata types and default weight 0
-	stn = MetaGraph(DiGraph(),Label = Int64, 
-		EdgeData = Dict{Symbol,Float64}, 
-		default_weight = 0.0)
+	stn = MetaGraph(
+        DiGraph(),
+        Int64,
+        Dict{Symbol, Int64},
+        Dict{Symbol, Float64},
+        nothing,
+        edge_data -> 1.0,
+        0.0)
 
 	for v in 1:nr_vertices
-		stn[v] = nothing
+		stn[v] = Dict{Symbol, Int64}()
 	end
 	
 	Q = calculate_weight_matrix(P)
