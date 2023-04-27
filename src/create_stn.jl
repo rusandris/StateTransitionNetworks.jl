@@ -75,7 +75,6 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
     end
 
 	#normalize Q and fill P by normalizing rows
-	print(sum(Q))
     Q = Q./sum(Q)
 	P = renormalize(Q)
 

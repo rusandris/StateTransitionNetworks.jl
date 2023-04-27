@@ -11,7 +11,7 @@ using Graphs
 import StateTransitionNetworks.lyapunov_measure
 import SparseArrays: spzeros 
 import StateTransitionNetworks.renormalize
-import Graphs: DiGraph, weights
+import Graphs: DiGraph
 
 
 function timeseries_to_common_grid(timeseries, grid, x_min, x_max, y_min, y_max)    
@@ -82,7 +82,11 @@ function add_timeseries(dt_list, grid;make_ergodic=false,verbose=false)
     return stn, ret_code
 end
 
-
+function get_grid_edges(psections)
+    x_max, y_max = maximum(reduce(vcat, maximum.(Matrix.(psections); dims=1)); dims=1)
+    x_min, y_min = minimum(reduce(vcat, minimum.(Matrix.(psections); dims=1)); dims=1)
+    return x_min, x_max, y_min, y_max
+end
 
 
 
@@ -90,7 +94,7 @@ end
 plane = (1,15.0);
 grid = 20;
 T = 500;
-ρ = 180.78;
+ρ = 180.1;
 
 u0 = rand(Float64,3).*50 .-25';
 system = Systems.lorenz(u0; ρ=ρ);
@@ -106,20 +110,12 @@ psection_2 = ChaosTools.poincaresos(timeseries_2, plane; direction=+1, idxs=[2,3
 dtraj_2, v2 = timeseries_to_grid(psection_2, grid);
 stn2, ret_code_stn = create_stn(dtraj_2, v2; make_ergodic=true,verbose=false);
 
-u0 = rand(Float64,3).*50 .-25';
-system = Systems.lorenz(u0; ρ=ρ);
-timeseries_3 = trajectory(system, T; Δt=Δt, Ttr=1000);
-psection_3 = ChaosTools.poincaresos(timeseries_3, plane; direction=+1, idxs=[2,3]);
-dtraj_3, v3 = timeseries_to_grid(psection_3, grid);
-stn3, ret_code_stn = create_stn(dtraj_3, v3; make_ergodic=true,verbose=false);
 
 psections = [psection_1, psection_2];
-x_max, y_max = maximum(reduce(vcat, maximum.(Matrix.(psections); dims=1)); dims=1)
-x_min, y_min = minimum(reduce(vcat, minimum.(Matrix.(psections); dims=1)); dims=1)
+x_min, x_max, y_min, y_max = get_grid_edges(psections)
 
 dt_1 = timeseries_to_common_grid(psection_1, grid, x_min, x_max, y_min, y_max);
 dt_2 = timeseries_to_common_grid(psection_2, grid, x_min, x_max, y_min, y_max);
-# dt_3 = timeseries_to_common_grid(psection_3, grid, x_min, x_max, y_min, y_max);
 stn_added1, ret_code = add_timeseries([dt_1, dt_2], grid; make_ergodic=true, verbose=false);
 stn_added2, ret_code = add_timeseries([dt_2, dt_1], grid; make_ergodic=true, verbose=false);
 
@@ -128,15 +124,11 @@ plot_stn(stn2;filename="stn2.pdf",nodesize=1,nodefillc="green",linetype="curve",
 plot_stn(stn_added1;filename="stn_added.pdf",nodesize=1,nodefillc="red",linetype="curve",max_edgelinewidth=1)
 plot_stn(stn_added2;filename="stn_added2.pdf",nodesize=1,nodefillc="red",linetype="curve",max_edgelinewidth=1)
 
-print(length(dtraj_1))
-print(length(dt_1))
-
 Q = weight_matrix(stn1)
 Q = weight_matrix(stn2)
 Q1 = weight_matrix(stn_added1)
 Q2 = weight_matrix(stn_added2)
-Q2[1,:]
 P1 = prob_matrix(stn_added1)
 lyapunov_measure(P1)
 P2 = prob_matrix(stn_added2)
-lyapunov_measure(P2[order, order])
+lyapunov_measure(P2)
