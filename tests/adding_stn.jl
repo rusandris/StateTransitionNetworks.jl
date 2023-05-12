@@ -88,8 +88,6 @@ function get_grid_edges(psections)
     return x_min, x_max, y_min, y_max
 end
 
-
-
 Δt = 0.001;
 plane = (1,15.0);
 grid = 20;
@@ -119,10 +117,10 @@ dt_2 = timeseries_to_common_grid(psection_2, grid, x_min, x_max, y_min, y_max);
 stn_added1, ret_code = add_timeseries([dt_1, dt_2], grid; make_ergodic=true, verbose=false);
 stn_added2, ret_code = add_timeseries([dt_2, dt_1], grid; make_ergodic=true, verbose=false);
 
-plot_stn(stn1;filename="stn1.pdf",nodesize=1,nodefillc="orange",linetype="curve",max_edgelinewidth=1)
-plot_stn(stn2;filename="stn2.pdf",nodesize=1,nodefillc="green",linetype="curve",max_edgelinewidth=1)
-plot_stn(stn_added1;filename="stn_added.pdf",nodesize=1,nodefillc="red",linetype="curve",max_edgelinewidth=1)
-plot_stn(stn_added2;filename="stn_added2.pdf",nodesize=1,nodefillc="red",linetype="curve",max_edgelinewidth=1)
+plot_stn(stn1;filename="stn1.pdf",nodesize=1,nodefillc="orange",linetype="curve",max_edgelinewidth=1, nodelabels=true)
+plot_stn(stn2;filename="stn2.pdf",nodesize=1,nodefillc="green",linetype="curve",max_edgelinewidth=1, nodelabels=true)
+plot_stn(stn_added1;filename="stn_added.pdf",nodesize=1,nodefillc="red",linetype="curve",max_edgelinewidth=1, nodelabels=true)
+plot_stn(stn_added2;filename="stn_added2.pdf",nodesize=1,nodefillc="salmon",linetype="curve",max_edgelinewidth=1, nodelabels=true)
 
 Q = weight_matrix(stn1)
 Q = weight_matrix(stn2)
@@ -132,3 +130,10 @@ P1 = prob_matrix(stn_added1)
 lyapunov_measure(P1)
 P2 = prob_matrix(stn_added2)
 lyapunov_measure(P2)
+
+Q1.nzval
+Q1[2, :]
+Q1[2, :].nzval
+[Q1[i,:].nzval for i in 1:nv(stn1)]
+reduce(vcat, [P1[i,:].nzval for i in 1:nv(stn1)])
+minimum(Q2.nzval)^0.125
