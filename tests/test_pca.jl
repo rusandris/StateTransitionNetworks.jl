@@ -5,10 +5,11 @@ using DynamicalSystems
 import Graphs: nv,ne
 using Plots,LaTeXStrings
 
+# cd tests
 include("adding_stn_functions.jl")
 
-function translate_to_origin!(epoch)
-	for i in 1:3
+function translate_to_origin!(epoch; data_idxs=1:3)
+	for i in data_idxs
 		epoch[:,i] = epoch[:,i] .- mean(epoch[:,i])
 	end
 end
@@ -24,6 +25,7 @@ end
 pca_data = readdlm("pca_data/sub-AH316_pca.txt")
 
 #-----------------params---------------------
+data_idxs = 2:4
 epoch_length = 386
 plane = (1,0.0)
 grid = 20
@@ -35,7 +37,7 @@ epoch_psections = []
 
 
 for epoch_start_index in 1:epoch_length:(size(pca_data)[1]-epoch_length)
-	epoch = pca_data[epoch_start_index:epoch_start_index+epoch_length-1,:]
+	epoch = pca_data[epoch_start_index:epoch_start_index+epoch_length-1,data_idxs]
 	#@show epoch_start_index
 	#@show size(epoch)[1]
 	
@@ -129,3 +131,16 @@ plot!(nr_vertices ./100,
 	framestyle=:box)
 
 savefig(pl,"add_stn_epoch_test.pdf")
+
+#-----------------plot epoch-stns-------------------
+for i in 1:10
+	stn_added,retcode = add_timeseries(discrete_timeseries[i:i],grid;make_ergodic=true,verbose=false)
+	@show nv(stn_added)
+	@show retcode
+	
+	if retcode == :Success
+		P = prob_matrix(stn_added)
+		entropy,lyapunov = network_measures(P)
+		plot_stn(stn_added;filename="stn_pca_epoch$(i).pdf",nodesize=0.6,nodefillc="orange",linetype="curve",max_edgelinewidth=1)
+	end
+end
