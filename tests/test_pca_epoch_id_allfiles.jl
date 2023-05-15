@@ -21,8 +21,20 @@ function ndensity(stn)
 end
 
 
-#read data
-pca_data = readdlm("pca_data/sub-AH316_pca.txt")
+#-----------------------read data from all files-------------------------------
+data_dir = "./pca_data/pca_selected/"
+pca_data = Array{Float64}(undef,(0,4))
+println("Data reading started from " * data_dir)
+
+
+for data_file in readdir(data_dir)
+	@show data_file
+	global pca_data = vcat(pca_data,readdlm(data_dir*data_file))
+end
+
+println("Data reading done.")
+println("Shape: ",size(pca_data)," Size in megabytes: ",Base.format_bytes(sizeof(pca_data)))
+
 
 #-----------------params---------------------
 data_idxs = 2:4
@@ -99,9 +111,10 @@ pl = plot(
 	legendfontsize=12,
 	xlabel=L"\Lambda",
 	ylabel=L"S",
-	framestyle=:box)
+	framestyle=:box,
+	legend=:bottomright)
 for i in 1:6
-	scatter!(pl, lyaps[i:i], entropies[i:i], label="id=$(i*10)")
+	scatter!(pl,lyaps[i:i],entropies[i:i], label="id=$(i*10)")
 end
 
 savefig(pl,"epoch_id_lambda-s.pdf")
