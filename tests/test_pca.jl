@@ -54,6 +54,8 @@ x_min, x_max, y_min, y_max = get_grid_edges(epoch_psections)
 #list of discrete timeseries for every epoch
 discrete_timeseries = timeseries_to_common_grid.(epoch_psections, grid, x_min, x_max, y_min, y_max);
 
+
+
 lyaps = []
 entropies = []
 densities = []
@@ -132,9 +134,13 @@ plot!(nr_vertices ./100,
 
 savefig(pl,"add_stn_epoch_test.pdf")
 
+
+
 #-----------------plot epoch-stns-------------------
+
+
 for i in 1:10
-	stn_added,retcode = add_timeseries(discrete_timeseries[i:i],grid;make_ergodic=true,verbose=false)
+	stn_added,retcode = add_timeseries(discrete_timeseries[i:i],grid;make_ergodic=true,verbose=true)
 	@show nv(stn_added)
 	@show retcode
 	
@@ -144,3 +150,4 @@ for i in 1:10
 		plot_stn(stn_added;filename="stn_pca_epoch$(i).pdf",nodesize=0.6,nodefillc="orange",linetype="curve",max_edgelinewidth=1)
 	end
 end
+

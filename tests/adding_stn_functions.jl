@@ -65,10 +65,12 @@ function add_timeseries(dt_list, grid; make_ergodic=false, verbose=false)
 	P = renormalize(Q)
 	#create directed metagraph with static label and metadata types and default weight 0
 	stn, ret_code = create_stn(P; make_ergodic=make_ergodic, verbose=verbose)
-    for v in 1:nr_vertices
+	
+    for v in values(stn.vertex_labels)
 		x,y = vertex_names[v,2:end] 
 		stn[v] = Dict(:x => x,:y => y)
 	end
+	
     return stn, ret_code
 end
 
