@@ -28,7 +28,7 @@ end
 
 
 
-function add_timeseries(dt_list, grid;make_ergodic=false,verbose=false)
+function add_timeseries(dt_list, grid; make_ergodic=false, verbose=false)
     Q_null = zeros(Int32, grid*grid, grid*grid) # Null matrix with all possible transitions
     vertex_names = [];  # Future name of vertices
     vertex_place = [];  # Rows, and column number in Q_null for a given vertex
@@ -64,7 +64,7 @@ function add_timeseries(dt_list, grid;make_ergodic=false,verbose=false)
 
 	P = renormalize(Q)
 	#create directed metagraph with static label and metadata types and default weight 0
-	stn, ret_code = create_stn(P;make_ergodic=make_ergodic,verbose=verbose)
+	stn, ret_code = create_stn(P; make_ergodic=make_ergodic, verbose=verbose)
     for v in 1:nr_vertices
 		x,y = vertex_names[v,2:end] 
 		stn[v] = Dict(:x => x,:y => y)
