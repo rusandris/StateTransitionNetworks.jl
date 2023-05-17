@@ -32,10 +32,35 @@ data_dir = "./pca_data/pca_selected/"
 
 println("Data reading started from " * data_dir)
 
+#-----------------plotting measures-IDs-------------------
+pl_ids = plot(
+	tickfontsize=12,
+	dpi=300,
+	guidefontsize=15,
+	legendfontsize=12,
+	xlabel=L"\mathrm{epoch~id}",
+	ylabel=L"S,~\Lambda",
+	framestyle=:box,
+	legend=:outertopright)
+
+	#-----------------plotting Λ-S for epoch IDs-------------------
+pl_entrop_lyap = plot(
+	tickfontsize=12,
+	dpi=300,
+	guidefontsize=15,
+	legendfontsize=12,
+	xlabel=L"\Lambda",
+	ylabel=L"S",
+	framestyle=:box,
+	legend=:outertopright)
+	
+marker_shapes = [:circle, :rect, :star5, :diamond, :utriangle, :x]
+colors = theme_palette(:auto)[1:6]
+
 
 #-----------------------apply to all files-------------------------------
 
-for data_file in readdir(data_dir)
+for (f,data_file) in enumerate(readdir(data_dir))
 	@show data_file
 	data_filename,ext = splitext(data_file)
 	pca_data = readdlm(data_dir*data_file)
@@ -84,38 +109,26 @@ for data_file in readdir(data_dir)
 			push!(nr_vertices, nv(stn_added))
 			push!(densities,ndensity(stn_added))
 			
-			plot_stn(stn_added;filename=data_filename*"_"*"stn_added_epoch_id=$(id*10).pdf",nodesize=0.6,nodefillc="orange",linetype="curve",max_edgelinewidth=1)
+			#plot_stn(stn_added;filename=data_filename*"_"*"stn_added_epoch_id=$(id*10).pdf",nodesize=0.6,nodefillc="orange",linetype="curve",max_edgelinewidth=1)
 		end
 	end
 
 	#-----------------plotting measures-IDs-------------------
-	pl = plot(
-		tickfontsize=12,
-		dpi=300,
-		guidefontsize=15,
-		legendfontsize=12,
-		xlabel=L"\mathrm{epoch~id}",
-		ylabel=L"S,~\Lambda",
-		framestyle=:box)
-	plot!(collect(10:10:60), lyaps, c=:red, label=L"\Lambda")
-	plot!(collect(10:10:60), entropies,	c=:blue, label=L"S")
+
+	plot!(pl_ids,collect(10:10:60), lyaps, c=:red, label=L"\Lambda"*" : "*data_filename[5:end-4],markershape=marker_shapes[f],ms=5)
+	plot!(pl_ids,collect(10:10:60), entropies,	c=:blue, label=L"S"*" : "*data_filename[5:end-4],markershape=marker_shapes[f],ms=5)
 	#plot!(collect(10:10:60), densities,	c=:orange, label=L"\rho")
 	#plot!(collect(10:10:60), nr_vertices ./100, c=:green, label=L"nr. vertices/100")
-	savefig(pl,data_filename*"_"*"epoch_id_test.pdf")
+	savefig(pl_ids,"epoch_id_test_all_pacients.pdf")
 
 	#-----------------plotting Λ-S for epoch IDs-------------------
-	pl = plot(
-		tickfontsize=12,
-		dpi=300,
-		guidefontsize=15,
-		legendfontsize=12,
-		xlabel=L"\Lambda",
-		ylabel=L"S",
-		framestyle=:box,
-		legend=:bottomright)
+		
 	for i in 1:6
-		scatter!(pl,lyaps[i:i],entropies[i:i], label="id=$(i*10)")
+		l = "id=$(i*10)"
+		labels = [x[:label] for x in pl_entrop_lyap.series_list]
+		l in labels && (l="") 
+		scatter!(pl_entrop_lyap,lyaps[i:i],entropies[i:i], label=l,markershape=marker_shapes[f],c=colors[i],ms=5)
 	end
 
-	savefig(pl,data_filename*"_"*"epoch_id_lambda-s.pdf")
+	savefig(pl_entrop_lyap,"epoch_id_lambda-s_all_pacients.pdf")
 end
