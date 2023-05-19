@@ -199,8 +199,6 @@ function renormalize!(P::AbstractMatrix)
 		sumPi = sum(P[i,:])
 		if sumPi != 0
     		P[i,:] = P[i,:]./sumPi
-    	else
-    		@warn "Stochastic matrix cannot be normalized."
     	end
         all(i -> isfinite(i),P[i,:]) || @warn "Stochastic matrix cannot be normalized. Inf/NaN values in the transition matrix P[i,j]!"
     end
@@ -214,7 +212,7 @@ function renormalize(Q::AbstractMatrix)
     		P[i,:] = Q[i,:]./sumQi
     	else
     		P[i,:] = Q[i,:]
-    		@warn "Stochastic matrix cannot be normalized."
+    		#@warn "Stochastic matrix cannot be normalized."
     	end
         all(i -> isfinite(i),P[i,:]) || @warn "Stochastic matrix cannot be normalized. Inf/NaN values in the transition matrix P[i,j]!"
     end
