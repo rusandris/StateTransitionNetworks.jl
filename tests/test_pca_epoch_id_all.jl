@@ -4,6 +4,7 @@ using StatsBase
 using DynamicalSystems
 import Graphs: nv,ne
 using Plots,LaTeXStrings
+using DataFrames
 
 # cd tests
 include("adding_stn_functions.jl")
@@ -26,7 +27,7 @@ data_idxs = 2:4
 epoch_length = 386
 plane = (1,0.0)
 grid = 20
-
+alldata = DataFrame(Patient=String[],EpochID=Int64[],Entropy=Float64[],Lyapunov=Float64[])
 
 data_dir = "./pca_data/pca_selected/"
 
@@ -119,7 +120,6 @@ for (f,data_file) in enumerate(readdir(data_dir))
 	plot!(pl_ids,collect(10:10:60), entropies,	c=:blue, label=L"S"*" : "*data_filename[5:end-4],markershape=marker_shapes[f],ms=5)
 	#plot!(collect(10:10:60), densities,	c=:orange, label=L"\rho")
 	#plot!(collect(10:10:60), nr_vertices ./100, c=:green, label=L"nr. vertices/100")
-	savefig(pl_ids,"epoch_id_test_all_pacients.pdf")
 
 	#-----------------plotting Λ-S for epoch IDs-------------------
 		
@@ -129,6 +129,16 @@ for (f,data_file) in enumerate(readdir(data_dir))
 		l in labels && (l="") 
 		scatter!(pl_entrop_lyap,lyaps[i:i],entropies[i:i], label=l,markershape=marker_shapes[f],c=colors[i],ms=5)
 	end
+	
+	#---------------------------create dataframe and add to alldata-----------------------------
+	
+	patient_data = DataFrame(Patient=fill(data_filename[5:end-4],6),EpochID=10:10:60,Entropy=Float64.(entropies),Lyapunov=Float64.(lyaps))
+	@show patient_data
+	global alldata = vcat(alldata,patient_data)
+	
+	
 
-	savefig(pl_entrop_lyap,"epoch_id_lambda-s_all_pacients.pdf")
 end
+savefig(pl_entrop_lyap,"epoch_id_lambda-s_all_pacients.pdf")
+savefig(pl_ids,"epoch_id_test_all_pacients.pdf")
+CSV.write("pca_stn.csv", alldata)
