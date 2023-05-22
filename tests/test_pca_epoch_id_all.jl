@@ -4,7 +4,7 @@ using StatsBase
 using DynamicalSystems
 import Graphs: nv,ne
 using Plots,LaTeXStrings
-using DataFrames
+using DataFrames,CSV
 
 # cd tests
 include("adding_stn_functions.jl")
