@@ -19,14 +19,14 @@ plane = (1,15.0);
 grid = 20;
 rho = [180.1, 180.7, 180.78];
 labels = ["chaos1", "chaos2", "ppchaos"];
-ensemble = 10^5;
+ensemble = 10^3;
 
 # Equidistant on log scale
 T = [
     10, 17.783, 31.623, 56.234,
     100, 177.83, 316.23, 562.34,
-    1000, 1778.3, 3162.3, 5623.4,
-    10000, 17783, 31623, 56234, 100000
+    #1000, 1778.3, 3162.3, 5623.4,
+    #10000, 17783, 31623, 56234, 100000
 ];
 
 
@@ -54,7 +54,11 @@ end
 
 
 for label in labels
-    rm("lorenz_error_$label.txt")
+    try
+        rm("lorenz_error_$label.txt")
+    catch
+        continue
+    end
 end
 
 L = SharedArray{Float64}(ensemble);
@@ -63,16 +67,18 @@ for i in eachindex(rho)
     label = labels[i]
     L_mean = []
     L_std = []
+    file = open("lorenz_error_$label.txt", "w")
+    close(file)
     for time in T
         @threads for j in 1:ensemble
             L[j] = calc_lyapunov_measure(ρ, time)
             end
         push!(L_mean, mean(L))
         push!(L_std, std(L))
+        file = open("lorenz_error_$label.txt", "a")
+        writedlm(file, [time mean(L) std(L)])
+        close(file)    
     end
-    file = open("lorenz_error_$label.txt", "w")
-    writedlm(file, [T L_mean L_std])
-    close(file)
 end
 
 # PLOTTING RESULTS
