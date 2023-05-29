@@ -4,6 +4,7 @@ using DynamicalSystems
 using Graphs
 using LaTeXStrings
 using StatsBase
+using DelimitedFiles
 
 
 function ndensity(stn)
@@ -12,11 +13,12 @@ function ndensity(stn)
 end
 
 
-T = 5000
+T = 50
 rho_vals = [180.1, 180.7, 180.78]
 plane = (1,15.0)
 ds = Systems.lorenz();
-grid_sizes = 5:150
+grid_sizes = 5:20
+gridmax = grid_sizes[end]
 Δt = 0.01
 
 
@@ -42,6 +44,7 @@ for rho in rho_vals
 		P = prob_matrix(stn)
 		if retcode == :Success
 			entropy,lyapunov = network_measures(P)
+			#entropy,lyapunov = network_measures(stn,1000,1000)
 			push!(entropies,entropy)
 			push!(lyaps,lyapunov)
 			push!(degrees, mean(outdegree(stn)))
@@ -52,11 +55,11 @@ for rho in rho_vals
 	
 	
 	pl_rho = plot(lyaps,
-	tickfontsize=12,
+	tickfontsize=15,
 	dpi=300,
 	c=:red,
-	guidefontsize=15,
-	legendfontsize=12,
+	guidefontsize=18,
+	legendfontsize=15,
 	label=L"\Lambda",
 	xlabel=L"grid ~ size",
 	ylabel=L"nv,~\rho,~S_{KS},~\Lambda",
@@ -64,22 +67,22 @@ for rho in rho_vals
 
 
 	plot!(entropies,
-		tickfontsize=12,
+		tickfontsize=15,
 		dpi=300,
 		c=:blue,
-		guidefontsize=15,
-		legendfontsize=12,
+		guidefontsize=18,
+		legendfontsize=15,
 		label=L"S_{KS}",
 		xlabel=L"grid ~ size",
 		ylabel=L"nv,~\rho,~S_{KS},~\Lambda",
 		framestyle=:box)
 		
 	plot!(densities,
-		tickfontsize=12,
+		tickfontsize=15,
 		dpi=300,
 		c=:orange,
-		guidefontsize=15,
-		legendfontsize=12,
+		guidefontsize=18,
+		legendfontsize=15,
 		label=L"\rho : density",
 		xlabel=L"grid ~ size",
 		ylabel=L"nv,~\rho,~S_{KS},~\Lambda",
@@ -88,19 +91,20 @@ for rho in rho_vals
 
 	
 	plot!(degrees ./10,
-		tickfontsize=12,
+		tickfontsize=15,
 		dpi=300,
 		c=:green,
-		guidefontsize=15,
-		legendfontsize=12,
+		guidefontsize=18,
+		legendfontsize=15,
 		label=L"<k_{out}>/10",
 		xlabel=L"grid ~ size",
 		ylabel=L"nv,~\rho,~S_{KS},~\Lambda",
 		framestyle=:box,
 		legend=:outertopright)
 		
-
-		
-	    savefig(pl_rho, "grid_size_effect_T_$T"*"_rho_$(rho).svg")
+	plot!(title=L"\rho = "*"$rho",titlefontsize=15)
+	
+	writedlm("data_grid_size_effect_T_$T"*"_rho_$(rho)"*"_gridmax=$gridmax"*".txt",hcat(lyaps,entropies,densities,degrees))	
+	savefig(pl_rho, "grid_size_effect_T_$T"*"_rho_$(rho)"*"_gridmax=$gridmax"*".svg")
 	
 end
