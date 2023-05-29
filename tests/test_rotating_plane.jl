@@ -5,10 +5,11 @@ using Graphs
 
 include("rotating_plane.jl")
 
-T = 5000
-rho_vals = [180.1, 180.7, 180.78]
+T = 10000
+rho_vals = [180.1, 180.7,180.78]
 ds = Systems.lorenz();
 grid_size = 20
+direction = +1
 
 plane0 = [0.0,0.0,1.0,0.0]
 
@@ -20,15 +21,21 @@ for rho in rho_vals
 	
 	@show rho
 	
-	angles,entropies,lyaps,PSOS_points_numbers,average_degrees = rotplane_measures(timeseries;
+	angles,entropies,lyaps,PSOS_points_numbers,average_degrees = rotplane_measures_v3(timeseries;
 		grid_size=grid_size,
 		plane0=plane0,
 		θ_min=0,
 		θ_max=π,
 		Δθ=0.001,
+		direction=direction,
 		return_angles=true)
 		
-		
+	@show length(angles)
+	@show length(lyaps)
+	@show length(entropies)
+	
+	
+	
 	pl_rho = plot(angles,lyaps,
 	tickfontsize=12,
 	dpi=300,
@@ -75,6 +82,7 @@ for rho in rho_vals
 		ylabel=L"n_{PSOS}/T,~S_{KS},~\Lambda,~<k>",
 		framestyle=:box)
 		
-	    savefig(pl_rho, "rotating_plane_rho_$(rho).svg")
+	    savefig(pl_rho, "rotating_plane_rho_$(rho)"*"_dir$direction"*"T_$T"*"v3.svg")
+	    
 	
 end
