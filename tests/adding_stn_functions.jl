@@ -80,3 +80,22 @@ function get_grid_edges(psections)
     return x_min, x_max, y_min, y_max
 end
 
+function are_equal(stn1, stn2)
+    Q1 = weight_matrix(stn1)
+    Q2 = weight_matrix(stn2)
+    if size(Q1) != size(Q2)
+        return false
+    end
+    vertices_2 = Vector(vertices(stn2));
+    permutation = [];
+    for i in vertices(stn1)
+        for j in vertices_2
+            if stn1[i] == stn2[j]
+                push!(permutation, j)
+                deleteat!(vertices_2, findall(x->x==j,vertices_2))
+                break
+            end
+        end
+    end
+    return Q1 ≈ Q2[permutation, permutation]
+end
