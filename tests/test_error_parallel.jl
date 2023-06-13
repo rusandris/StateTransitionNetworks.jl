@@ -13,7 +13,7 @@ using .Threads
 import StateTransitionNetworks.lyapunov_measure
 
 # PARALLEL ====================================================================================================================
-
+println("Packages imported.")
 Δt = 0.001;
 plane = (1,15.0);
 grid = 20;
@@ -63,7 +63,9 @@ end
 
 L = SharedArray{Float64}(ensemble);
 for i in eachindex(rho)
-    @show ρ=rho[i]
+    ρ=rho[i]
+    println("ρ=",ρ)
+    flush(stdout)
     label = labels[i]
     L_mean = []
     L_std = []
