@@ -47,7 +47,7 @@ Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
 by using the analytical definitions of both quantities
 """
 function network_measures(P::AbstractMatrix)
-   	entropy = sinai_kolmogorov_entropy(P)
+   	entropy, ret_code_entr = sinai_kolmogorov_entropy(P)
     lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P)
 	return entropy, lyapunov
 end
@@ -124,7 +124,7 @@ function sinai_kolmogorov_entropy(P::AbstractMatrix)
 	replace!(L, Inf=>0.0)
 	L = P.*L
 	entropy = x*L*v
-	return real(entropy)
+	return real(entropy), :Success
 end
 
 
