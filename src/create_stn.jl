@@ -11,12 +11,18 @@ function timeseries_to_grid(timeseries, grid)
     y_min = minimum(timeseries[:, 2])
     x_max = maximum(timeseries[:, 1])
     y_max = maximum(timeseries[:, 2])
+    
+    #partitioning with little extra space on both ends
+    
     dx = 0.5*(x_max-x_min)/grid
     dy = 0.5*(y_max-y_min)/grid
+    
     x_grid = range(x_min-dx, x_max+dx, grid);
     x_min = x_grid[1]
     y_grid = range(y_min-dy, y_max+dy, grid);
     y_min = y_grid[1]
+    
+    #arrays for space-discrete timeseries 
     x_n = Vector{Int64}(undef, T)
     y_n = Vector{Int64}(undef, T)
     num_vertex = 0
@@ -39,14 +45,26 @@ function timeseries_to_grid(timeseries, grid)
     return d_timeseries, vertex_names
 end
 
+"""
+	create_stn(time_discrete_ts, vertex_names;make_ergodic=false,verbose=false) -> stn
+Higher level function that creates a state transition network (STN) directly from the  time-discrete timeseries (could be a trajectory of a discrete dynamical system). The returned `stn` is a directed metagraph object. \\
+`make_ergodic=true` returns an STN with only one strongly connected components. Defaults to `false`.   
+`verbose=true` logs info about the network checking process. Defaults to `false`.  
 
-function create_stn(psection,grid::Int64; make_ergodic=false, verbose=false)
-	discrete_timeseries,vertex_names = timeseries_to_grid(psection,grid)
+For more info about the network checking go to Graphs.jl: https://juliagraphs.org/Graphs.jl/dev/algorithms/connectivity/#Graphs.strongly_connected_components 
+
+## Vertex properties
+	stn[i] -> (:x => x,:y => y)
+## Edge properties 
+	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
+"""
+function create_stn(time_discrete_ts,grid::Int64; make_ergodic=false, verbose=false)
+	discrete_timeseries,vertex_names = timeseries_to_grid(time_discrete_ts,grid)
 	create_stn(discrete_timeseries,vertex_names;make_ergodic=make_ergodic,verbose=verbose)
 end
 
 """
-	create_stn(discrete_timeseries, vertex_names) -> stn
+	create_stn(discrete_timeseries, vertex_names;make_ergodic=false,verbose=false) -> stn
 Creates a state transition network (STN) using the discrete timeseries and vertex list. The network is a directed metagraph object. \\
 `make_ergodic=true` returns an STN with no defective vertices (vertices with no ingoing/outgoing edges and deadends are deleted). Defaults to `false`.  
 
