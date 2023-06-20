@@ -45,6 +45,27 @@ function timeseries_to_grid(timeseries, grid)
     return d_timeseries, vertex_names
 end
 
+
+"""
+	create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn
+Higher level function that creates a state transition network (STN) directly from the timeseries of a continuous system `ts` using `ChaosTools.poincaresos`. The returned `stn` is a directed metagraph object. \\
+`plane` is the same as in `ChaosTools.poincaresos`. With `idxs` you can choose the variables you want to save.
+`make_ergodic=true` returns an STN with only one strongly connected components. Defaults to `false`.   
+`verbose=true` logs info about the network checking process. Defaults to `false`.
+Other `kwargs` get propageted into `ChaosTools.poincaresos`.
+
+For more info about PSOS  go to https://juliadynamics.github.io/DynamicalSystems.jl/v1.3/chaos/orbitdiagram/#ChaosTools.poincaresos
+"""
+function create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...)
+	
+	#psos
+	psection = poincaresos(ts, plane; idxs=idxs,warning=true,kwargs...)
+	#method for time-discrete trajectory
+	create_stn(psection,grid; make_ergodic=make_ergodic, verbose=verbose)
+	
+end
+
+
 """
 	create_stn(time_discrete_ts, vertex_names;make_ergodic=false,verbose=false) -> stn
 Higher level function that creates a state transition network (STN) directly from the  time-discrete timeseries (could be a trajectory of a discrete dynamical system). The returned `stn` is a directed metagraph object. \\
@@ -52,11 +73,6 @@ Higher level function that creates a state transition network (STN) directly fro
 `verbose=true` logs info about the network checking process. Defaults to `false`.  
 
 For more info about the network checking go to Graphs.jl: https://juliagraphs.org/Graphs.jl/dev/algorithms/connectivity/#Graphs.strongly_connected_components 
-
-## Vertex properties
-	stn[i] -> (:x => x,:y => y)
-## Edge properties 
-	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
 function create_stn(time_discrete_ts,grid::Int64; make_ergodic=false, verbose=false)
 	discrete_timeseries,vertex_names = timeseries_to_grid(time_discrete_ts,grid)
