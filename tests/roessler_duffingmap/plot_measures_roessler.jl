@@ -9,11 +9,11 @@ legendfontsize=15
 
 #read data
 
-data = readdlm("data_reproduced_netmeasures_roessler_b_T_5000_Ttr_500_traj_ens_1_rwens_100_nsteps_100_grid_20standardpsos.txt")
+data = readdlm("data/data_netmeasures_roessler_b_T_5000_Ttr_500_traj_ens_rwens_100_nsteps_10000_grid_20standardpsos.txt")
 
-lyap_expdata = readdlm("lyapunov_exponent_roessler_b_T_5000_Ttr_500.txt")
+lyap_expdata = readdlm("data/lyapunov_exponent_roessler_b_T_5000_Ttr_500.txt")
 
-od_data = readdlm("orbit_diagram_roessler_b_saved_z_T_5000_Ttr_500.txt")
+od_data = readdlm("data/orbit_diagram_roessler_b_saved_z_T_5000_Ttr_500.txt")
 
 parameter_values = data[:,1]
 analytic_entropies = data[:,2]
@@ -25,7 +25,7 @@ num_lyapunovs = data[:,5]
 #---------------------orbit diagrams-------------------------------
 
 
-special_bs = [0.42,0.369,0.34,0.28]
+special_bs = [0.42,0.372,0.34,0.28]
 colors = [colorant"orange",colorant"red",colorant"blue",colorant"green"]
 
 od_plot = plot(guidefontsize=guidefontsize,
@@ -46,7 +46,8 @@ for (i, p) in enumerate(parameter_values)
     st=:scatter,
     ms=0.5,
     markerstrokewidth=0.00001,
-    mc =:gray10)	
+    mc =:gray10,
+    ma=0.1)	
 end
 plot!(special_bs,fill(-2.5,4),st=:scatter,mc=colors,ms=8,markerstrokewidth=0.001)
 #plot!([special_bs[2],special_bs[2]],[-2,-10.0],lc=:red,lw=0.3)
