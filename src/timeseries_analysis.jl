@@ -1,34 +1,41 @@
+stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) = stn_analysis(Dataset(timeseries);grid=grid,plane=plane,idxs=idxs,ensemble=ensemble,N_steps=N_steps,make_ergodic=make_ergodic, verbose=verbose,return_stn=return_stn,use_analytic=use_analytic)
+
 """
-	stn_analysis(timeseries::AbstractDataset;grid,plane,ensemble,N_steps) ->  S, Λ
+	stn_analysis(timeseries::Dataset;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) ->  S, Λ
 	
-Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created from `timeseries`. If the retcode is other than `:Success`, 'NaN's are returned.
+Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created from `timeseries`. If `retcode` is other than `:Success`, `NaN`s are returned.
 ## Keyword arguments
 * `grid` : size of grid used for discretization 
 * `plane` : PSOS plane propagated to `poincaresos` from ChaosTools
 * `idxs` : choose which variables to save
-* `ensemble` : number of individual random walks on the STN
+* `ensemble` : number of individual random walks on the `stn`
 * `N_steps` : number of steps in each random walk
-* `return_stn` : returns only the `stn` and the `retcode`
+* `return_stn` : returns the `stn` and the `retcode` as well
+* `make_ergodic` : returns an `stn` with only one strongly connected component. Defaults to `false`.  
+* `verbose` : logs the connectedness checking process
 """
-function stn_analysis(timeseries::Dataset;grid,plane,idxs,ensemble=100,N_steps=1000,return_stn=false)
-	dim = size(timeseries)[2]
-	psection = poincaresos(timeseries, plane;idxs=idxs); 
+function stn_analysis(timeseries::Dataset;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false)
+
+	stn,retcode = create_stn(timeseries,grid::Int64,plane,idxs;make_ergodic=make_ergodic, verbose=verbose)
 	
-	discrete_timeseries, vertex_names = timeseries_to_grid(psection,grid)
-	stn,retcode = create_stn(discrete_timeseries,vertex_names)
-	
-	if return_stn
-		return stn,retcode
-	end
+	entropy,lyapunov = NaN,NaN #initialize variables
 	
 	if retcode ==:Success
-		return network_measures(stn,ensemble,N_steps)
-	else
-		return NaN,NaN
+		if use_analytic
+			P = prob_matrix(stn)
+			entropy,lyapunov = network_measures(P)
+		else
+			entropy,lyapunov = network_measures(stn,ensemble,N_steps)
+		end
 	end
+			
+	if return_stn
+		return stn,retcode,entropy,lyapunov
+	else
+		return entropy,lyapunov
+	end
+		
 end
-
-stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,return_stn=false) = stn_analysis(Dataset(timeseries);grid=grid,plane=plane,idxs=idxs,ensemble=ensemble,N_steps=N_steps,return_stn=return_stn)
 
 """
 	read_bin(filename::String,T::DataType,dim) -> Matrix

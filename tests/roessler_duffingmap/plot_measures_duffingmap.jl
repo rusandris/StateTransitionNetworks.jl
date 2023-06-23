@@ -6,7 +6,7 @@ tickfontsize=15
 legendfontsize=15
 
 
-data = readdlm("data_netmeasures_duffingmap_b_T_30000_Ttr_1000_rwens_100_nsteps_10000_grid_20.txt")
+data = readdlm("data/data_netmeasures_duffingmap_b_T_30000_Ttr_1000_rwens_100_nsteps_10000_grid_20.txt")
 
 parameter_values = data[:,1]
 analytic_entropies = data[:,2]
@@ -15,16 +15,16 @@ num_entropies = data[:,4]
 num_lyapunovs = data[:,5]
 
 
-od_data = readdlm("orbit_diagram_duffingmap_a_saved_x_T_30000_Ttr_1000.txt")
+od_data = readdlm("data/orbit_diagram_duffingmap_a_saved_x_T_30000_Ttr_1000.txt")
 
-lyap_expdata = readdlm("lyapunov_exponent_duffingmap_a_T_30000_Ttr_1000.txt")
+lyap_expdata = readdlm("data/lyapunov_exponent_duffingmap_a_T_30000_Ttr_1000.txt")
 lyap_exponents = lyap_expdata[:,2]
 
 
 #---------------------orbit diagrams-------------------------------
 
 
-special_as = [2.5054,2.50579,2.507,2.5084]
+special_as = [2.5054,2.50579,2.506,2.5084]
 colors = [colorant"orange",colorant"red",colorant"blue",colorant"green"]
 
 od_plot = plot(guidefontsize=guidefontsize,

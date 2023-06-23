@@ -17,17 +17,17 @@ tickfontsize=15
 legendfontsize=15
 
 
-data = readdlm("data_netmeasures_roessler_b_T_5000_Ttr_500_traj_ens_1_rwens_100_nsteps_10000_grid_20standardpsos.txt")
+data = readdlm("data/data_netmeasures_roessler_b_T_5000_Ttr_500_traj_ens_rwens_100_nsteps_10000_grid_20standardpsos.txt")
 
 parameter_values = data[:,1]
 analytic_lyapunovs = data[:,3]
 
-od_data = readdlm("orbit_diagram_roessler_b_saved_z_T_5000_Ttr_500.txt")
+od_data = readdlm("data/orbit_diagram_roessler_b_saved_z_T_5000_Ttr_500.txt")
 
 
 @show parameter_values[argmax(analytic_lyapunovs)]
 
-special_bs = [0.42,0.369,0.34,0.28]
+special_bs = [0.42,0.372,0.34,0.28]
 colors = [colorant"orange",colorant"red",colorant"blue",colorant"green"]
 
 #=

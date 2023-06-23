@@ -194,3 +194,13 @@ pl = plot()
 scatter!(pl, abs.(data_zoom[:,1] .- a_c)/a_c, data_zoom[:,5] ./ data_zoom[:,4], label=L"a_c=%$(a_c)", lw=0, ms=6, markerstrokewidth=0, color="red", alpha=0.5)
 plot!(pl, xaxis=:log, yaxis=:log, xlabel=L"(a-a_c)/a_c", ylabel=L"\Lambda/S", xlim=[1e-5,1e-1], xguidefontsize=22, yguidefontsize=22, tickfontsize=14, lw=2, fontfamily="sans-serif", legendfontsize=16, dpi=300)
 savefig(pl, "./tests/henon_scaling_ac=1.2266.png")
+
+#############
+### intermittency plot
+#############
+ds = Systems.henon([0.01, 0.20]; a=1.2265, b=0.3)
+traj = trajectory(ds,10000;Ttr = 1000) #generate timeseries
+pl = plot()
+plot!(pl, 1:10001, traj[:,1], label=nothing, lw=2, color="red")
+plot!(pl, xlim=[9000,10000], ylabel=L"x_n", xlabel=L"n", xguidefontsize=22, yguidefontsize=22, tickfontsize=14, xtickfontsize=1, lw=2, fontfamily="serif", legendfontsize=16, legend_position=:topleft)
+savefig(pl, "./tests/henon_x-t_a=1.2265.pdf")

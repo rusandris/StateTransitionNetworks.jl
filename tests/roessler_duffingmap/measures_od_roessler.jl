@@ -64,7 +64,7 @@ for b in b_vals
 	set_parameter!(ds,2,b)
 
 	timeseries = trajectory(ds, T; Δt=Δt, Ttr=Ttr);
-	psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+	psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[1,3]);
 	d_traj, v_names = timeseries_to_grid(psection, grid_size);
 	stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
 	
@@ -93,7 +93,7 @@ for b in b_vals
 		
 end
 
-writedlm("data_netmeasures_roessler_b_T_$T"*"_Ttr_$Ttr"*"_traj_ens"*"_rwens_$rw_ensemble"*"_nsteps_$nr_steps"*"_grid_$grid_size"*"standardpsos.txt",hcat(b_vals,analytic_entropies,analytic_lyapunovs,num_entropies,num_lyapunovs))
+writedlm("data/data_netmeasures_roessler_b_T_$T"*"_Ttr_$Ttr"*"_traj_ens"*"_rwens_$rw_ensemble"*"_nsteps_$nr_steps"*"_grid_$grid_size"*"standardpsos.txt",hcat(b_vals,analytic_entropies,analytic_lyapunovs,num_entropies,num_lyapunovs))
 
 
 
