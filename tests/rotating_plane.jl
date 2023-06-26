@@ -6,7 +6,7 @@ using LinearAlgebra
 using StatsBase
 using LaTeXStrings
 using DelimitedFiles
-
+using Graphs
 include("adding_stn_functions.jl")
 
 
@@ -42,6 +42,13 @@ function translate_to_origin!(traj)
 		traj.data[s] = traj.data[s] - means
 	end
 end
+
+function translate_to_origin!(traj::Matrix)
+	for i in size(traj)[2]
+		traj[:,i] = traj[:,i] .- mean(traj[:,i])
+	end
+end
+
 
 #--------------------------------CHAOSTOOLS-----------------------------
 
@@ -103,8 +110,7 @@ function interpolate_crossing(A, B, pc::PlaneCrossing{<:Tuple})
     return A .+ (B .- A) .* t
 end
 
-
-function rotplane_measures_v2(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction=+1,return_angles=false)
+function rotplane_measures(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction=+1)
 	
 
 	translate_to_origin!(traj)
@@ -117,183 +123,8 @@ function rotplane_measures_v2(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction
 	lyapunovs = []
 	PSOS_points_numbers = []
 	average_degrees = []
-	
-	
-	if return_angles
-		angles = []
-	end
-	
-	while θ < θ_max
-
-		#add psection points from both directions
-		if (direction ==:both) 
-			psection_plus =	ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=+1);
-			psection_minus = ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=-1);
-			
-			nrPSOS_points = length(psection_plus) +  length(psection_minus)
-			
-			transform_to_plane!(psection_plus,θ)
-			transform_to_plane!(psection_minus,θ)
-			
-			x_min, x_max, y_min, y_max = get_grid_edges([psection_plus[:,1:2],psection_minus[:,1:2]])
-			
-			
-			discrete_timeseries = timeseries_to_common_grid.([psection_plus[:,1:2],psection_minus[:,1:2]], grid_size, x_min, x_max, y_min, y_max);
-			stn,retcode = add_timeseries(discrete_timeseries, grid_size; make_ergodic=true, verbose=true)
-
-		else
-			psection = ChaosTools.poincaresos(traj, plane; idxs=[1,2],warning=true,direction=direction);
-			nrPSOS_points = length(psection)
-			
-			
-			transform_to_plane!(psection,θ)
-			traj_grid, vertex_names = timeseries_to_grid(psection,grid_size) 
-			stn,retcode = create_stn(traj_grid,vertex_names)
-		end
-		
-		if retcode ==:Success
-			#P = prob_matrix(stn)
-			#entropy, lyap = network_measures(P)
-			entropy,lyap = network_measures(stn,1000,1000)
-			
-			
-			if lyap > 200
-				plot_stn(stn,filename="lyap_$lyap"*".pdf",nodesize=0.6,nodefillc="orange",linetype="curve",max_edgelinewidth=1)
-			
-			end
-			
-			push!(entropies,entropy)
-			push!(lyapunovs,lyap)
-			push!(PSOS_points_numbers,nrPSOS_points)
-			push!(average_degrees,mean(outdegree(stn)))
-		else
-			push!(entropies,NaN)
-			push!(lyapunovs,NaN)
-		end
-		
-		rotate_plane!(plane,Δθ)
-		
-		if return_angles
-			push!(angles,θ)
-		end
-		
-		θ += Δθ
-		
-	end
-	if return_angles
-		return angles,entropies,lyapunovs,PSOS_points_numbers,average_degrees
-	else
-		return entropies,lyapunovs,PSOS_points_numbers,average_degrees
-	end
-end
-
-function rotplane_measures_v1(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction=+1,return_angles=false)
-	
-
-	translate_to_origin!(traj)
-	plane = deepcopy(plane0)
-	rotate_plane!(plane,θ_min)
-	θ = θ_min
-	
-	
-	entropies = []
-	lyapunovs = []
-	PSOS_points_numbers = []
-	average_degrees = []
-	
-	
-	if return_angles
-		angles = []
-	end
-	
-	while θ < θ_max
-
-		if (direction ==:both) 
-			psection_plus =	ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=+1);
-			psection_minus = ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=-1);
-			
-			lplus = length(psection_plus)
-			lminus = length(psection_minus)
-			
-			
-			psection = Dataset(zeros((length(psection_minus)+length(psection_plus),3)))
-			
-			if lplus > lminus
-				println("lplus is bigger")
-				@show lplus 
-				@show lminus
-				psection.data[1:2:end,:] .= psection_plus.data
-				psection.data[2:2:end,:] .= psection_minus.data
-			else
-				psection.data[1:2:end,:] .= psection_minus.data
-				psection.data[2:2:end,:] .= psection_plus.data
-			end
-
-		else
-			psection = ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=direction);
-		end
-		
-		nrPSOS_points = length(psection)
-
-		if nrPSOS_points <= 1
-			@warn "Change the plane parameters!"
-			continue
-		end
-		
-
-		
-		transform_to_plane!(psection,θ)
-		traj_grid, vertex_names = timeseries_to_grid(psection[:,1:2],grid_size) 
-		
-		stn,retcode = create_stn(traj_grid,vertex_names,make_ergodic=true,verbose=true)
-		if retcode ==:Success
-			P = prob_matrix(stn)
-			entropy, lyap = network_measures(P)
-			
-			push!(entropies,entropy)
-			push!(lyapunovs,lyap)
-			push!(PSOS_points_numbers,nrPSOS_points)
-			push!(average_degrees,mean(outdegree(stn)))
-		else
-			push!(entropies,NaN)
-			push!(lyapunovs,NaN)
-		end
-		
-		rotate_plane!(plane,Δθ)
-		
-		if return_angles
-			push!(angles,θ)
-		end
-		
-		θ += Δθ
-		
-	end
-	if return_angles
-		return angles,entropies,lyapunovs,PSOS_points_numbers,average_degrees
-	else
-		return entropies,lyapunovs,PSOS_points_numbers,average_degrees
-	end
-end
-
-
-function rotplane_measures_v3(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction=+1,return_angles=false)
-	
-
-	translate_to_origin!(traj)
-	plane = deepcopy(plane0)
-	rotate_plane!(plane,θ_min)
-	θ = θ_min
-	
-	
-	entropies = []
-	lyapunovs = []
-	PSOS_points_numbers = []
-	average_degrees = []
-	
-	
-	if return_angles
-		angles = []
-	end
+	angles = []
+	qweights = []
 	
 	while θ < θ_max
 
@@ -310,9 +141,7 @@ function rotplane_measures_v3(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction
 			@warn "Change the plane parameters!"
 			
 		end
-		
 
-		
 		transform_to_plane!(psection,θ)
 		traj_grid, vertex_names = timeseries_to_grid(psection[:,1:2],grid_size) 
 		
@@ -325,6 +154,7 @@ function rotplane_measures_v3(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction
 			push!(lyapunovs,lyap)
 			push!(PSOS_points_numbers,nrPSOS_points)
 			push!(average_degrees,mean(outdegree(stn)))
+			push!(qweights,weight_matrix(stn).nzval...)
 		else
 			push!(entropies,NaN)
 			push!(lyapunovs,NaN)
@@ -334,18 +164,14 @@ function rotplane_measures_v3(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction
 		
 		rotate_plane!(plane,Δθ)
 		
-		if return_angles
-			push!(angles,θ)
-		end
+		
+		push!(angles,θ)
+		
 		
 		θ += Δθ
 		
 	end
-	if return_angles
-		return angles,entropies,lyapunovs,PSOS_points_numbers,average_degrees
-	else
-		return entropies,lyapunovs,PSOS_points_numbers,average_degrees
-	end
+	return angles,entropies,lyapunovs,PSOS_points_numbers,average_degrees,qweights
 end
 
 

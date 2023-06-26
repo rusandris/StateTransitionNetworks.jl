@@ -45,12 +45,13 @@ for (i, p) in enumerate(parameter_values)
     plot!(od_plot,fill(p,length(od_line)),od_line,
     st=:scatter,
     ms=0.5,
-    markerstrokewidth=0.001,
+    ma=0.5,
+    markerstrokewidth=0.000,
     mc =:gray10)	
 end
 
 
-plot!(special_as,fill(0.98,4),st=:scatter,mc=colors,ms=8,markerstrokewidth=0.001)
+plot!(special_as,fill(0.98,4),st=:scatter,mc=colors,ms=8,markerstrokewidth=0.0)
 #plot!([special_as[2],special_as[2]],[0.8,1.0],lc=:red,lw=0.3)
 
 plot!(title="Duffing map",titlefontsize=20,reuse=false)
@@ -101,7 +102,7 @@ plot!(pl_lyap,parameter_values,num_lyapunovs,
 	mc=:gray50,
 	ms=4,
 	ma=0.4,
-	markerstrokewidth = 0.001,
+	markerstrokewidth = 0.00,
 	st=:scatter,
 	label= "random walk")	
 	
@@ -111,7 +112,7 @@ plot!(pl_lyap,parameter_values,num_lyapunovs,
 pl_entr = plot(parameter_values,analytic_entropies,
 	lc=:gray10,
 	lw=2,
-	xlabel=L"b",
+	xlabel=L"a",
 	ylabel=L"S_{SK}",
 	ylims=(0.0,1.2),
 	guidefontsize=guidefontsize,
@@ -127,7 +128,7 @@ plot!(pl_entr,parameter_values,num_entropies,
 	mc=:gray50,
 	ms=4,
 	ma=0.4,
-	markerstrokewidth = 0.001,
+	markerstrokewidth = 0.000,
 	st=:scatter,
 	label= "random_walk",reuse=false)
 
@@ -138,7 +139,7 @@ l = @layout [a{0.4h}; b{0.2h}; c{0.2h}; b{0.2h}]
 
 plot_all = plot(od_plot,pl_lyap_exp,pl_lyap,pl_entr,size=(1000,1000),layout=l)
 
-savefig(plot_all,"duffingmap_results.png")
+savefig(plot_all,"duffingmap_results.pdf")
 
 
 

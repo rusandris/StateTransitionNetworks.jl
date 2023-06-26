@@ -25,7 +25,7 @@ num_lyapunovs = data[:,5]
 #---------------------orbit diagrams-------------------------------
 
 
-special_bs = [0.42,0.372,0.34,0.28]
+special_bs = [0.42,0.368,0.34,0.28]
 colors = [colorant"orange",colorant"red",colorant"blue",colorant"green"]
 
 od_plot = plot(guidefontsize=guidefontsize,
@@ -45,11 +45,11 @@ for (i, p) in enumerate(parameter_values)
     plot!(od_plot,fill(p,length(od_line)),od_line,
     st=:scatter,
     ms=0.5,
-    markerstrokewidth=0.00001,
+    markerstrokewidth=0.0000,
     mc =:gray10,
     ma=0.1)	
 end
-plot!(special_bs,fill(-2.5,4),st=:scatter,mc=colors,ms=8,markerstrokewidth=0.001)
+plot!(special_bs,fill(-2.5,4),st=:scatter,mc=colors,ms=8,markerstrokewidth=0.00)
 #plot!([special_bs[2],special_bs[2]],[-2,-10.0],lc=:red,lw=0.3)
 #plot!([special_bs[4],special_bs[4]],[-2,-10.0],lc=:green,lw=0.3)
 
@@ -82,6 +82,8 @@ pl_lyap_exp = plot(parameter_values,lyap_exponents,
 
 #---------------------network measures-------------------------------
 
+@show parameter_values[argmax(analytic_lyapunovs)]
+@show maximum(analytic_lyapunovs)
 
 
 pl_lyap = plot(parameter_values,analytic_lyapunovs,
@@ -101,7 +103,7 @@ plot!(pl_lyap,parameter_values,num_lyapunovs,
 	mc=:gray50,
 	ms=4,
 	ma=0.4,
-	markerstrokewidth = 0.001,
+	markerstrokewidth = 0.00,
 	st=:scatter,
 	label= "random walk")	
 	
@@ -127,7 +129,7 @@ plot!(pl_entr,parameter_values,num_entropies,
 	mc=:gray50,
 	ms=4,
 	ma=0.4,
-	markerstrokewidth = 0.001,
+	markerstrokewidth = 0.00,
 	st=:scatter,
 	label= "random_walk",reuse=false)
 
@@ -138,5 +140,5 @@ l = @layout [a{0.4h}; b{0.2h}; c{0.2h}; b{0.2h}]
 
 plot_all = plot(od_plot,pl_lyap_exp,pl_lyap,pl_entr,size=(1000,1000),layout=l)
 
-savefig(plot_all,"roesler_results.png")
+savefig(plot_all,"roesler_results.pdf")
 

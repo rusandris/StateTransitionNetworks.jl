@@ -27,7 +27,7 @@ od_data = readdlm("data/orbit_diagram_roessler_b_saved_z_T_5000_Ttr_500.txt")
 
 @show parameter_values[argmax(analytic_lyapunovs)]
 
-special_bs = [0.42,0.372,0.34,0.28]
+special_bs = [0.42,0.368,0.34,0.28]
 colors = [colorant"orange",colorant"red",colorant"blue",colorant"green"]
 
 #=
@@ -112,7 +112,6 @@ for (i,b) in enumerate(special_bs)
 	
 	psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[1,3]);
 	
-	@show maximum(psection[:,2])
 	
 	ms = i == 3 ? 4 : 1.5
 	ylabel = i == 1 ? L"z" : ""
@@ -124,7 +123,7 @@ for (i,b) in enumerate(special_bs)
 	ma=0.1,
 	xlims = (-10,-2),
 	ylims = (0.018,0.05),
-	markerstrokewidth=0.0001,
+	markerstrokewidth=0.000,
 	tickfontsize=tickfontsize,
 	legendfontsize=legendfontsize,
 	guidefontsize=guidefontsize,
@@ -158,7 +157,8 @@ for (i,b) in enumerate(special_bs)
 			nodefillc=[RGBA(c.r,c.g,c.b,x) for x in p_nodes .^ (1/8)],
 			linetype="curve",
 			max_edgelinewidth=1.0,
-			nodelabeldist=1.5, 
+			nodelabeldist=1.5,
+			weight_exponent=1,
 			nodelabelangleoffset=π/4,
 			arrowlengthfrac=0.05)
 			
@@ -173,4 +173,4 @@ l = @layout [a{0.25w} b{0.25w} c{0.25w} d{0.25w};a{0.25w} b{0.25w} c{0.25w} d{0.
 
 plot_all = plot(trajectories...,psos_plots...,layout=l,size=(1200,800))
 
-savefig(plot_all,"roessler_trajectories_psos.png")
+savefig(plot_all,"roessler_trajectories_psos.pdf")

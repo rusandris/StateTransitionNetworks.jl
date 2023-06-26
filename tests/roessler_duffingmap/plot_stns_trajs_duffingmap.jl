@@ -16,17 +16,17 @@ tickfontsize=15
 legendfontsize=15
 
 
-data = readdlm("data_netmeasures_duffingmap_b_T_30000_Ttr_1000_rwens_100_nsteps_100_grid_20.txt")
+data = readdlm("data/data_netmeasures_duffingmap_b_T_30000_Ttr_1000_rwens_100_nsteps_10000_grid_20.txt")
 
 parameter_values = data[:,1]
 analytic_lyapunovs = data[:,3]
 
-od_data = readdlm("orbit_diagram_duffingmap_a_saved_x_T_30000_Ttr_1000.txt")
+od_data = readdlm("data/orbit_diagram_duffingmap_a_saved_x_T_30000_Ttr_1000.txt")
 
 @show parameter_values[argmax(analytic_lyapunovs)]
 
 
-special_as = [2.5054,2.50579,2.507,2.5084]
+special_as = [2.5054,2.50579,2.506,2.5084]
 colors = [colorant"orange",colorant"red",colorant"blue",colorant"green"]
 
 
@@ -99,7 +99,7 @@ for (i,a) in enumerate(special_as)
 	st=:scatter,
 	mc=colors[i],
 	ms = ms,
-	markerstrokewidth=0.0001,
+	markerstrokewidth=0.000,
 	tickfontsize=tickfontsize,
 	legendfontsize=legendfontsize,
 	guidefontsize=guidefontsize,
@@ -149,4 +149,4 @@ l = @layout [a{0.25w} b{0.25w} c{0.25w} d{0.25w}]
 
 plot_all = plot(trajectories...,layout=l,size=(1200,400))
 
-savefig(plot_all,"duffingmap_trajectories.png")
+savefig(plot_all,"duffingmap_trajectories.pdf")
