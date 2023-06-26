@@ -1,33 +1,43 @@
-function plot_phase_portrait(timeseries::Matrix,i,j;filename)
+
+guidefontsize=20
+tickfontsize=15
+legendfontsize=15
+
+
+function plot_phase_portrait(timeseries::Matrix,i,j;color)
 	dim = size(timeseries)[2]
 	pl = plot(timeseries[:,i],timeseries[:,j],
-	lc=:gray10,
-	lw=2,xlabel="$i",
-	ylabel="$j",
+	lc=color,
+	lw=0.1,
+	xlabel=L"F3" ,
+	ylabel=L"O1",
 	framestyle=:origin,
-	xguidefontsize=18,
-	yguidefontsize=18,
-	tickfontsize=10,
+	guidefontsize=guidefontsize,
+	tickfontsize=tickfontsize,
+	legendfontsize=legendfontsize,
+	ylims = [-250,250],
+	xlims = [-250,250],
+	yticks = [-200,200],
+	xticks = [-200,200],
 	legend=false,
 	dpi=300)
 	
-	savefig(pl,filename)
 end
 
-function plot_timeseries(timeseries::Matrix;filename,dims)
+function plot_timeseries(timeseries::Matrix;dims)
 	dim = size(timeseries)[2]
 	pl = plot(timeseries[:,dims],
 	legend=false,
 	lw=1,
-	xguidefontsize=18,
-	yguidefontsize=18,
-	tickfontsize=10,
+	framestyle=:box,
+	guidefontsize=guidefontsize,
+	tickfontsize=tickfontsize,
+	legendfontsize=legendfontsize,
 	dpi=300)
 	
-	savefig(pl,filename)
 end
 
-function plot_psection(timeseries::Matrix;plane,idxs,filename)
+function plot_psection(timeseries::Matrix;plane,idxs,color)
 	dim = size(timeseries)[2]
 	psection = poincaresos(Dataset(timeseries), plane;idxs=idxs); 
 	i = idxs[1]
@@ -36,20 +46,22 @@ function plot_psection(timeseries::Matrix;plane,idxs,filename)
 	
 	pl = plot(psection[:,1],psection[:,2],
 	st=:scatter,
-	ms=1,
-	markerstrokewidth=0.001,
-	markeralpha=0.5,
-	mc=:gray10,
-	xlabel="$i",
-	ylabel="$j",
+	ms=2,
+	markerstrokewidth=0.000,
+	markeralpha=0.3,
+	mc=color,
 	framestyle=:origin,
-	xguidefontsize=18,
-	yguidefontsize=18,
-	tickfontsize=10,
+	xlabel=L"F3",
+	ylims = [-100,100],
+	xlims = [-100,100],
+	yticks = [-100,100],
+	xticks = [-100,100],
+	guidefontsize=guidefontsize,
+	tickfontsize=tickfontsize,
+	legendfontsize=legendfontsize,
 	legend=false,
 	dpi=300)
 	
-	savefig(pl,filename)
 end
 
 function plot_degree_distribution(stn;bins=nothing,xaxis,yaxis,mc,filename)
