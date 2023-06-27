@@ -48,7 +48,7 @@ for (i,ens) in enumerate(ensembles)
 		yticks = [0.2,0.35,0.5],
 		la = alphas[i],
 		lc =:gray10,
-		xlabel="t",
+		xlabel=L"t",
 		ylabel=L"\Lambda",
 		guidefontsize=guidefontsize,
 		tickfontsize=tickfontsize,
@@ -71,13 +71,13 @@ for (i,ens) in enumerate(ensembles)
 		yticks = [0.8,0.825,0.85],
 		la = alphas[i],
 		lc = :gray10,
-		xlabel="t",
+		xlabel=L"t",
 		ylabel=L"S_{SK}",
 		guidefontsize=guidefontsize,
 		tickfontsize=tickfontsize,
 		legendfontsize=legendfontsize,
 		label=L"N = "*"$ens",
-		legend=:topright,
+		legend=:false,
 		title = L"b = " *"$b",
 		framestyle=:box,
 		xticks = [0,Int(N_max/2),N_max],
@@ -89,9 +89,11 @@ for (i,ens) in enumerate(ensembles)
 
 end
 
-pl = plot(pl_entr,pl_lyap,layout=(1,2),size=(1000,400),margin=8Plots.mm)
+empty_plot = plot((1:3)',legend=:outertopleft,legendfontsize=legendfontsize,color = [:gray10,:gray10,:gray10],la=alphas',labels=[L"N=10^2" L"N=10^3" L"N=10^4"],framestyle = :none)
 
-savefig(pl,"roessler_convergence_b_$b"*"_N$N_max"*"_T$T"*"_Ttr$Ttr.pdf")
+pl_ensembles = plot(pl_entr,pl_lyap,empty_plot,layout=(1,3),size=(1000,300),margin=9Plots.mm)
+
+savefig(pl_ensembles,"roessler_convergence_b_$b"*"_N$N_max"*"_T$T"*"_Ttr$Ttr.pdf")
 
 
 
@@ -122,7 +124,6 @@ for (i,b) in enumerate(special_bs)
 		guidefontsize=guidefontsize,
 		tickfontsize=tickfontsize,
 		legendfontsize=legendfontsize,
-		label="$b",
 		title = L"N = 10^4",
 		framestyle=:box,
 		ylims=(0.0,1.8),
@@ -147,7 +148,7 @@ for (i,b) in enumerate(special_bs)
 		ylims=(0.0,1.0),
 		yticks = [0.0,0.5,1.0],
 		xticks = [0,Int(N_max/2),N_max],
-		legend=:topright,
+		legend=false,
 		dpi=300)
 		
 		plot!(pl_entr,[steps[1],steps[end]],[analytic_entr,analytic_entr],lw = 1, ls=:dash,lc=colors[i],ma=0.4,label="")
@@ -157,6 +158,12 @@ for (i,b) in enumerate(special_bs)
 	end
 end
 
-pl = plot(pl_entr,pl_lyap,layout=(1,2),size=(700,300),margin=6Plots.mm)
+empty_plot = plot((1:4)',legend=:outertopleft,legendfontsize=legendfontsize,color = [:orange :red :blue :green] ,labels=[L"b=0.42" L"b=0.368" L"b=0.34" L"b=0.28"],framestyle = :none)
+pl_bs = plot(pl_entr,pl_lyap,empty_plot,layout=(1,3),size=(1000,300),margin=9Plots.mm)
 
-savefig(pl,"roessler_convergence_ens$ensemble"*"_N$N_max"*"_T$T"*"_Ttr$Ttr.pdf")
+savefig(pl_bs,"roessler_convergence_ens$ensemble"*"_N$N_max"*"_T$T"*"_Ttr$Ttr.pdf")
+plot_all = plot(pl_ensembles,pl_bs,layout=(2,1),size=(1000,600))
+savefig(plot_all,"roessler_convergence_T$T"*"_Ttr$Ttr.pdf")
+
+
+
