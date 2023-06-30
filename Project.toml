@@ -25,4 +25,3 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
 [compat]
 DynamicalSystems = "2.3"
-MetaGraphsNext = "0.6.0"
