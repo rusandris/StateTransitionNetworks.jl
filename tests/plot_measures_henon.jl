@@ -10,14 +10,29 @@ using LinearAlgebra
 using DelimitedFiles
 using LaTeXStrings
 
+###############################
+### Measures for a single value
+###############################
+
+grid_size = 20;
+b = 0.3;
+a = 1.4;
+ds = Systems.henon([0.1, 0.123]; a=a, b=b)
+λ = lyapunov(ds, 10000; d0 = 1e-7, threshold = 1e-4, Ttr = 500)
+timeseries = trajectory(ds, 100000, [0, 0]; Ttr=1000)
+discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
+@time stn,retcode = create_stn(discrete_timeseries, vertex_names);
+P = prob_matrix(stn);
+S, Λ = network_measures(P)
+
 #################
 ### orbit diagram
 #################
 
 b = 0.3;
-a = 1.0;
+a = 1.4;
 a_values = 1:0.001:1.4;
-ds = Systems.henon([0.0, 0.0]; a=a, b=b)
+ds = Systems.henon([0.1, 0.123]; a=a, b=b)
 i = 1
 ics = [rand() for m in 1:10]
 n = 500
@@ -73,10 +88,10 @@ dpi=300)
 
 b = 0.3;
 a_values = 1:0.001:1.4;
-a_values = 1.21:0.0001:1.23;
-traj_length = 30000;
+#a_values = 1.21:0.0001:1.23;
+traj_length = 1000000;
 trans = 1000;
-grid_size = 20;
+grid_size = 200;
 ensemble = 1000;
 N_steps = 10000;
 
@@ -101,12 +116,15 @@ end
 data = hcat(a_values, sim_entropy_measures, sim_lyapunov_measures, theor_entropy_measures, theor_lyapunov_measures)
 
 #save data
-f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
-f_name = "./tests/henon_measures_a=1.21-1.23_da=0.0001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
+#f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
+#f_name = "./tests/henon_measures_a=1.21-1.23_da=0.0001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
+#f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_ens=1000_tmax=300000_ttrans=1000_grid=100.dat"
+f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_ens=1000_tmax=1000000_ttrans=1000_grid=200.dat"
 writedlm(f_name,data)
 # load data
 f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
 f_name = "./tests/henon_measures_a=1.21-1.23_da=0.0001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
+f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_ens=1000_tmax=300000_ttrans=1000.dat"
 data = readdlm(f_name)
 
 pl = scatter(data[:,1], data[:,2], label = "Random walk", lw=2, color="gray", alpha=0.5)
