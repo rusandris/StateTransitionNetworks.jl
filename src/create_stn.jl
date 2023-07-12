@@ -26,7 +26,7 @@ function timeseries_to_grid(timeseries, grid)
     x_n = Vector{Int64}(undef, T)
     y_n = Vector{Int64}(undef, T)
     num_vertex = 0
-    vertex_names = [];
+    vertex_names = OrderedDict{Tuple{Int64,Int64},Int64}()
     x_n, y_n = [], [];
 
     for row in eachrow(timeseries)
@@ -34,14 +34,13 @@ function timeseries_to_grid(timeseries, grid)
         x = floor(Int,(row[1]-x_min)/Float64(x_grid.step))+1
         if M[y,x] == 0
             num_vertex += 1 
-            push!(vertex_names, [num_vertex, x, y])
+            vertex_names[(x,y)] = num_vertex
             M[y,x] = 1
         end
         push!(x_n, x)
         push!(y_n, y)
     end
-    vertex_names = reduce(hcat, vertex_names)'
-    d_timeseries = [x_n y_n]
+    d_timeseries = collect(zip(x_n,y_n))
     return d_timeseries, vertex_names
 end
 
@@ -90,22 +89,17 @@ Creates a state transition network (STN) using the discrete timeseries and verte
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
 function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=false)
-	nr_vertices = length(vertex_names[:,1])
-	states = zeros(Int32,length(discrete_timeseries[:,1])) #discrete timeseries but only with vertex indices
-	
-	for v in 1:nr_vertices
-		timepoints_at_v = findall(x -> x == vertex_names[v,2:end],[eachrow(discrete_timeseries)...]) #find all times when state was v
-		states[timepoints_at_v] .= v  
-	end		
+	nr_vertices = length(vertex_names)
 	
 	#weight and transition probability matrices
 	Q = spzeros(nr_vertices, nr_vertices)
     P = spzeros(nr_vertices, nr_vertices)
     
     #count transitions
-    next_states = circshift(states,-1)
-    for i in eachindex(states[1:end-1])
-        Q[states[i],next_states[i]] += 1
+    for i in eachindex(discrete_timeseries[1:end-1])
+    	state = discrete_timeseries[i]
+    	next_state = discrete_timeseries[i+1]
+        Q[vertex_names[state],vertex_names[next_state]] += 1
     end
 
 	#normalize Q and fill P by normalizing rows
@@ -126,13 +120,12 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 	#add edges and properties
 	#Properties: vertices ->  Dict{Symbol,Int64}, edges -> Dict{Symbol,Float64}
 	
-	for v in 1:nr_vertices
-		x,y = vertex_names[v,2:end] 
-		stn[v] = Dict(:x => x,:y => y)
+	for state in keys(vertex_names)
+		stn[vertex_names[state]] = Dict(:x => state[1],:y => state[2])
 	end
 	
-	for i in 1:nr_vertices
-        for j in 1:nr_vertices
+	for i in 1:length(vertex_names)
+        for j in 1:length(vertex_names)
             if P[i, j] != 0
 				stn[i,j] = Dict(:prob => P[i,j],:weight => Q[i,j])
             end
