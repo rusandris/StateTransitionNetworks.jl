@@ -114,3 +114,27 @@ P = random_transition_matrix(N,A)
 stn, retcode = create_stn(P; make_ergodic=true)
 P = prob_matrix(stn)
 network_measures(P)
+
+
+# fully connected STN with random weights => S ~ N, Λ = 0.25
+data0 = [];
+data1 = [];
+data2 = [];
+for N in 1:500
+    @show N
+    A = ones(N,N)
+    P = random_transition_matrix(N,A)
+    S, Λ = network_measures(P)
+    push!(data0, N)
+    push!(data1, S)
+    push!(data2, Λ)
+    #lyapunov_measure(P)
+end
+mask1 = data1 .!= -1
+#mask1 = 1 ./ data1 .!= Inf
+plot(data0[mask1], data1[mask1], label=L"S", linewidth=4)
+plot!(data0[mask1], data2[mask1], label=L"\Lambda", linewidth=4)
+plot!(data0[mask1], log.(data0[mask1]), label=L"S=\log(N)", linewidth=2, linestyle= :dash,color=:black)
+plot!(data0[mask1], 0.25*ones(500), label=L"\Lambda=1/4", linewidth=2, linestyle= :dash,color=:gray)
+plot!(xlabel=L"N", ylabel=L"S,\Lambda", xguidefontsize=22, yguidefontsize=22, tickfontsize=14, xtickfontsize=12, lw=2, legendfontsize=16)
+#plot!(xaxis=:log, yaxis=:log)
