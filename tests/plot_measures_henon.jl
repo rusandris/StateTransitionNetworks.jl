@@ -14,16 +14,62 @@ using LaTeXStrings
 ### Measures for a single value
 ###############################
 
-grid_size = 20;
+grid_size = 1000;
 b = 0.3;
 a = 1.4;
-ds = Systems.henon([0.1, 0.123]; a=a, b=b)
-λ = lyapunov(ds, 10000; d0 = 1e-7, threshold = 1e-4, Ttr = 500)
-timeseries = trajectory(ds, 100000, [0, 0]; Ttr=1000)
+ds = Systems.henon([0.1, 0.123]; a=a, b=b);
+λ = lyapunov(ds, 10000; d0 = 1e-7, threshold = 1e-4, Ttr = 500);
+timeseries = trajectory(ds, 100000, [0, 0]; Ttr=1000);
 discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
 @time stn,retcode = create_stn(discrete_timeseries, vertex_names);
 P = prob_matrix(stn);
-S, Λ = network_measures(P)
+@time S, Λ = network_measures(P)
+
+###############################
+### Measures as a function of the grid
+###############################
+
+data0 = collect(10:1:500);
+data1 = zeros(length(data0)); 
+data2 = zeros(length(data0)); 
+b = 0.3;
+a = 1.4;
+a = 1.2265;
+ens = 10
+ds = Systems.henon([0.1, 0.123]; a=a, b=b);
+λ = lyapunov(ds, 10000; d0 = 1e-7, threshold = 1e-4, Ttr = 500)
+#plot(timeseries[end-1000:end,1])
+for i in 1:ens
+    @show i 
+    u0 = 0.2*rand(2)
+    timeseries = trajectory(ds, 5000000, u0; Ttr=1000);
+    for (g,grid_size) in enumerate(data0);
+        @show grid_size
+        discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
+        @time stn,retcode = create_stn(discrete_timeseries, vertex_names);
+        P = prob_matrix(stn);
+        @time S, Λ = network_measures(P)
+        data1[g] += S
+        data2[g] += Λ
+    end
+end
+data1 ./= ens
+data2 ./= ens
+
+# save data
+f_name1 = "./tests/henon_S-gr_a=1.4_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
+f_name1 = "./tests/henon_S-gr_a=1.2265_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
+writedlm(f_name1,data1)
+f_name2 = "./tests/henon_Lyap-gr_a=1.4_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
+f_name2 = "./tests/henon_Lyap-gr_a=1.2265_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
+writedlm(f_name2,data2)
+# load data
+data0 = collect(5:5:500);
+data1 = readdlm(f_name1);
+data2 = readdlm(f_name2);
+
+plot!(data0, data1)
+plot!(data0, data2)
 
 #################
 ### orbit diagram
