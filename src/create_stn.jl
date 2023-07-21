@@ -4,14 +4,18 @@ Discretizes a 2D timeseries/trajectory on a grid. Returns
 a discrete timeseries containing the the cell coordinates and the list
 of vertices with cell coordinates. 
 """
-function timeseries_to_grid(timeseries, grid)    
+function timeseries_to_grid(timeseries, grid; grid_edges = [])    
     M = zeros(grid,grid)
     T = length(timeseries[:,1])
-    x_min = minimum(timeseries[:, 1])
-    y_min = minimum(timeseries[:, 2])
-    x_max = maximum(timeseries[:, 1])
-    y_max = maximum(timeseries[:, 2])
     
+    if isempty(grid_edges)		
+		x_min = minimum(timeseries[:, 1])
+		y_min = minimum(timeseries[:, 2])
+		x_max = maximum(timeseries[:, 1])
+		y_max = maximum(timeseries[:, 2])
+    else
+    	x_min,y_min,x_max,y_max = grid_edges 
+    end
     #partitioning with little extra space on both ends
     
     dx = 0.5*(x_max-x_min)/grid
@@ -43,7 +47,6 @@ function timeseries_to_grid(timeseries, grid)
     d_timeseries = collect(zip(x_n,y_n))
     return d_timeseries, vertex_names
 end
-
 
 """
 	create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn
