@@ -10,6 +10,29 @@ using LinearAlgebra
 using DelimitedFiles
 using LaTeXStrings
 
+
+###############################
+### Measures for a single value
+###############################
+
+Δt = 0.001;
+plane = (1,15.0);
+grid_size = 1000;
+u0 = rand(3)
+ρ = 180.
+T = 100000;
+trans = 5000
+
+
+system = Systems.lorenz(u0; ρ=ρ);
+timeseries = trajectory(system, T; Δt=Δt, Ttr=trans);
+psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+d_traj, v_names = timeseries_to_grid(psection, grid_size);
+stn, ret_code_stn = create_stn(d_traj, v_names);
+P = prob_matrix(stn);
+network_measures(P)
+
+
 #################
 ### orbit diagram
 #################
@@ -205,3 +228,6 @@ pl = plot()
 scatter!(pl, (data_zoom[:,1] .- ρ_c)/ρ_c, data_zoom[:,5] ./ data_zoom[:,4], label=L"\rho_c=%$(ρ_c)", lw=0, ms=6, markerstrokewidth=0, color="red", alpha=0.5)
 plot!(pl, xaxis=:log, yaxis=:log, xlabel=L"(\rho-\rho_c)/\rho_c", ylabel=L"\Lambda/S", xlim=[1e-6,1e-3], xguidefontsize=22, yguidefontsize=22, tickfontsize=14, lw=2, fontfamily="sans-serif", legendfontsize=16, dpi=300)
 savefig(pl, "./tests/lorenz_scaling_rhoc=181.669.png")
+
+
+
