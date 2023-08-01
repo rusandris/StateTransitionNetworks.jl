@@ -24,3 +24,4 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
 [compat]
 ChaosTools = "2.9.0"
+DelayEmbeddings = "<2.6"
