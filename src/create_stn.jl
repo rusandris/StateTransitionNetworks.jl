@@ -4,14 +4,18 @@ Discretizes a 2D timeseries/trajectory on a grid. Returns
 a discrete timeseries containing the the cell coordinates and the list
 of vertices with cell coordinates. 
 """
-function timeseries_to_grid(timeseries, grid)    
+function timeseries_to_grid(timeseries, grid; grid_edges = [])    
     M = zeros(grid,grid)
     T = length(timeseries[:,1])
-    x_min = minimum(timeseries[:, 1])
-    y_min = minimum(timeseries[:, 2])
-    x_max = maximum(timeseries[:, 1])
-    y_max = maximum(timeseries[:, 2])
     
+    if isempty(grid_edges)		
+		x_min = minimum(timeseries[:, 1])
+		y_min = minimum(timeseries[:, 2])
+		x_max = maximum(timeseries[:, 1])
+		y_max = maximum(timeseries[:, 2])
+    else
+    	x_min,y_min,x_max,y_max = grid_edges 
+    end
     #partitioning with little extra space on both ends
     
     dx = 0.5*(x_max-x_min)/grid
@@ -43,7 +47,6 @@ function timeseries_to_grid(timeseries, grid)
     d_timeseries = collect(zip(x_n,y_n))
     return d_timeseries, vertex_names
 end
-
 
 """
 	create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn
@@ -95,12 +98,23 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 	Q = spzeros(nr_vertices, nr_vertices)
     P = spzeros(nr_vertices, nr_vertices)
     
+    #probability distribution of states
+    states_distrib = zeros(nr_vertices)
+    
     #count transitions
     for i in eachindex(discrete_timeseries[1:end-1])
     	state = discrete_timeseries[i]
     	next_state = discrete_timeseries[i+1]
         Q[vertex_names[state],vertex_names[next_state]] += 1
+        states_distrib[vertex_names[state]] += 1
     end
+    
+    #update end (final) state 
+    end_state = discrete_timeseries[end]
+    states_distrib[vertex_names[end_state]] += 1
+    
+    #normalize state distribution
+	states_distrib = states_distrib ./ sum(states_distrib)
 
 	#normalize Q and fill P by normalizing rows
     Q = Q./sum(Q)
@@ -110,7 +124,7 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 	stn = MetaGraph(
         DiGraph(),
         Int64,
-        Dict{Symbol, Int64},
+        Dict{Symbol, Union{Int64,Float64}},
         Dict{Symbol, Float64},
         nothing,
         edge_data -> 1.0,
@@ -121,7 +135,7 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 	#Properties: vertices ->  Dict{Symbol,Int64}, edges -> Dict{Symbol,Float64}
 	
 	for state in keys(vertex_names)
-		stn[vertex_names[state]] = Dict(:x => state[1],:y => state[2])
+		stn[vertex_names[state]] = Dict(:x => state[1],:y => state[2],:prob => states_distrib[vertex_names[state]])
 	end
 	
 	for i in 1:length(vertex_names)
