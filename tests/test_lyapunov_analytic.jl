@@ -27,9 +27,9 @@ grid = 20;
 u0 = rand(3)
 T = 5000;
 system = Systems.lorenz(u0; ρ=ρ);
-timeseries = trajectory(system, T; Δt=Δt, Ttr=500);
+timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500);
 
-psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
 d_traj, v_names = timeseries_to_grid(psection, grid);
 stn, ret_code = create_stn(d_traj, v_names);
 ret_code
@@ -148,8 +148,8 @@ for ρ in rho
       while true # STN must be 'healthy'
          u0 = rand(Float64,3).*50 .-25;
          system = Systems.lorenz(u0; ρ=ρ);
-         timeseries = trajectory(system, T; Δt=Δt, Ttr=500);
-         psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+         timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500);
+         psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
          d_traj, v_names = timeseries_to_grid(psection, grid);
          stn, ret_code_stn = create_stn(d_traj, v_names);
          if ret_code_stn == :Success
@@ -201,7 +201,7 @@ for a in a_values
       while true # STN must be 'healthy'
          #u0 = rand(Float64,2);
          system = Systems.henon([0.,0.]; a=a, b=b);
-         timeseries = trajectory(system, T; Ttr=1000);
+         timeseries,  = trajectory(system, T; Ttr=1000);
          d_traj, v_names = timeseries_to_grid(timeseries, grid);
          stn, ret_code_stn = create_stn(d_traj, v_names);
          if ret_code_stn == :Success

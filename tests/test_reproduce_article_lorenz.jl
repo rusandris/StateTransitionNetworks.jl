@@ -37,8 +37,8 @@ for rho in rho_vals
 	
 	for i in 1:traj_ensemble
 		@show i
-		timeseries = trajectory(ds, T, rand(3)*20 .- 10;Δt=Δt, Ttr=Ttr);
-		psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+		timeseries,  = trajectory(ds, T, rand(3)*20 .- 10;Δt=Δt, Ttr=Ttr);
+		psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
 		d_traj, v_names = timeseries_to_grid(psection, grid_size);
 		stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
 		

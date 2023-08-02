@@ -22,8 +22,8 @@ ds = Systems.roessler()
 set_parameter!(ds,2,0.42)
 
 traj = trajectory(ds,100;Ttr = 500)
-psection_plus = ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=1)
-psection_minus = ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=-1)
+psection_plus = DynamicalSystemsBase.poincaresos(traj, plane; save_idxs=[1,2,3],warning=true,direction=1)
+psection_minus = DynamicalSystemsBase.poincaresos(traj, plane; save_idxs=[1,2,3],warning=true,direction=-1)
 
 
 pl = plot(traj[:,1],traj[:,2],traj[:,3],

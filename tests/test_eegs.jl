@@ -29,7 +29,7 @@ for (i,eeg_file) in enumerate(eeg_files)
 	fn,ext = splitext(eeg_file)
 	println(fn)
 	
-	stn,retcode = stn_analysis(eeg_data;grid=grid,plane=plane,idxs=[var1,var2],return_stn=true)
+	stn,retcode = stn_analysis(eeg_data;grid=grid,plane=plane,save_idxs=[var1,var2],return_stn=true)
 	@show retcode
 		
 	entr, lyap = network_measures(stn,ens,steps)
@@ -45,7 +45,7 @@ for (i,eeg_file) in enumerate(eeg_files)
 	
 	plot_phase_portrait(eeg_data,var1,var2;filename = path_data*"pp_vars$var1"*"$var2" * fn * ".png")
 	plot_timeseries(eeg_data,filename=path_data*"ts_vars$var1"*"$var2" * fn * ".png",dims=[var1,var2])
-	plot_psection(eeg_data;plane = plane,idxs=[var1,var2],filename=path_data*"psec_vars$var1"*"$var2" * fn * ".png")
+	plot_psection(eeg_data;plane = plane,save_idxs=[var1,var2],filename=path_data*"psec_vars$var1"*"$var2" * fn * ".png")
 	
 end
 

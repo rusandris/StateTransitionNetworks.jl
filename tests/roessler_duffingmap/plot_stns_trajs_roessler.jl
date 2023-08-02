@@ -78,7 +78,7 @@ for (i,b) in enumerate(special_bs)
 	@show b	
 
 
-	timeseries = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
+	timeseries,  = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
 	
 	yticks = i == 1 ? true : false
 	ylabel = i == 1 ? L"y" : ""
@@ -110,7 +110,7 @@ for (i,b) in enumerate(special_bs)
 	
 	push!(trajectories,traj)
 	
-	psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[1,3]);
+	psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[1,3]);
 	
 	
 	ms = i == 3 ? 4 : 1.5

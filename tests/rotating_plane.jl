@@ -129,10 +129,10 @@ function rotplane_measures(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction=+1
 	while θ < θ_max
 
 		if (direction ==:both) 
-			psection =	my_poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=+1);
+			psection =	my_poincaresos(traj, plane; save_idxs=[1,2,3],warning=true,direction=+1);
 	
 		else
-			psection = ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=direction);
+			psection = DynamicalSystemsBase.poincaresos(traj, plane; save_idxs=[1,2,3],warning=true,direction=direction);
 		end
 		
 		nrPSOS_points = length(psection)

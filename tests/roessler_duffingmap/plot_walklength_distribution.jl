@@ -46,8 +46,8 @@ entropies = []
 
 for (i,b) in enumerate(b_vals)
     system = Systems.roessler(b=b);
-    timeseries = trajectory(system, T; Δt=Δt, Ttr=500);
-    psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[1,3]);
+    timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500);
+    psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[1,3]);
     d_traj, v_names = timeseries_to_grid(psection, grid);
     stn, ret_code = create_stn(d_traj, v_names);
     

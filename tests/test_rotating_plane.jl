@@ -17,7 +17,7 @@ plane0 = [0.0,0.0,1.0,0.0]
 for rho in rho_vals
 
 	set_parameter!(ds,2,rho)
-	timeseries = trajectory(ds, T; Δt=0.01, Ttr=500);
+	timeseries,  = trajectory(ds, T; Δt=0.01, Ttr=500);
 	
 	@show rho
 	

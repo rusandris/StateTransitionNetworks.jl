@@ -104,7 +104,7 @@ lyapunov_measures = zeros(length(a_values))
 for (i,a) in enumerate(a_values)
     system = Systems.henon([0.0, 0.0]; a=a, b=b)
     @show a
-    timeseries = trajectory(system, traj_length, [0, 0]; Ttr=trans)
+    timeseries,  = trajectory(system, traj_length, [0, 0]; Ttr=trans)
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
     stn,retcode = create_stn(discrete_timeseries, vertex_names)
     entropy_measures[i], lyapunov_measures[i] = network_measures(stn,ensemble, N_steps)
@@ -147,7 +147,7 @@ entropy_measures = zeros(length(rho_values))
 for (i,ρ) in enumerate(rho_values)
     ds = Systems.lorenz(ρ=ρ)
     @show ρ
-    psection = ChaosTools.poincaresos(ds, plane, T; Ttr=500, idxs = [2,3],direction=+1,rootkw = (xrtol = 1e-8, atol = 1e-8))
+    psection = DynamicalSystemsBase.poincaresos(ds, plane, T; Ttr=500, idxs = [2,3],direction=+1,rootkw = (xrtol = 1e-8, atol = 1e-8))
     discrete_timeseries, vertex_names = timeseries_to_grid(psection, grid_size)
     stn,retcode = create_stn(discrete_timeseries, vertex_names)
     entropy_measures[i], lyap_measures[i] = network_measures(stn,ensemble, N_steps)

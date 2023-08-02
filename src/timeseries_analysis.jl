@@ -1,4 +1,4 @@
-stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) = stn_analysis(Dataset(timeseries);grid=grid,plane=plane,idxs=idxs,ensemble=ensemble,N_steps=N_steps,make_ergodic=make_ergodic, verbose=verbose,return_stn=return_stn,use_analytic=use_analytic)
+stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) = stn_analysis(Dataset(timeseries);grid=grid,plane=plane,save_idxs=idxs,ensemble=ensemble,N_steps=N_steps,make_ergodic=make_ergodic, verbose=verbose,return_stn=return_stn,use_analytic=use_analytic)
 
 """
 	stn_analysis(timeseries::Dataset;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) ->  S, Λ

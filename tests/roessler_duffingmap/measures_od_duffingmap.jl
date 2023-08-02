@@ -63,7 +63,7 @@ for a in a_vals
 
 	set_parameter!(ds,1,a)
 	
-	timeseries = trajectory(ds, T;Ttr=Ttr);
+	timeseries,  = trajectory(ds, T;Ttr=Ttr);
 	d_traj, v_names = timeseries_to_grid(timeseries, grid_size);
 	stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
 	

@@ -89,7 +89,7 @@ for (i,a) in enumerate(special_as)
 	@show a	
 
 
-	timeseries = trajectory(ds, T; Ttr=Ttr);
+	timeseries,  = trajectory(ds, T; Ttr=Ttr);
 
 	ms = i == 3 ? 4 : 1.5
 	yticks = i == 1 ? true : false

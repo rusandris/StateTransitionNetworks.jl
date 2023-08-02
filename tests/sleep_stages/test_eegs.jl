@@ -35,7 +35,7 @@ for (i,eeg_file) in enumerate(eeg_files)
 	println("Means: ",mean(eeg_data,dims=1))
 
 	
-	stn,retcode,entr,lyap = stn_analysis(eeg_data;grid=grid_size,plane=plane,idxs=[var1,var2],return_stn=true)
+	stn,retcode,entr,lyap = stn_analysis(eeg_data;grid=grid_size,plane=plane,save_idxs=[var1,var2],return_stn=true)
 	@show retcode
 		
 	@show entr, lyap
@@ -53,7 +53,7 @@ for (i,eeg_file) in enumerate(eeg_files)
 	pl_pp = plot_phase_portrait(eeg_data,var1,var2,color=symbol_colors[i])
 	push!(plots_all,pl_pp)
 	#pl_ts = plot_timeseries(eeg_data,dims=[var1,var2])
-	pl_ps = plot_psection(eeg_data;plane = plane,idxs=[var1,var2],color=symbol_colors[i])
+	pl_ps = plot_psection(eeg_data;plane = plane,save_idxs=[var1,var2],color=symbol_colors[i])
 	push!(plots_all,pl_ps)
 
 end

@@ -31,8 +31,8 @@ for rho in rho_vals
 	densities = []
 
 	set_parameter!(ds,2,rho)
-	timeseries = trajectory(ds, T; Δt=Δt, Ttr=500);
-	psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+	timeseries,  = trajectory(ds, T; Δt=Δt, Ttr=500);
+	psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
 	@show length(psection)
 	
 	

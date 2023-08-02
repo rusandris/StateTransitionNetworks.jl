@@ -24,7 +24,7 @@ plots = []
 for (i,rho) in enumerate(rho_vals)
 
 	set_parameter!(ds,2,rho)
-	timeseries = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
+	timeseries,  = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
 	
 	@show rho
 	

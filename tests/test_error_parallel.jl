@@ -35,8 +35,8 @@ T = [
 function calc_lyapunov_measure(ρ, total_time, u0)
     ret_code_stn = :Fail
     system = Systems.lorenz(u0; ρ=ρ);
-    timeseries = trajectory(system, total_time; Δt=Δt, Ttr=1000);
-    psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+    timeseries,  = trajectory(system, total_time; Δt=Δt, Ttr=1000);
+    psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
     d_traj, v_names = timeseries_to_grid(psection, grid);
     stn, ret_code_stn = create_stn(d_traj, v_names; make_ergodic=true,verbose=false);
     if ret_code_stn == :Success
@@ -61,8 +61,8 @@ function generate_initial_states(ensemble, ρ)
         system = Systems.lorenz([0, 0, 0]; ρ=ρ);
         while ret_code_stn != :Success
             u0 = rand(Float64, 3).*200 .-100;
-            timeseries = trajectory(system, 10, u0; Δt=Δt, Ttr=1000);
-            psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+            timeseries,  = trajectory(system, 10, u0; Δt=Δt, Ttr=1000);
+            psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
             d_traj, v_names = timeseries_to_grid(psection, grid);
             stn, ret_code_stn = create_stn(d_traj, v_names; make_ergodic=true,verbose=false);
             if ret_code_stn == :Success

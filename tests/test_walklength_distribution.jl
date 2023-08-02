@@ -36,8 +36,8 @@ color_arr = [:orange, :red, :green]
 pl = plot()
 for (i,ρ) in enumerate(rho_arr)
     system = Systems.lorenz(u0; ρ=ρ);
-    timeseries = trajectory(system, T; Δt=Δt, Ttr=500);
-    psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+    timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500);
+    psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
     d_traj, v_names = timeseries_to_grid(psection, grid);
     stn, ret_code = create_stn(d_traj, v_names);
     ret_code

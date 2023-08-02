@@ -33,7 +33,7 @@ for index in eachindex(rho)
         stream = open("lorenz_cut_$label.txt", "a")
         u0 = rand(Float64,3).*50 .-25;
         system = Systems.lorenz(u0; ρ=ρ);
-        timeseries = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
+        timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
         L = length(timeseries);
         timeseries = Matrix(timeseries);
         S_data = []
@@ -49,7 +49,7 @@ for index in eachindex(rho)
                 end
             end
             new_timeseries = Dataset(new_timeseries)
-            psection = ChaosTools.poincaresos(new_timeseries, plane; direction=+1, idxs=[2,3])
+            psection = DynamicalSystemsBase.poincaresos(new_timeseries, plane; direction=+1, save_idxs=[2,3])
             d_traj, v_names = timeseries_to_grid(psection, grid);
             stn, ret_code = create_stn(d_traj, v_names; make_ergodic=true, verbose=true);
             if ret_code == :Success
@@ -96,8 +96,8 @@ for index in eachindex(rho)
     for i in 1:ensemble
         u0 = rand(Float64,3).*50 .-25;
         system = Systems.lorenz(u0; ρ=ρ);
-        timeseries = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
-        psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3])
+        timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
+        psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3])
         d_traj, v_names = timeseries_to_grid(psection, grid);
         stn, ret_code = create_stn(d_traj, v_names);
         if ret_code == :Success
