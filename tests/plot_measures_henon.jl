@@ -14,7 +14,7 @@ using LaTeXStrings
 ### Measures for a single value
 ###############################
 
-grid_size = 1000;
+grid_size = 200;
 b = 0.3;
 a = 1.4;
 ds = Systems.henon([0.1, 0.123]; a=a, b=b);
@@ -35,7 +35,7 @@ data2 = zeros(length(data0));
 b = 0.3;
 a = 1.4;
 a = 1.2265;
-ens = 10
+ens = 5
 ds = Systems.henon([0.1, 0.123]; a=a, b=b);
 λ = lyapunov(ds, 10000; d0 = 1e-7, threshold = 1e-4, Ttr = 500)
 #plot(timeseries[end-1000:end,1])
@@ -59,17 +59,32 @@ data2 ./= ens
 # save data
 f_name1 = "./tests/henon_S-gr_a=1.4_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
 f_name1 = "./tests/henon_S-gr_a=1.2265_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
+f_name1 = "./tests/henon_S-gr_a=1.2265_b=0.3_gr=10-500_dgr=1_t=5x10^6_ttrans=1000_ens=5.dat"
 writedlm(f_name1,data1)
 f_name2 = "./tests/henon_Lyap-gr_a=1.4_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
 f_name2 = "./tests/henon_Lyap-gr_a=1.2265_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
+f_name2 = "./tests/henon_Lyap-gr_a=1.2265_b=0.3_gr=10-500_dgr=1_t=5x10^6_ttrans=1000_ens=5.dat"
 writedlm(f_name2,data2)
+
 # load data
+f_name1 = "./tests/henon_S-gr_a=1.4_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
+f_name2 = "./tests/henon_Lyap-gr_a=1.4_b=0.3_gr=5-500_dgr=5_t=5x10^6_ttrans=1000.dat"
+f_name1cr = "./tests/henon_S-gr_a=1.2265_b=0.3_gr=10-500_dgr=1_t=5x10^6_ttrans=1000_ens=5.dat"
+f_name2cr = "./tests/henon_Lyap-gr_a=1.2265_b=0.3_gr=10-500_dgr=1_t=5x10^6_ttrans=1000_ens=5.dat"
 data0 = collect(5:5:500);
+data0cr = collect(10:1:500);
 data1 = readdlm(f_name1);
 data2 = readdlm(f_name2);
+data1cr = readdlm(f_name1cr);
+data2cr = readdlm(f_name2cr);
 
-plot!(data0, data1)
-plot!(data0, data2)
+plot(data0, data1, lw=2, color=:orange, label=L"S, a=1.4")
+plot!(data0, data2, lw=2, color=:orange, linestyle=:dash, label=L"\Lambda, a=1.4")
+plot!(data0cr, data1cr, lw=2, color=:red, label=L"S, a=1.2265")
+plot!(data0cr, data2cr, lw=2, color=:red, linestyle=:dash, label=L"\Lambda, a=1.2265")
+plot!(xlabel="# of grid cells", ylabel=L"S, \Lambda", ylim=[0,3], xguidefontsize=22, yguidefontsize=22, tickfontsize=14, lw=2, legendfontsize=16, dpi=300)
+savefig("./tests/henon_S-Lyap-gr_a=1.4_1.2265_gr=5-500_t=5x10^6_ttrans=1000_ens=5.pdf")
+
 
 #################
 ### orbit diagram
@@ -125,7 +140,7 @@ sim_lyapunov_eponent = readdlm(f_name)
 pl = plot()
 plot!(pl, a_values, zeros(length(a_values)), linestyle=:dash, color="black", label=nothing)
 plot!(pl, a_values, sim_lyapunov_eponent, label=nothing, lw=2)
-plot!(pl, xlabel=L"a", ylabel=L"\lambda", xlim=[1,1.4], xticks=1:0.1:1.4, xguidefontsize=22, yguidefontsize=22, tickfontsize=14, lw=2, fontfamily="Serif", legendfontsize=16,
+plot!(pl, xlabel=L"a", ylabel=L"\lambda", xlim=[1,1.4], xticks=1:0.1:1.4, 
 dpi=300)
 
 ####################
