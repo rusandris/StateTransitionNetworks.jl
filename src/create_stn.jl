@@ -59,7 +59,7 @@ For more info about PSOS  go to https://juliadynamics.github.io/DynamicalSystems
 function create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...)
 	
 	#psos
-	psection = poincaresos(ts, plane; save_idxs=idxs,warning=true,kwargs...)
+	psection = DynamicalSystemsBase.poincaresos(StateSpaceSet(ts), plane; save_idxs=idxs,warning=true,kwargs...)
 	#method for time-discrete trajectory
 	create_stn(psection,grid; make_ergodic=make_ergodic, verbose=verbose)
 	
