@@ -141,8 +141,7 @@ for (i,b) in enumerate(special_bs)
 	push!(psos_plots,psos_plot)
 	
 	
-	d_traj, v_names = timeseries_to_grid(psection, grid_size);
-	stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
+	stn, retcode = create_stn(psection, grid_size;make_ergodic=true,verbose=true);
 	
 	if retcode == :Success
 		P = prob_matrix(stn)
