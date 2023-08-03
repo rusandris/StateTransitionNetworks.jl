@@ -16,7 +16,7 @@ end
 T = 50
 rho_vals = [180.1, 180.7, 180.78]
 plane = (1,15.0)
-ds = Systems.lorenz();
+ds = PredefinedDynamicalSystems.lorenz();
 grid_sizes = 5:20
 gridmax = grid_sizes[end]
 Δt = 0.01

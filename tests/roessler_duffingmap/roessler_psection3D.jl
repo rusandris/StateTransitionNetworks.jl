@@ -18,7 +18,7 @@ plane = (2,0.0) #y = 0
 plot_plane = (0,1,0.01,0.0) #close plane hack
 
 
-ds = Systems.roessler()
+ds = PredefinedDynamicalSystems.roessler()
 set_parameter!(ds,2,0.42)
 
 traj = trajectory(ds,100;Ttr = 500)

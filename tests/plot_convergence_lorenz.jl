@@ -4,7 +4,7 @@ using Plots
 using LaTeXStrings
 using OrdinaryDiffEq	
 
-ds = Systems.lorenz()
+ds = PredefinedDynamicalSystems.lorenz()
 tol = 1e-8
 params = [180.7,180.1,180.78,181.1]
 ensemble = 10000

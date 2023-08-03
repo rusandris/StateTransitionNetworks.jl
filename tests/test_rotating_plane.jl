@@ -7,7 +7,7 @@ include("rotating_plane.jl")
 
 T = 10000
 rho_vals = [180.1, 180.7,180.78]
-ds = Systems.lorenz();
+ds = PredefinedDynamicalSystems.lorenz();
 grid_size = 20
 direction = +1
 

@@ -3,7 +3,7 @@ using StateTransitionNetworks
 using Plots
 using LaTeXStrings
 
-ds = Systems.henon()
+ds = PredefinedDynamicalSystems.henon()
 params = [1.2,1.2265,1.24,1.27]
 ensemble = 10000
 N_max = 5000

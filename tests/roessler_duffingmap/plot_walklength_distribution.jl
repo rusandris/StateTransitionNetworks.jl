@@ -45,7 +45,7 @@ lyaps = []
 entropies = []
 
 for (i,b) in enumerate(b_vals)
-    system = Systems.roessler(b=b);
+    system = PredefinedDynamicalSystems.roessler(b=b);
     timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500);
     psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[1,3]);
     d_traj, v_names = timeseries_to_grid(psection, grid);

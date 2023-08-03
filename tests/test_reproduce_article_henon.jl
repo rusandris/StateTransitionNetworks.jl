@@ -10,7 +10,7 @@ using DelimitedFiles
 T = 30000
 Ttr = 1000
 a_vals = [1:0.01:1.4;]
-ds = Systems.henon();
+ds = PredefinedDynamicalSystems.henon();
 grid_size = 20
 Δt = 0.01
 traj_ensemble = 1

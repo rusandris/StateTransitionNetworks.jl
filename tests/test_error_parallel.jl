@@ -34,7 +34,7 @@ T = [
 
 function calc_lyapunov_measure(ρ, total_time, u0)
     ret_code_stn = :Fail
-    system = Systems.lorenz(u0; ρ=ρ);
+    system = PredefinedDynamicalSystems.lorenz(u0; ρ=ρ);
     timeseries,  = trajectory(system, total_time; Δt=Δt, Ttr=1000);
     psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
     d_traj, v_names = timeseries_to_grid(psection, grid);
@@ -58,7 +58,7 @@ function generate_initial_states(ensemble, ρ)
     init = SharedMatrix{Float64}(ensemble, 3)
     for i in 1:ensemble
         ret_code_stn = :Fail
-        system = Systems.lorenz([0, 0, 0]; ρ=ρ);
+        system = PredefinedDynamicalSystems.lorenz([0, 0, 0]; ρ=ρ);
         while ret_code_stn != :Success
             u0 = rand(Float64, 3).*200 .-100;
             timeseries,  = trajectory(system, 10, u0; Δt=Δt, Ttr=1000);

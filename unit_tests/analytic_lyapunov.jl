@@ -16,7 +16,7 @@ for i in eachindex(rho)
 
 	while length(l) < ensemble
 		u0 = rand(Float64,3).*50 .-25;
-		system = Systems.lorenz(u0; ρ=ρ);
+		system = PredefinedDynamicalSystems.lorenz(u0; ρ=ρ);
 		timeseries,  = trajectory(system, T; Δt=Δt, Ttr=1000);
 		psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
 	    d_traj, v_names = timeseries_to_grid(psection, grid_size);

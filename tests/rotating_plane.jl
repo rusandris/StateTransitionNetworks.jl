@@ -177,7 +177,7 @@ end
 
 
 function parameter_sweep(rho_values;grid_size,T,Ttr,Δt,θ_min,θ_max,Δθ,save = false)
-	ds = Systems.lorenz()
+	ds = PredefinedDynamicalSystems.lorenz()
 
 
 	plane0 = [0.0,0.0,1.0,0.0]

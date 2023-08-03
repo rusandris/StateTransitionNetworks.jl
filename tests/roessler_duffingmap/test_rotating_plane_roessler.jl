@@ -14,7 +14,7 @@ include("rotating_plane.jl")
 T = 5000
 Ttr = 500
 b_vals = [0.42,0.372,0.28,0.34]
-ds = Systems.roessler();
+ds = PredefinedDynamicalSystems.roessler();
 grid_size = 20
 direction = +1
 

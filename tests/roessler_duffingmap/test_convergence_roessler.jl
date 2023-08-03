@@ -8,7 +8,7 @@ guidefontsize=20
 tickfontsize=15
 legendfontsize=15
 
-ds = Systems.roessler()
+ds = PredefinedDynamicalSystems.roessler()
 special_bs = [0.42,0.368,0.34,0.28]
 ensembles = 10 .^[2,3,4]
 ensemble = ensembles[3]

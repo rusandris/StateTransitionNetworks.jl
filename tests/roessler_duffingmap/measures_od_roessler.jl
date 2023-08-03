@@ -16,7 +16,7 @@ b_vals = [0.2:0.001:1.0;]
 
 
 plane = (2,0.0)
-ds = Systems.roessler();
+ds = PredefinedDynamicalSystems.roessler();
 grid_size = 20
 Δt = 0.01
 rw_ensemble = 100 
