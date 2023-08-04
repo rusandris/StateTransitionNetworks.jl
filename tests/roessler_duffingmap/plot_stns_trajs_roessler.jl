@@ -58,6 +58,9 @@ plot!([special_bs[2],special_bs[2]],[-9,-3])
 
 ds = PredefinedDynamicalSystems.roessler();
 
+
+#predictability not implemented in v3
+
 #=
 for b in special_bs
 	@show b 
@@ -151,7 +154,7 @@ for (i,b) in enumerate(special_bs)
 		p_nodes /= sum(p_nodes)
 
 
-		plot_stn(stn;filename="stn_roessler_b_$b"*".pdf",
+		plot_stn(stn;filename="figs/stn_roessler_b_$b"*".pdf",
 			nodesize=0.2,
 			nodefillc=[RGBA(c.r,c.g,c.b,x) for x in p_nodes .^ (1/8)],
 			linetype="curve",
@@ -172,4 +175,4 @@ l = @layout [a{0.25w} b{0.25w} c{0.25w} d{0.25w};a{0.25w} b{0.25w} c{0.25w} d{0.
 
 plot_all = plot(trajectories...,psos_plots...,layout=l,size=(1200,800))
 
-savefig(plot_all,"roessler_trajectories_psos.pdf")
+savefig(plot_all,"figs/roessler_trajectories_psos.pdf")
