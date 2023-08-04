@@ -4,8 +4,7 @@ using LaTeXStrings
 using Graphs
 using StatsBase
 using LinearAlgebra
-using DelayEmbeddings
-using ChaosTools
+
 
 include("../plot_functions.jl")
 
@@ -53,7 +52,7 @@ for (i,eeg_file) in enumerate(eeg_files)
 	pl_pp = plot_phase_portrait(eeg_data,var1,var2,color=symbol_colors[i])
 	push!(plots_all,pl_pp)
 	#pl_ts = plot_timeseries(eeg_data,dims=[var1,var2])
-	pl_ps = plot_psection(eeg_data;plane = plane,save_idxs=[var1,var2],color=symbol_colors[i])
+	pl_ps = plot_psection(eeg_data;plane = plane,idxs=[var1,var2],color=symbol_colors[i])
 	push!(plots_all,pl_ps)
 
 end
@@ -62,7 +61,7 @@ end
 l = @layout [a{0.4h}; b{0.2h}; c{0.2h}; b{0.2h}]
 plots = plot(plots_all...,size=(600,1000),layout=(4,2),left_margin=8Plots.mm,right_margin=8Plots.mm)
 
-savefig(plots,"sleep_stages_plots.pdf")
+savefig(plots,"figs/sleep_stages_plots.pdf")
 
 
 

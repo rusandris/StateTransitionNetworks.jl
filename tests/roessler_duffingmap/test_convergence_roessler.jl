@@ -32,7 +32,7 @@ for (i,ens) in enumerate(ensembles)
 	
 
 	@show ens
-	traj = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
+	traj, = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
 	stn,retcode = create_stn(traj,grid_size,plane,[1,3];direction=1)
 
 
@@ -93,7 +93,7 @@ empty_plot = plot((1:3)',legend=:outertopleft,legendfontsize=legendfontsize,colo
 
 pl_ensembles = plot(pl_entr,pl_lyap,empty_plot,layout=(1,3),size=(1000,300),margin=9Plots.mm)
 
-savefig(pl_ensembles,"roessler_convergence_b_$b"*"_N$N_max"*"_T$T"*"_Ttr$Ttr.pdf")
+savefig(pl_ensembles,"figs/roessler_convergence_b_$b"*"_N$N_max"*"_T$T"*"_Ttr$Ttr.pdf")
 
 
 
@@ -108,7 +108,7 @@ pl_entr = plot()
 for (i,b) in enumerate(special_bs)
 	set_parameter!(ds,2,b)
 	@show b
-	traj = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
+	traj, = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
 	stn,retcode = create_stn(traj,grid_size,plane,[1,3],direction=1)
 	
 	if retcode ==:Success
@@ -161,9 +161,9 @@ end
 empty_plot = plot((1:4)',legend=:outertopleft,legendfontsize=legendfontsize,color = [:orange :red :blue :green] ,labels=[L"b=0.42" L"b=0.368" L"b=0.34" L"b=0.28"],framestyle = :none)
 pl_bs = plot(pl_entr,pl_lyap,empty_plot,layout=(1,3),size=(1000,300),margin=9Plots.mm)
 
-savefig(pl_bs,"roessler_convergence_ens$ensemble"*"_N$N_max"*"_T$T"*"_Ttr$Ttr.pdf")
+savefig(pl_bs,"figs/roessler_convergence_ens$ensemble"*"_N$N_max"*"_T$T"*"_Ttr$Ttr.pdf")
 plot_all = plot(pl_ensembles,pl_bs,layout=(2,1),size=(1000,600))
-savefig(plot_all,"roessler_convergence_T$T"*"_Ttr$Ttr.pdf")
+savefig(plot_all,"figs/roessler_convergence_T$T"*"_Ttr$Ttr.pdf")
 
 
 
