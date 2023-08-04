@@ -1,7 +1,7 @@
-stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) = stn_analysis(Dataset(timeseries);grid=grid,plane=plane,save_idxs=idxs,ensemble=ensemble,N_steps=N_steps,make_ergodic=make_ergodic, verbose=verbose,return_stn=return_stn,use_analytic=use_analytic)
+stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) = stn_analysis(DynamicalSystemsBase.StateSpaceSet(timeseries);grid=grid,plane=plane,save_idxs=idxs,ensemble=ensemble,N_steps=N_steps,make_ergodic=make_ergodic, verbose=verbose,return_stn=return_stn,use_analytic=use_analytic)
 
 """
-	stn_analysis(timeseries::Dataset;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) ->  S, Λ
+	stn_analysis(timeseries::DynamicalSystemsBase.StateSpaceSet;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false) ->  S, Λ
 	
 Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created from `timeseries`. If `retcode` is other than `:Success`, `NaN`s are returned.
 ## Keyword arguments
@@ -14,7 +14,7 @@ Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created fr
 * `make_ergodic` : returns an `stn` with only one strongly connected component. Defaults to `false`.  
 * `verbose` : logs the connectedness checking process
 """
-function stn_analysis(timeseries::Dataset;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false)
+function stn_analysis(timeseries::DynamicalSystemsBase.StateSpaceSet;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false)
 
 	stn,retcode = create_stn(timeseries,grid::Int64,plane,idxs;make_ergodic=make_ergodic, verbose=verbose)
 	
