@@ -5,8 +5,7 @@ import StatsBase: sample, mean, var, Weights
 using MetaGraphsNext
 using GraphPlot,Cairo,Compose
 import SparseArrays: spzeros 
-import DelayEmbeddings: Dataset,AbstractDataset
-import DynamicalSystemsBase: poincaresos
+using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet
 import LinearAlgebra: eigen, Diagonal
 
 include("create_stn.jl")
