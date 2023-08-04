@@ -16,14 +16,11 @@ function timeseries_to_grid(timeseries, grid; grid_edges = [])
     else
     	x_min,y_min,x_max,y_max = grid_edges 
     end
-    #partitioning with little extra space on both ends
     
-    dx = 0.5*(x_max-x_min)/grid
-    dy = 0.5*(y_max-y_min)/grid
-    
-    x_grid = range(x_min-dx, x_max+dx, grid);
+	#partitioning between `x_min` and `x_max` into `grid` number of cells
+    x_grid = range(x_min, x_max, grid);
     x_min = x_grid[1]
-    y_grid = range(y_min-dy, y_max+dy, grid);
+    y_grid = range(y_min, y_max, grid);
     y_min = y_grid[1]
     
     #arrays for space-discrete timeseries 
