@@ -18,9 +18,9 @@ function timeseries_to_grid(timeseries, grid; grid_edges = [])
     end
     
 	#partitioning between `x_min` and `x_max` into `grid` number of cells
-    x_grid = range(x_min, x_max, grid);
+    x_grid = range(x_min, nextfloat(x_max), grid+1);
     x_min = x_grid[1]
-    y_grid = range(y_min, y_max, grid);
+    y_grid = range(y_min, nextfloat(x_max), grid+1);
     y_min = y_grid[1]
     
     #arrays for space-discrete timeseries 
