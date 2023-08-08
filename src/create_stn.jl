@@ -17,7 +17,7 @@ function timeseries_to_grid(timeseries, grid; grid_edges = [])
     	x_min,y_min,x_max,y_max = grid_edges 
     end
     
-	#partitioning between `x_min` and `x_max` into `grid` number of cells
+	#partitioning between [`x_min`, `x_max`] into `grid` number of cells
     x_grid = range(x_min, nextfloat(x_max), grid+1);
     x_min = x_grid[1]
     y_grid = range(y_min, nextfloat(x_max), grid+1);
