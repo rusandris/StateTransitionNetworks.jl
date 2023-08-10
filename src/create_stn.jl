@@ -164,14 +164,16 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
 	stn = MetaGraph(
         DiGraph(),
         Int64,
-        Dict{Symbol, Int64},
+        Dict{Symbol, Union{Int64,Float64}},
         Dict{Symbol, Float64},
         nothing,
         edge_data -> 1.0,
         0.0)
 
+	# add dummy coordinates
 	for v in 1:nr_vertices
-		stn[v] = Dict{Symbol, Int64}()
+		#stn[v] = Dict{Symbol, Int64}()
+		stn[v] = Dict(:x => v, :y => 0, :prob => 0.)
 	end
 	
 	Q = calculate_weight_matrix(P)
