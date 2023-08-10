@@ -9,7 +9,7 @@ tickfontsize=15
 legendfontsize=15
 
 
-include("rotating_plane.jl")
+include("../rotating_plane.jl")
 
 T = 5000
 Ttr = 500
@@ -28,15 +28,15 @@ for (i,rho) in enumerate(rho_vals)
 	
 	@show rho
 	
-	angles,entropies,lyaps,PSOS_points_numbers,average_degrees = rotplane_measures_v3(timeseries;
+	angles,entropies,lyaps,PSOS_points_numbers,average_degrees = rotplane_measures(timeseries;
 		grid_size=grid_size,
 		plane0=plane0,
 		θ_min=0,
 		θ_max=π,
-		Δθ=0.001,
-		direction=direction,return_angles =true)
+		Δθ=0.01,
+		direction=direction)
 		
-	writedlm("data_rotating_plane_lorenz_rho_$(rho)"*"_dir$direction"*"T_$T"*"grid_$grid"*".txt",hcat(angles,entropies,lyaps,PSOS_points_numbers,average_degrees))
+	writedlm("data/data_rotating_plane_lorenz_rho_$(rho)"*"_dir$direction"*"T_$T"*"grid_$grid_size"*".txt",hcat(angles,entropies,lyaps,PSOS_points_numbers,average_degrees))
 		
 	#@show length(angles)
 	#@show length(lyaps)
@@ -91,7 +91,7 @@ for (i,rho) in enumerate(rho_vals)
 		l = @layout [a{0.5h}; b{0.5h}]
 		plot_all_measures = plot(pl_b,pl_other;layout=l,size=(1000,500),margin=5Plots.mm)
 	
-	    savefig(plot_all_measures, "rotating_plane_lorenz_rho_$(rho)"*"_dir$direction"*"T_$T"*".pdf")
+	    savefig(plot_all_measures, "figs/rotating_plane_lorenz_rho_$(rho)"*"_dir$direction"*"T_$T"*".pdf")
 	    
 	
 end
@@ -102,7 +102,7 @@ l = @layout [a{0.33h}; b{0.33h}; c{0.33h}]
 
 plot_all = plot(plots...;layout=l,size=(1000,1000),margin=5Plots.mm)
 
-savefig(plot_all,"rotplane_measures_lorenz.pdf")
+savefig(plot_all,"figs/rotplane_measures_lorenz.pdf")
 
 
 

@@ -1,6 +1,5 @@
 using StateTransitionNetworks
 using DynamicalSystems
-using ChaosTools
 using Plots
 using LinearAlgebra
 using StatsBase
@@ -50,7 +49,8 @@ function translate_to_origin!(traj::Matrix)
 end
 
 
-#--------------------------------CHAOSTOOLS-----------------------------
+#--------------------------------From DynamicalSystemsBase-----------------------------
+
 
 _initialize_output(::S, ::Int) where {S} = eltype(S)[]
 _initialize_output(u::S, i::SVector{N, Int}) where {N, S} = typeof(u[i])[]
@@ -58,30 +58,58 @@ function _initialize_output(u, i)
     error("The variable index when producing the PSOS must be Int or SVector{Int}")
 end
 
-function my_poincaresos(A::Dataset, plane; direction = -1, warning = true, idxs = 1:size(A, 2))
-    i = typeof(idxs) <: Int ? idxs : SVector{length(idxs), Int}(idxs...)
+"Ensure hyperplane is matching with dimension `D`."
+
+function check_hyperplane_match(plane, D)
+    P = typeof(plane)
+    L = length(plane)
+    if P <: AbstractVector
+        if L != D + 1
+            throw(ArgumentError(
+            "The plane for the `poincaresos` must be either a 2-Tuple or a vector of "*
+            "length D+1 with D the dimension of the system."
+            ))
+        end
+    elseif P <: Tuple
+        if !(P <: Tuple{Int, Number})
+            throw(ArgumentError(
+            "If the plane for the `poincaresos` is a 2-Tuple then "*
+            "it must be subtype of `Tuple{Int, Number}`."
+            ))
+        end
+    else
+        throw(ArgumentError(
+        "Unrecognized type for the `plane` argument."
+        ))
+    end
+end
+
+function my_poincaresos(A::AbstractStateSpaceSet, plane;
+        direction = -1, warning = true, save_idxs = 1:dimension(A)
+    )
+    check_hyperplane_match(plane, size(A, 2))
+    i = typeof(save_idxs) <: Int ? save_idxs : SVector{length(save_idxs), Int}(save_idxs...)
     planecrossing = PlaneCrossing(plane, direction > 0)
     data = my_poincaresos(A, planecrossing, i)
     warning && length(data) == 0 && @warn PSOS_ERROR
-    return Dataset(data)
+    return StateSpaceSet(data)
 end
-function my_poincaresos(A::Dataset, planecrossing::PlaneCrossing, j)
+
+function my_poincaresos(A::StateSpaceSet, planecrossing::PlaneCrossing, j)
     i, L = 1, length(A)
     data = _initialize_output(A[1], j)
     # Check if initial condition is already on the plane
     planecrossing(A[i]) == 0 && push!(data, A[i][j])
     i += 1
     side = planecrossing(A[i])
-
-    while i ≤ L # We always check point i vs point i-1
+ 	while i ≤ L # We always check point i vs point i-1
         while side < 0 # bring trajectory infront of hyperplane
             i == L && break
             i += 1
             side = planecrossing(A[i])
         end
-        
-        # It is now guaranteed that A crosses hyperplane between i-1 and i
-        ucross = interpolate_crossing(A[i-1], A[i], planecrossing)
+    	# It is now guaranteed that A crosses hyperplane between i-1 and i
+        ucross = my_interpolate_crossing(A[i-1], A[i], planecrossing)
         push!(data, ucross[j])
         
         while side ≥ 0 # iterate until behind the hyperplane
@@ -91,24 +119,26 @@ function my_poincaresos(A::Dataset, planecrossing::PlaneCrossing, j)
         end
         i == L && break
         # It is now guaranteed that A crosses hyperplane between i-1 and i
-        ucross = interpolate_crossing(A[i-1], A[i], planecrossing)
+        ucross = my_interpolate_crossing(A[i-1], A[i], planecrossing)
         push!(data, ucross[j])
     end
     return data
 end
 
-function interpolate_crossing(A, B, pc::PlaneCrossing{<:AbstractVector})
+function my_interpolate_crossing(A, B, pc::PlaneCrossing{<:AbstractVector})
     # https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
     t = LinearAlgebra.dot(pc.n, (pc.p₀ .- A))/LinearAlgebra.dot((B .- A), pc.n)
     return A .+ (B .- A) .* t
 end
 
-function interpolate_crossing(A, B, pc::PlaneCrossing{<:Tuple})
+function my_interpolate_crossing(A, B, pc::PlaneCrossing{<:Tuple})
     # https://en.wikipedia.org/wiki/Linear_interpolation
     y₀ = A[pc.plane[1]]; y₁ = B[pc.plane[1]]; y = pc.plane[2]
     t = (y - y₀) / (y₁ - y₀) # linear interpolation with t₀ = 0, t₁ = 1
     return A .+ (B .- A) .* t
 end
+
+#---------------------------------------------------------------------------------
 
 function rotplane_measures(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction=+1)
 	
@@ -145,7 +175,7 @@ function rotplane_measures(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction=+1
 		transform_to_plane!(psection,θ)
 		traj_grid, vertex_names = timeseries_to_grid(psection[:,1:2],grid_size) 
 		
-		stn,retcode = create_stn(traj_grid,vertex_names,make_ergodic=true,verbose=true)
+		stn,retcode = create_stn(psection[:,1:2],grid_size;make_ergodic=true,verbose=true)
 		if retcode ==:Success
 			P = prob_matrix(stn)
 			entropy, lyap = network_measures(P)
@@ -173,6 +203,8 @@ function rotplane_measures(traj;grid_size,plane0,θ_min,θ_max,Δθ,direction=+1
 	end
 	return angles,entropies,lyapunovs,PSOS_points_numbers,average_degrees,qweights
 end
+
+
 
 
 
