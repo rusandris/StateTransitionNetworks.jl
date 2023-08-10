@@ -46,9 +46,9 @@ end
 Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
 by using the analytical definitions of both quantities
 """
-function network_measures(P::AbstractMatrix)
-   	entropy, ret_code_entr = sinai_kolmogorov_entropy(P)
-    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P)
+function network_measures(P::AbstractMatrix;x=nothing)
+   	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
+    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x)
 	return entropy, lyapunov
 end
 
@@ -109,15 +109,19 @@ end
 Calculates analytically the Sinai-Kolmogorov entropy given the P transition probability matrix of the STN. 
 
 """
-function sinai_kolmogorov_entropy(P::AbstractMatrix)
-	x = nullspace(Matrix(P' - I))
-	x = x' ./sum(x)
+function sinai_kolmogorov_entropy(P::AbstractMatrix;x=nothing)
+		
+	if isnothing(x)
+		x = nullspace(Matrix(P' - I))
+		x = x ./sum(x)
+	end
+	
 	v = ones(length(x))
 
 	L = Matrix(-log.(P))
 	replace!(L, Inf=>0.0)
 	L = P.*L
-	entropy = (x*L*v)[1]
+	entropy = (x'*L*v)[1]
 	return real(entropy), :Success
 end
 
@@ -127,9 +131,13 @@ end
 Calculates analytically the Lyapunov measure given the the P transition probability matrix of the STN. 
 
 """
-function lyapunov_measure(P::AbstractMatrix)
-	x = nullspace(Matrix(P' - I))
-	x = x' ./sum(x)
+function lyapunov_measure(P::AbstractMatrix;x=nothing)
+	
+	if isnothing(x)
+		x = nullspace(Matrix(P' - I))
+		x = x ./sum(x)
+	end
+	x = x'
 	v = ones(length(x))
 	
 	L = Matrix(-log.(P))

@@ -189,6 +189,27 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
 	return stn,retcode	
 end
 
+
+"""
+	state_distribution(stn) -> prob_states,pos_states
+Returns the probability distribution of states and the positions of the vertices that correspond to these states.  
+"""
+function state_distribution(stn)
+	prob_states = zeros(nv(stn))	#probability of vertices(states)
+	pos_states = zeros(Int32,nv(stn),2)	#position of vertices
+	
+	for v in collect(vertices(stn))
+		# v is the code of the vertex
+		v_label = label_for(stn,v)
+		prob_states[v] = stn[v_label][:prob] 
+		pos_states[v,:] .= [stn[v_label][:x],stn[v_label][:y]] 
+	end
+	
+	return prob_states,pos_states
+end
+
+
+
 function prob_matrix(stn)
 	nr_vertices = nv(stn)
 	P = spzeros(Float64,(nr_vertices,nr_vertices))
