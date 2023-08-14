@@ -8,7 +8,7 @@ using Plots,LaTeXStrings
 # cd tests
 include("adding_stn_functions.jl")
 
-function translate_to_origin!(epoch; data_save_idxs=1:3)
+function translate_to_origin!(epoch; data_idxs=1:3)
 	for i in data_idxs
 		epoch[:,i] = epoch[:,i] .- mean(epoch[:,i])
 	end
@@ -43,7 +43,7 @@ for epoch_start_index in 1:epoch_length:(size(pca_data)[1]-epoch_length)
 	
 	translate_to_origin!(epoch)
 	
-	psection = DynamicalSystemsBase.poincaresos(Dataset(epoch), plane; direction=+1, save_idxs=[2,3]);
+	psection = DynamicalSystemsBase.poincaresos(StateSpaceSet(epoch), plane; direction=+1, save_idxs=[2,3]);
 	push!(epoch_psections,psection)
 	
 end

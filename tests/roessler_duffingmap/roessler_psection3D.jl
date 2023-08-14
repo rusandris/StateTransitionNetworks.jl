@@ -70,5 +70,5 @@ x = [-10,12]
 
 surface!(pl,x,y,(x,y)->plane_surface(x,y;plane=plot_plane),c=:greens,alpha=0.4,zlims=(0,12),colorbar=false,clim=(0,0))
 
-savefig(pl,"roessler3D.pdf")
+savefig(pl,"figs/roessler3D.pdf")
 

@@ -3,11 +3,12 @@ using DelimitedFiles
 using StateTransitionNetworks
 using LinearAlgebra
 using StatsBase
+using StatsPlots
 
 guidefontsize=20
 tickfontsize=15
 legendfontsize=15
-
+"figs" in readdir() || mkdir("figs/")
 
 
 labels = ["NREM2", "SWS", "WAKE", "NREM1"]
@@ -17,7 +18,7 @@ colors = [:purple,:green,:red,:orange]
 
 #-----------------netmeasure statistics-----------------------
 
-path_data = "netmeasures/"
+path_data = "data/netmeasures/"
 
 
 function plot_EEG_statistics(data;labels,colors,ylabel,tickrotation,alpha)
@@ -41,7 +42,7 @@ entropies = []
 lyapunovs = []
 
 for (i,data_file) in enumerate(readdir(path_data))
-		
+	@show path_data
 	@show data_file
 	rotplane_data = readdlm(path_data*data_file)
 	
@@ -66,7 +67,7 @@ savefig(plots_all,"figs/sleep_stages_violins.pdf")
 
 #--------------------weight distributions------------------------
 
-path_data = "weights_distributions/"
+path_data = "data/weights_distributions/"
 
 x_axes = [:identity,:identity,:log10,:identity]
 
@@ -79,8 +80,9 @@ colors = [:purple,:green,:red,:orange]
 
 
 for (i,data_file) in enumerate(readdir(path_data))
+	@show path_data
 	@show data_file
-	qweights = readdlm(data_file)
+	qweights = readdlm(path_data*data_file)
 	h = fit(Histogram,vec(qweights))
 	h = normalize(h,mode=:probability)
 	bin_centers = h.edges[1][1:end-1] + diff(h.edges[1])/2

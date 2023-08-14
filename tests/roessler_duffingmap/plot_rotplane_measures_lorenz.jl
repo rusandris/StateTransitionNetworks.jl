@@ -1,8 +1,8 @@
 using Plots,LaTeXStrings
 using DelimitedFiles
 
-
-rotplane_data = readdlm("data_rotating_plane_lorenz_rho_180.1_dir1T_5000grid_20.txt")
+data_filename = "data_rotating_plane_lorenz_rho_180.1_dir1T_5000grid_20"
+rotplane_data = readdlm("data/"*data_filename*".txt")
 
 rho = 180.1
 
@@ -69,4 +69,4 @@ plot!(pl_other,angles,average_degrees,
 l = @layout [a{0.5h}; b{0.5h}]
 plot_all_measures = plot(pl_b,pl_other;layout=l,size=(1000,500),margin=5Plots.mm)
 
-savefig(plot_all_measures, "rotating_plane_lorenz_rho_$(rho)"*"_dir$direction"*"T_$T"*".pdf")
+savefig(plot_all_measures, "figs/"*data_filename*".pdf")

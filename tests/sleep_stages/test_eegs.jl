@@ -7,7 +7,7 @@ using LinearAlgebra
 
 
 include("../plot_functions.jl")
-
+"figs" in readdir() || mkdir("figs/")
 path_data = "./sleep_data/"
 #path_data = "./surrogate_data/"
 eeg_files = filter(fn -> splitext(fn)[2] == ".dat" || splitext(fn)[2] == ".bin",readdir(path_data))
