@@ -11,11 +11,11 @@ end
 
 
 ds = PredefinedDynamicalSystems.henon()
-traj1 = trajectory(ds,10000;Ttr = 1000)
-traj2 = trajectory(ds,10000;Ttr = 11000)
+traj1, = trajectory(ds,10000;Ttr = 1000)
+traj2, = trajectory(ds,10000;Ttr = 11000)
 
 
-# @testset "stn addition test: commutativity" begin
+@testset "stn addition test: commutativity" begin
 	symts_list12 = timeseries_to_common_grid([traj1,traj2],20)
 	symts_list21 = timeseries_to_common_grid([traj2,traj1],20)
 	
@@ -23,4 +23,4 @@ traj2 = trajectory(ds,10000;Ttr = 11000)
 	stn_added21,retcode = add_timeseries(symts_list21,20)
 	@test are_equal(stn_added12,stn_added21)
 	
-# end
+end
