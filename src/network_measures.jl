@@ -46,9 +46,9 @@ end
 Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
 by using the analytical definitions of both quantities
 """
-function network_measures(P::AbstractMatrix)
-   	entropy, ret_code_entr = sinai_kolmogorov_entropy(P)
-    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P)
+function network_measures(P::AbstractMatrix;x=nothing)
+   	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
+    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x)
 	return entropy, lyapunov
 end
 
@@ -109,21 +109,19 @@ end
 Calculates analytically the Sinai-Kolmogorov entropy given the P transition probability matrix of the STN. 
 
 """
-function sinai_kolmogorov_entropy(P::AbstractMatrix)
-	λ, V = eigen(Matrix(P))
-	λ, X = eigen(transpose(Matrix(P)))
-	
-	if real(λ[end]) ≈ 1
-	   x = transpose(X[:,end]./sum(X[:,end]))
-	   v = V[:,end]./V[1,end]
-	else
-	   return -1, :StochasticMatrixError
+function sinai_kolmogorov_entropy(P::AbstractMatrix;x=nothing)
+		
+	if isnothing(x)
+		x = nullspace(Matrix(P' - I))
+		x = x ./sum(x)
 	end
+	
+	v = ones(length(x))
 
 	L = Matrix(-log.(P))
 	replace!(L, Inf=>0.0)
 	L = P.*L
-	entropy = x*L*v
+	entropy = (x'*L*v)[1]
 	return real(entropy), :Success
 end
 
@@ -133,28 +131,25 @@ end
 Calculates analytically the Lyapunov measure given the the P transition probability matrix of the STN. 
 
 """
-function lyapunov_measure(P::AbstractMatrix)
-	λ, V = eigen(Matrix(P))
-	λ, X = eigen(transpose(Matrix(P)))
+function lyapunov_measure(P::AbstractMatrix;x=nothing)
 	
-	if real(λ[end]) ≈ 1
-	   x = transpose(X[:,end]./sum(X[:,end]))
-	   v = V[:,end]./V[1,end]
-	else
-	   return -1, -1, -1, :StochasticMatrixError
+	if isnothing(x)
+		x = nullspace(Matrix(P' - I))
+		x = x ./sum(x)
 	end
- 
+	x = x'
+	v = ones(length(x))
+	
 	L = Matrix(-log.(P))
 	replace!(L, Inf=>0.0)
 	L2 = P.*L.^2
 	L = P.*L
-	I = Diagonal(ones(length(x)))
 	S = (I-v*x)+(P-v*x)*inv(I-P+v*x)
-	covariance = x*L*S*L*v
-	variance = x*L2*v-(x*L*v)^2
-	lyapunov =  variance + 2*real(covariance)
+	covariance = (x*L*S*L*v)[1]
+	variance = (x*L2*v)[1] -(x*L*v)[1]^2
+	lyapunov =  variance + 2*covariance
 	if imag(covariance) < 1.0e-3
-	   return real(lyapunov), real(variance), real(covariance), :Success
+	   return lyapunov, variance, covariance, :Success
 	else
 	   @show covariance
 	   return real(lyapunov), real(variance), real(covariance), :ComplexCovariancveWarning

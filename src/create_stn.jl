@@ -4,29 +4,30 @@ Discretizes a 2D timeseries/trajectory on a grid. Returns
 a discrete timeseries containing the the cell coordinates and the list
 of vertices with cell coordinates. 
 """
-function timeseries_to_grid(timeseries, grid)    
+function timeseries_to_grid(timeseries, grid; grid_edges = [])    
     M = zeros(grid,grid)
     T = length(timeseries[:,1])
-    x_min = minimum(timeseries[:, 1])
-    y_min = minimum(timeseries[:, 2])
-    x_max = maximum(timeseries[:, 1])
-    y_max = maximum(timeseries[:, 2])
     
-    #partitioning with little extra space on both ends
+    if isempty(grid_edges)		
+		x_min = minimum(timeseries[:, 1])
+		y_min = minimum(timeseries[:, 2])
+		x_max = maximum(timeseries[:, 1])
+		y_max = maximum(timeseries[:, 2])
+    else
+    	x_min,y_min,x_max,y_max = grid_edges 
+    end
     
-    dx = 0.5*(x_max-x_min)/grid
-    dy = 0.5*(y_max-y_min)/grid
-    
-    x_grid = range(x_min-dx, x_max+dx, grid);
+	#partitioning between [`x_min`, `x_max`] into `grid` number of cells
+    x_grid = range(x_min, nextfloat(x_max, 100), grid+1);
     x_min = x_grid[1]
-    y_grid = range(y_min-dy, y_max+dy, grid);
+    y_grid = range(y_min, nextfloat(y_max, 100), grid+1);
     y_min = y_grid[1]
     
     #arrays for space-discrete timeseries 
     x_n = Vector{Int64}(undef, T)
     y_n = Vector{Int64}(undef, T)
     num_vertex = 0
-    vertex_names = [];
+    vertex_names = OrderedDict{Tuple{Int64,Int64},Int64}()
     x_n, y_n = [], [];
 
     for row in timeseries
@@ -34,17 +35,15 @@ function timeseries_to_grid(timeseries, grid)
         x = floor(Int,(row[1]-x_min)/Float64(x_grid.step))+1
         if M[y,x] == 0
             num_vertex += 1 
-            push!(vertex_names, [num_vertex, x, y])
+            vertex_names[(x,y)] = num_vertex
             M[y,x] = 1
         end
         push!(x_n, x)
         push!(y_n, y)
     end
-    vertex_names = reduce(hcat, vertex_names)'
-    d_timeseries = [x_n y_n]
+    d_timeseries = collect(zip(x_n,y_n))
     return d_timeseries, vertex_names
 end
-
 
 """
 	create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn
@@ -60,6 +59,7 @@ function create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,
 	
 	#psos
 	psection = DynamicalSystemsBase.poincaresos(DynamicalSystemsBase.StateSpaceSet(ts), plane; save_idxs=idxs,warning=true,kwargs...)
+
 	#method for time-discrete trajectory
 	create_stn(psection,grid; make_ergodic=make_ergodic, verbose=verbose)
 	
@@ -90,23 +90,29 @@ Creates a state transition network (STN) using the discrete timeseries and verte
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
 function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=false)
-	nr_vertices = length(vertex_names[:,1])
-	states = zeros(Int32,length(discrete_timeseries[:,1])) #discrete timeseries but only with vertex indices
-	
-	for v in 1:nr_vertices
-		timepoints_at_v = findall(x -> x == vertex_names[v,2:end],[eachrow(discrete_timeseries)...]) #find all times when state was v
-		states[timepoints_at_v] .= v  
-	end		
+	nr_vertices = length(vertex_names)
 	
 	#weight and transition probability matrices
 	Q = spzeros(nr_vertices, nr_vertices)
     P = spzeros(nr_vertices, nr_vertices)
     
+    #probability distribution of states
+    states_distrib = zeros(nr_vertices)
+    
     #count transitions
-    next_states = circshift(states,-1)
-    for i in eachindex(states[1:end-1])
-        Q[states[i],next_states[i]] += 1
+    for i in eachindex(discrete_timeseries[1:end-1])
+    	state = discrete_timeseries[i]
+    	next_state = discrete_timeseries[i+1]
+        Q[vertex_names[state],vertex_names[next_state]] += 1
+        states_distrib[vertex_names[state]] += 1
     end
+    
+    #update end (final) state 
+    end_state = discrete_timeseries[end]
+    states_distrib[vertex_names[end_state]] += 1
+    
+    #normalize state distribution
+	states_distrib = states_distrib ./ sum(states_distrib)
 
 	#normalize Q and fill P by normalizing rows
     Q = Q./sum(Q)
@@ -116,7 +122,7 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 	stn = MetaGraph(
         DiGraph(),
         Int64,
-        Dict{Symbol, Int64},
+        Dict{Symbol, Union{Int64,Float64}},
         Dict{Symbol, Float64},
         nothing,
         edge_data -> 1.0,
@@ -126,13 +132,12 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 	#add edges and properties
 	#Properties: vertices ->  Dict{Symbol,Int64}, edges -> Dict{Symbol,Float64}
 	
-	for v in 1:nr_vertices
-		x,y = vertex_names[v,2:end] 
-		stn[v] = Dict(:x => x,:y => y)
+	for state in keys(vertex_names)
+		stn[vertex_names[state]] = Dict(:x => state[1],:y => state[2],:prob => states_distrib[vertex_names[state]])
 	end
 	
-	for i in 1:nr_vertices
-        for j in 1:nr_vertices
+	for i in 1:length(vertex_names)
+        for j in 1:length(vertex_names)
             if P[i, j] != 0
 				stn[i,j] = Dict(:prob => P[i,j],:weight => Q[i,j])
             end
@@ -160,14 +165,16 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
 	stn = MetaGraph(
         DiGraph(),
         Int64,
-        Dict{Symbol, Int64},
+        Dict{Symbol, Union{Int64,Float64}},
         Dict{Symbol, Float64},
         nothing,
         edge_data -> 1.0,
         0.0)
 
+	# add dummy coordinates
 	for v in 1:nr_vertices
-		stn[v] = Dict{Symbol, Int64}()
+		#stn[v] = Dict{Symbol, Int64}()
+		stn[v] = Dict(:x => v, :y => 0, :prob => 0.)
 	end
 	
 	Q = calculate_weight_matrix(P)
@@ -184,6 +191,27 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
 	
 	return stn,retcode	
 end
+
+
+"""
+	state_distribution(stn) -> prob_states,pos_states
+Returns the probability distribution of states and the positions of the vertices that correspond to these states.  
+"""
+function state_distribution(stn)
+	prob_states = zeros(nv(stn))	#probability of vertices(states)
+	pos_states = zeros(Int32,nv(stn),2)	#position of vertices
+	
+	for v in collect(vertices(stn))
+		# v is the code of the vertex
+		v_label = label_for(stn,v)
+		prob_states[v] = stn[v_label][:prob] 
+		pos_states[v,:] .= [stn[v_label][:x],stn[v_label][:y]] 
+	end
+	
+	return prob_states,pos_states
+end
+
+
 
 function prob_matrix(stn)
 	nr_vertices = nv(stn)

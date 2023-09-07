@@ -1,15 +1,10 @@
 function plot_stn(stn;filename="stn.pdf",nodesize=1,nodefillc="orange",linetype="straight",max_edgelinewidth=1,weight_exponent=1,nodelabels=false,kwargs...)
-	nr_vertices = nv(stn)
-	x = []
-	y = []
-		
-	for i in 1:nr_vertices
-		ilabel = label_for(stn,i)
-		push!(x,stn[ilabel][:x])
-		push!(y,stn[ilabel][:y])
-	end
-	x = Int32.(x)
-	y = Int32.(y)
+	
+	prob_states,pos_states = state_distribution(stn)
+	#vertex alphas could be a function of their probability
+	
+	x = pos_states[:,1]
+	y = pos_states[:,2]
 	
 	w = weight_matrix(stn)
 	
