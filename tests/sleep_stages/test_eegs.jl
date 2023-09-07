@@ -4,11 +4,10 @@ using LaTeXStrings
 using Graphs
 using StatsBase
 using LinearAlgebra
-using DelayEmbeddings
-using ChaosTools
+
 
 include("../plot_functions.jl")
-
+"figs" in readdir() || mkdir("figs/")
 path_data = "./sleep_data/"
 #path_data = "./surrogate_data/"
 eeg_files = filter(fn -> splitext(fn)[2] == ".dat" || splitext(fn)[2] == ".bin",readdir(path_data))
@@ -35,7 +34,7 @@ for (i,eeg_file) in enumerate(eeg_files)
 	println("Means: ",mean(eeg_data,dims=1))
 
 	
-	stn,retcode,entr,lyap = stn_analysis(eeg_data;grid=grid_size,plane=plane,idxs=[var1,var2],return_stn=true)
+	stn,retcode,entr,lyap = stn_analysis(eeg_data;grid=grid_size,plane=plane,save_idxs=[var1,var2],return_stn=true)
 	@show retcode
 		
 	@show entr, lyap
@@ -62,7 +61,7 @@ end
 l = @layout [a{0.4h}; b{0.2h}; c{0.2h}; b{0.2h}]
 plots = plot(plots_all...,size=(600,1000),layout=(4,2),left_margin=8Plots.mm,right_margin=8Plots.mm)
 
-savefig(plots,"sleep_stages_plots.pdf")
+savefig(plots,"figs/sleep_stages_plots.pdf")
 
 
 

@@ -1,22 +1,21 @@
 using StateTransitionNetworks
-using Plots
 using DynamicalSystems
 using Graphs
-using LaTeXStrings
 using StatsBase
 using DelimitedFiles
 
-
 T = 5000
+nr_points = 5000
 Ttr = 500
-b_vals = [0.2:0.001:1.0;]
+b_vals = [0.2:0.01:1.0;]
 
 #stn_colors = Dict(zip([180.10,180.70,180.78,181.10],[colorant"orange",colorant"red",colorant"green",colorant"blue"]))
 
 
 
 plane = (2,0.0)
-ds = Systems.roessler();
+ds = PredefinedDynamicalSystems.roessler();
+pmap = PoincareMap(ds,plane;rootkw=(xrtol=1e-10, atol=1e-10), direction=1)
 grid_size = 20
 Δt = 0.01
 rw_ensemble = 100 
@@ -26,8 +25,8 @@ nr_steps = 10000
 #---------------orbit diagram-----------------------
 
 println("Orbit diagram calculation starting...")
-od = produce_orbitdiagram(ds, plane, 1, 2, b_vals; tfinal=T, Ttr=Ttr, direction=1, printparams=true, rootkw=(xrtol=1e-10, atol=1e-10))
-writedlm("orbit_diagram_roessler_b_saved_z_T_$T"*"_Ttr_$Ttr.txt",od)
+od = orbitdiagram(pmap, 1, 2, b_vals; n=nr_points, Ttr=Ttr, show_progress=true)
+writedlm("data/orbit_diagram_roessler_b_saved_z_T_$T"*"_Ttr_$Ttr.txt",od)
 println("Done.")
 
 #---------------normal lyapunovs--------------------
@@ -44,7 +43,7 @@ for (i,b) in enumerate(b_vals)
 
 end
 
-writedlm("lyapunov_exponent_roessler_b_T_$T"*"_Ttr_$Ttr.txt",hcat(b_vals,lyapunov_exponents))
+writedlm("data/lyapunov_exponent_roessler_b_T_$T"*"_Ttr_$Ttr.txt",hcat(b_vals,lyapunov_exponents))
 println("Done.")
 
 
@@ -63,10 +62,8 @@ for b in b_vals
 
 	set_parameter!(ds,2,b)
 
-	timeseries = trajectory(ds, T; Δt=Δt, Ttr=Ttr);
-	psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[1,3]);
-	d_traj, v_names = timeseries_to_grid(psection, grid_size);
-	stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
+	timeseries,  = trajectory(ds, T; Δt=Δt, Ttr=Ttr);
+	stn, retcode = create_stn(timeseries, grid_size, plane, [1,3];make_ergodic=true,verbose=true,direction=+1);
 	
 	if retcode == :Success
 		

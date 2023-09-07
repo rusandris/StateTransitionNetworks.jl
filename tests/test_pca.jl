@@ -43,7 +43,7 @@ for epoch_start_index in 1:epoch_length:(size(pca_data)[1]-epoch_length)
 	
 	translate_to_origin!(epoch)
 	
-	psection = ChaosTools.poincaresos(Dataset(epoch), plane; direction=+1, idxs=[2,3]);
+	psection = DynamicalSystemsBase.poincaresos(StateSpaceSet(epoch), plane; direction=+1, save_idxs=[2,3]);
 	push!(epoch_psections,psection)
 	
 end

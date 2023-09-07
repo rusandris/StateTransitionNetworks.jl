@@ -40,7 +40,7 @@ plane = (1,15.0);
 u0 = rand(3)
 rho_values = 180.:0.001:182.;
 T = 20000;
-ds = Systems.lorenz(u0)
+ds = PredefinedDynamicalSystems.lorenz(u0)
 Ttr = 19990
 
 # computation
@@ -72,7 +72,7 @@ savefig(pl, "./tests/lorenz_bif.png")
 
 sim_lyapunov_eponent = zeros(length(rho_values))
 for (i,ρ) in enumerate(rho_values)
-    ds = Systems.lorenz(; ρ=ρ)
+    ds = PredefinedDynamicalSystems.lorenz(; ρ=ρ)
     @show ρ
     λ = lyapunov(ds, 10000; d0=1e-7, Ttr=5000)
     sim_lyapunov_eponent[i] = λ
@@ -119,9 +119,9 @@ for (i,ρ) in enumerate(rho_values)
         @show ρ
         while true # STN must be 'healthy'
             u0 = rand(Float64,3).*50 .-25;
-            system = Systems.lorenz(u0; ρ=ρ);
-            timeseries = trajectory(system, T; Δt=Δt, Ttr=trans);
-            psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+            system = PredefinedDynamicalSystems.lorenz(u0; ρ=ρ);
+            timeseries,  = trajectory(system, T; Δt=Δt, Ttr=trans);
+            psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
             d_traj, v_names = timeseries_to_grid(psection, grid);
             stn, ret_code_stn = create_stn(d_traj, v_names);
             if ret_code_stn == :Success

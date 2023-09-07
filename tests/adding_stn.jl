@@ -95,16 +95,16 @@ T = 500;
 ρ = 180.1;
 
 u0 = rand(Float64,3).*50 .-25';
-system = Systems.lorenz(u0; ρ=ρ);
+system = PredefinedDynamicalSystems.lorenz(u0; ρ=ρ);
 timeseries_1 = trajectory(system, T; Δt=Δt, Ttr=1000);
-psection_1 = ChaosTools.poincaresos(timeseries_1, plane; direction=+1, idxs=[2,3]);
+psection_1 = DynamicalSystemsBase.poincaresos(timeseries_1, plane; direction=+1, save_idxs=[2,3]);
 dtraj_1, v1 = timeseries_to_grid(psection_1, grid);
 stn1, ret_code_stn = create_stn(dtraj_1, v1; make_ergodic=true,verbose=false);
 
 u0 = rand(Float64,3).*50 .-25';
-system = Systems.lorenz(u0; ρ=ρ);
+system = PredefinedDynamicalSystems.lorenz(u0; ρ=ρ);
 timeseries_2 = trajectory(system, T; Δt=Δt, Ttr=1000);
-psection_2 = ChaosTools.poincaresos(timeseries_2, plane; direction=+1, idxs=[2,3]);
+psection_2 = DynamicalSystemsBase.poincaresos(timeseries_2, plane; direction=+1, save_idxs=[2,3]);
 dtraj_2, v2 = timeseries_to_grid(psection_2, grid);
 stn2, ret_code_stn = create_stn(dtraj_2, v2; make_ergodic=true,verbose=false);
 

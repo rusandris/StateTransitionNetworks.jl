@@ -120,9 +120,9 @@ end
     for j in 1:n_ens
         @show j
         u0 = rand(Float64,3).*50 .-25;
-        system = Systems.lorenz(u0; ρ=ρ);
-        timeseries = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
-        psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+        system = PredefinedDynamicalSystems.lorenz(u0; ρ=ρ);
+        timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
+        psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
         L = length(timeseries);
         stream = open("lorenz_rearrange_$label.txt", "a")
         S_data = []
@@ -134,9 +134,9 @@ end
             psection_list = []
             for i in shuffle(1:cuts[n])
                 u = timeseries[Int(i*len),:]
-                system = Systems.lorenz(u; ρ=ρ);
-                new_timeseries = trajectory(system, len*Δt; Δt=Δt)
-                psection = ChaosTools.poincaresos(new_timeseries, plane; direction=+1, idxs=[2,3]);
+                system = PredefinedDynamicalSystems.lorenz(u; ρ=ρ);
+                new_timeseries,  = trajectory(system, len*Δt; Δt=Δt)
+                psection = DynamicalSystemsBase.poincaresos(new_timeseries, plane; direction=+1, save_idxs=[2,3]);
                 if length(psection) != 0
                     push!(psection_list, psection)
                 end
@@ -175,9 +175,9 @@ for index in eachindex(rho)
     covariance = 0.0
     for i in 1:ensemble
         u0 = rand(Float64,3).*50 .-25;
-        system = Systems.lorenz(u0; ρ=ρ);
-        timeseries = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
-        psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3])
+        system = PredefinedDynamicalSystems.lorenz(u0; ρ=ρ);
+        timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500)[1:end-1];
+        psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3])
         d_traj, v_names = timeseries_to_grid(psection, grid);
         stn, ret_code = create_stn(d_traj, v_names);
         if ret_code == :Success

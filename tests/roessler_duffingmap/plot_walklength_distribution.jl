@@ -45,18 +45,16 @@ lyaps = []
 entropies = []
 
 for (i,b) in enumerate(b_vals)
-    system = Systems.roessler(b=b);
-    timeseries = trajectory(system, T; Δt=Δt, Ttr=500);
-    psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[1,3]);
-    d_traj, v_names = timeseries_to_grid(psection, grid);
-    stn, ret_code = create_stn(d_traj, v_names);
+    system = PredefinedDynamicalSystems.roessler(b=b);
+    timeseries,  = trajectory(system, T; Δt=Δt, Ttr=500);
+
+    stn, retcode = create_stn(timeseries, grid, plane, [1,3];make_ergodic=true,verbose=true,direction=+1);
     
     #=
     P = prob_matrix(P)
     entropy,lyapunov = network_measures(P)
     =#
     
-    ret_code
     L, S, Λ = walk_length_distribution(stn, ensemble, N_steps)
     
     
@@ -161,14 +159,14 @@ annotate!(pl,2600, 0.005, text(L"S_{SK} = "*"$(round(entropies[2];digits=2))" * 
 annotate!(pl,6300, 0.011, text(L"S_{SK} = "*"$(round(entropies[3];digits=2))" * "\n" * L"\Lambda = "*"$(round(lyaps[3];digits=2))", :center, 10))
 
 plot!(pl, xlim=(1900,9000))
-savefig(pl, "walk_length_distribution_Nsteps=$(N_steps)_ensemble=$(ensemble).pdf")
+savefig(pl, "figs/walk_length_distribution_Nsteps=$(N_steps)_ensemble=$(ensemble).pdf")
 
 
 l = @layout [a{0.33w} b{0.33w} c{0.33w}]
 
 plot_all = plot(individual_plots...;layout=l,size=(1200,500),margin=7Plots.mm)
 
-savefig(plot_all,"walklength_distributions_bs.pdf")
+savefig(plot_all,"figs/walklength_distributions_bs.pdf")
 
 
 

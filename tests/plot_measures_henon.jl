@@ -93,7 +93,10 @@ savefig("./tests/henon_S-Lyap-gr_a=1.4_1.2265_gr=5-500_t=5x10^6_ttrans=1000_ens=
 b = 0.3;
 a = 1.4;
 a_values = 1:0.001:1.4;
-ds = Systems.henon([0.1, 0.123]; a=a, b=b)
+
+ds = PredefinedDynamicalSystems.henon([0.0, 0.0]; a=a, b=b)
+#ds = PredefinedDynamicalSystems.henon([0.1, 0.123]; a=a, b=b)
+
 i = 1
 ics = [rand() for m in 1:10]
 n = 500
@@ -123,7 +126,7 @@ dpi=300)
 
 sim_lyapunov_eponent = zeros(length(a_values))
 for (i,a) in enumerate(a_values)
-    henon = Systems.henon([0.0, 0.0]; a=a, b=b)
+    henon = PredefinedDynamicalSystems.henon([0.0, 0.0]; a=a, b=b)
     @show a
     λ = lyapunov(henon, 10000; d0 = 1e-7, threshold = 1e-4, Ttr = 500)
     sim_lyapunov_eponent[i] = λ
@@ -164,9 +167,9 @@ theor_lyapunov_measures = zeros(length(a_values))
 #a = 1.4
 #i = 1
 for (i,a) in enumerate(a_values)
-    system = Systems.henon([0.0, 0.0]; a=a, b=b)
+    system = PredefinedDynamicalSystems.henon([0.0, 0.0]; a=a, b=b)
     @show a
-    timeseries = trajectory(system, traj_length, [0, 0]; Ttr=trans)
+    timeseries,  = trajectory(system, traj_length, [0, 0]; Ttr=trans)
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
     stn,retcode = create_stn(discrete_timeseries, vertex_names)
     sim_entropy_measures[i], sim_lyapunov_measures[i] = network_measures(stn, ensemble, N_steps)
@@ -277,7 +280,7 @@ savefig(pl, "./tests/henon_scaling_ac=1.2266.png")
 #############
 ### intermittency plot
 #############
-ds = Systems.henon([0.01, 0.20]; a=1.2265, b=0.3)
+ds = PredefinedDynamicalSystems.henon([0.01, 0.20]; a=1.2265, b=0.3)
 traj = trajectory(ds,10000;Ttr = 1000) #generate timeseries
 pl = plot()
 plot!(pl, 1:10001, traj[:,1], label=nothing, lw=2, color="red")

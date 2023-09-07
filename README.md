@@ -21,7 +21,7 @@ using StateTransitionNetworks
 Constructing state-transition network for the [Henon map](https://juliadynamics.github.io/DynamicalSystems.jl/dev/ds/predefined/#DynamicalSystemsBase.Systems.henon) (2D discrete dynamical system):
 ```julia
 using DynamicalSystems
-ds = Systems.henon()
+ds = PredefinedDynamicalSystems.henon()
 traj = trajectory(ds,10000;Ttr = 1000) #generate timeseries
 ```
 This can be fed into `timeseries_to_grid` which discretizes the timeseries and returns the name of the vertices:
@@ -102,9 +102,9 @@ entropy_measures = zeros(length(a_values))
 lyapunov_measures = zeros(length(a_values))
 
 for (i,a) in enumerate(a_values)
-    system = Systems.henon([0.0, 0.0]; a=a, b=b)
+    system = PredefinedDynamicalSystems.henon([0.0, 0.0]; a=a, b=b)
     @show a
-    timeseries = trajectory(system, traj_length, [0, 0]; Ttr=trans)
+    timeseries,  = trajectory(system, traj_length, [0, 0]; Ttr=trans)
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
     stn,retcode = create_stn(discrete_timeseries, vertex_names)
     entropy_measures[i], lyapunov_measures[i] = network_measures(stn,ensemble, N_steps)
@@ -116,7 +116,7 @@ The workflow is similar for continuous systems. The difference is that one must 
 
 Constructing state-transition network for the [Lorenz system](https://juliadynamics.github.io/DynamicalSystems.jl/dev/ds/predefined/#DynamicalSystemsBase.Systems.lorenz) (3D continuous dynamical system):
 ```julia
-ds = Systems.lorenz()
+ds = PredefinedDynamicalSystems.lorenz()
 plane = (1,15.0) #plane in 3D phase space with x = 15.0
 ```
 Calculate the `PSOS` with `poincaresos`
@@ -145,9 +145,9 @@ plane = (1,15.0) #plane in 3D phase space with x = 15.0
 lyap_measures = zeros(length(rho_values))
 entropy_measures = zeros(length(rho_values))
 for (i,ρ) in enumerate(rho_values)
-    ds = Systems.lorenz(ρ=ρ)
+    ds = PredefinedDynamicalSystems.lorenz(ρ=ρ)
     @show ρ
-    psection = ChaosTools.poincaresos(ds, plane, T; Ttr=500, idxs = [2,3],direction=+1,rootkw = (xrtol = 1e-8, atol = 1e-8))
+    psection = DynamicalSystemsBase.poincaresos(ds, plane, T; Ttr=500, idxs = [2,3],direction=+1,rootkw = (xrtol = 1e-8, atol = 1e-8))
     discrete_timeseries, vertex_names = timeseries_to_grid(psection, grid_size)
     stn,retcode = create_stn(discrete_timeseries, vertex_names)
     entropy_measures[i], lyap_measures[i] = network_measures(stn,ensemble, N_steps)

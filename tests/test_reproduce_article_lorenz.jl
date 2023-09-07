@@ -11,7 +11,7 @@ T = 5000
 Ttr = 1000
 rho_vals = [180:0.01:182.0;]
 plane = (1,15.0)
-ds = Systems.lorenz();
+ds = PredefinedDynamicalSystems.lorenz();
 grid_size = 20
 Δt = 0.01
 traj_ensemble = 1
@@ -37,8 +37,8 @@ for rho in rho_vals
 	
 	for i in 1:traj_ensemble
 		@show i
-		timeseries = trajectory(ds, T, rand(3)*20 .- 10;Δt=Δt, Ttr=Ttr);
-		psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+		timeseries,  = trajectory(ds, T, rand(3)*20 .- 10;Δt=Δt, Ttr=Ttr);
+		psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
 		d_traj, v_names = timeseries_to_grid(psection, grid_size);
 		stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
 		

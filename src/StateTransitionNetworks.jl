@@ -5,8 +5,7 @@ import StatsBase: sample, mean, var, Weights
 using MetaGraphsNext
 using GraphPlot,Cairo,Compose
 import SparseArrays: spzeros 
-import DelayEmbeddings: Dataset,AbstractDataset
-import ChaosTools: poincaresos
+using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet
 import LinearAlgebra: eigen, Diagonal, I, nullspace
 import DataStructures: OrderedDict
 

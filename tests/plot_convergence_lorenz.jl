@@ -4,7 +4,7 @@ using Plots
 using LaTeXStrings
 using OrdinaryDiffEq	
 
-ds = Systems.lorenz()
+ds = PredefinedDynamicalSystems.lorenz()
 tol = 1e-8
 params = [180.7,180.1,180.78,181.1]
 ensemble = 10000
@@ -23,7 +23,7 @@ pl = plot()
 for (i,ρ) in enumerate(params)
 	set_parameter!(ds,2,ρ)
 	@show ρ
-	psection = ChaosTools.poincaresos(ds, plane, T; Ttr=Ttr, direction=+1,rootkw = (xrtol = tol, atol = tol));
+	psection = DynamicalSystemsBase.poincaresos(ds, plane, T; Ttr=Ttr, direction=+1,rootkw = (xrtol = tol, atol = tol));
 	traj = psection[:,2:end] 
 	traj_grid, vertex_names = timeseries_to_grid(traj,grid_size) 
 	stn,retcode = create_stn(traj_grid,vertex_names)

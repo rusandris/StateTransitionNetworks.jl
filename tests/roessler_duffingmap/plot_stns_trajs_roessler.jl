@@ -56,7 +56,10 @@ plot!([special_bs[2],special_bs[2]],[-9,-3])
 
 =#
 
-ds = Systems.roessler();
+ds = PredefinedDynamicalSystems.roessler();
+
+
+#predictability not implemented in v3
 
 #=
 for b in special_bs
@@ -78,7 +81,7 @@ for (i,b) in enumerate(special_bs)
 	@show b	
 
 
-	timeseries = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
+	timeseries,  = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
 	
 	yticks = i == 1 ? true : false
 	ylabel = i == 1 ? L"y" : ""
@@ -110,7 +113,7 @@ for (i,b) in enumerate(special_bs)
 	
 	push!(trajectories,traj)
 	
-	psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[1,3]);
+	psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[1,3]);
 	
 	
 	ms = i == 3 ? 4 : 1.5
@@ -141,8 +144,7 @@ for (i,b) in enumerate(special_bs)
 	push!(psos_plots,psos_plot)
 	
 	
-	d_traj, v_names = timeseries_to_grid(psection, grid_size);
-	stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
+	stn, retcode = create_stn(psection, grid_size;make_ergodic=true,verbose=true);
 	
 	if retcode == :Success
 		P = prob_matrix(stn)
@@ -152,7 +154,7 @@ for (i,b) in enumerate(special_bs)
 		p_nodes /= sum(p_nodes)
 
 
-		plot_stn(stn;filename="stn_roessler_b_$b"*".pdf",
+		plot_stn(stn;filename="figs/stn_roessler_b_$b"*".pdf",
 			nodesize=0.2,
 			nodefillc=[RGBA(c.r,c.g,c.b,x) for x in p_nodes .^ (1/8)],
 			linetype="curve",
@@ -173,4 +175,4 @@ l = @layout [a{0.25w} b{0.25w} c{0.25w} d{0.25w};a{0.25w} b{0.25w} c{0.25w} d{0.
 
 plot_all = plot(trajectories...,psos_plots...,layout=l,size=(1200,800))
 
-savefig(plot_all,"roessler_trajectories_psos.pdf")
+savefig(plot_all,"figs/roessler_trajectories_psos.pdf")

@@ -18,12 +18,12 @@ end
 
 
 @testset "stn creation from timeseries" begin
-	ds = Systems.lorenz()
-	timeseries = trajectory(ds,100;Ttr = 1000,Δt = 1e-2)
+	ds = PredefinedDynamicalSystems.lorenz()
+	timeseries, = trajectory(ds,100;Ttr = 1000,Δt = 1e-2)
 	grid_size = 20
 	plane = (1,15.0);
 	
-	psection = ChaosTools.poincaresos(timeseries, plane; direction=+1, idxs=[2,3]);
+	psection = DynamicalSystemsBase.poincaresos(timeseries, plane; direction=+1, save_idxs=[2,3]);
     d_traj, v_names = timeseries_to_grid(psection, grid_size);
     stn, retcode = create_stn(d_traj, v_names; make_ergodic=true,verbose=false);
 	@test retcode == :Success

@@ -39,7 +39,7 @@ end
 
 function plot_psection(timeseries::Matrix;plane,idxs,color)
 	dim = size(timeseries)[2]
-	psection = poincaresos(Dataset(timeseries), plane;idxs=idxs); 
+	psection = poincaresos(Dataset(timeseries), plane;save_idxs=idxs); 
 	i = idxs[1]
 	j = idxs[2]
 	

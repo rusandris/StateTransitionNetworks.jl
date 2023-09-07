@@ -10,7 +10,7 @@ using DelimitedFiles
 T = 30000
 Ttr = 1000
 a_vals = [1:0.01:1.4;]
-ds = Systems.henon();
+ds = PredefinedDynamicalSystems.henon();
 grid_size = 20
 Δt = 0.01
 traj_ensemble = 1
@@ -38,7 +38,7 @@ for a in a_vals
 		@show i
 		x0 = rand() .- 0.5 
 		y0 = rand() * 0.4 .- 0.2 
-		timeseries = trajectory(ds, T,[x0,y0]; Ttr=Ttr);
+		timeseries,  = trajectory(ds, T,[x0,y0]; Ttr=Ttr);
 		d_traj, v_names = timeseries_to_grid(timeseries, grid_size);
 		stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
 		

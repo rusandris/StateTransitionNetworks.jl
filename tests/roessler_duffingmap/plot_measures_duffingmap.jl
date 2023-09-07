@@ -139,7 +139,7 @@ l = @layout [a{0.4h}; b{0.2h}; c{0.2h}; b{0.2h}]
 
 plot_all = plot(od_plot,pl_lyap_exp,pl_lyap,pl_entr,size=(1000,1000),layout=l)
 
-savefig(plot_all,"duffingmap_results.pdf")
+savefig(plot_all,"figs/duffingmap_results.pdf")
 
 
 

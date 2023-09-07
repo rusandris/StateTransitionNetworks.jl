@@ -7,7 +7,7 @@ include("rotating_plane.jl")
 
 T = 10000
 rho_vals = [180.1, 180.7,180.78]
-ds = Systems.lorenz();
+ds = PredefinedDynamicalSystems.lorenz();
 grid_size = 20
 direction = +1
 
@@ -17,7 +17,7 @@ plane0 = [0.0,0.0,1.0,0.0]
 for rho in rho_vals
 
 	set_parameter!(ds,2,rho)
-	timeseries = trajectory(ds, T; Δt=0.01, Ttr=500);
+	timeseries,  = trajectory(ds, T; Δt=0.01, Ttr=500);
 	
 	@show rho
 	

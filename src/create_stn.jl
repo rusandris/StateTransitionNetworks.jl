@@ -30,7 +30,7 @@ function timeseries_to_grid(timeseries, grid; grid_edges = [])
     vertex_names = OrderedDict{Tuple{Int64,Int64},Int64}()
     x_n, y_n = [], [];
 
-    for row in eachrow(timeseries)
+    for row in timeseries
         y = floor(Int,(row[2]-y_min)/Float64(y_grid.step))+1
         x = floor(Int,(row[1]-x_min)/Float64(x_grid.step))+1
         if M[y,x] == 0
@@ -47,18 +47,19 @@ end
 
 """
 	create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn
-Higher level function that creates a state transition network (STN) directly from the timeseries of a continuous system `ts` using `ChaosTools.poincaresos`. The returned `stn` is a directed metagraph object. \\
-`plane` is the same as in `ChaosTools.poincaresos`. With `idxs` you can choose the variables you want to save.
+Higher level function that creates a state transition network (STN) directly from the timeseries of a continuous system `ts` using `DynamicalSystemsBase.poincaresos`. The returned `stn` is a directed metagraph object. \\
+`plane` is the same as in `DynamicalSystemsBase.poincaresos`. With `idxs` you can choose the variables you want to save.
 `make_ergodic=true` returns an STN with only one strongly connected components. Defaults to `false`.   
 `verbose=true` logs info about the network checking process. Defaults to `false`.
-Other `kwargs` get propageted into `ChaosTools.poincaresos`.
+Other `kwargs` get propageted into `DynamicalSystemsBase.poincaresos`.
 
-For more info about PSOS  go to https://juliadynamics.github.io/DynamicalSystems.jl/v1.3/chaos/orbitdiagram/#ChaosTools.poincaresos
+For more info about PSOS  go to https://juliadynamics.github.io/DynamicalSystems.jl/v1.3/chaos/orbitdiagram/#DynamicalSystemsBase.poincaresos
 """
 function create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...)
 	
 	#psos
-	psection = poincaresos(Dataset(ts), plane; idxs=idxs,warning=true,kwargs...)
+	psection = DynamicalSystemsBase.poincaresos(DynamicalSystemsBase.StateSpaceSet(ts), plane; save_idxs=idxs,warning=true,kwargs...)
+
 	#method for time-discrete trajectory
 	create_stn(psection,grid; make_ergodic=make_ergodic, verbose=verbose)
 	

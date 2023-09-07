@@ -9,12 +9,12 @@ tickfontsize=15
 legendfontsize=15
 
 
-include("rotating_plane.jl")
+include("../rotating_plane.jl")
 
 T = 5000
 Ttr = 500
 b_vals = [0.42,0.372,0.28,0.34]
-ds = Systems.roessler();
+ds = PredefinedDynamicalSystems.roessler();
 grid_size = 20
 direction = +1
 
@@ -24,17 +24,17 @@ plots = []
 for (i,b) in enumerate(b_vals)
 
 	set_parameter!(ds,2,b)
-	timeseries = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
+	timeseries,  = trajectory(ds, T; Δt=0.01, Ttr=Ttr);
 	
 	@show b
 	
-	angles,entropies,lyaps,PSOS_points_numbers,average_degrees = rotplane_measures_v3(timeseries;
+	angles,entropies,lyaps,PSOS_points_numbers,average_degrees = rotplane_measures(timeseries;
 		grid_size=grid_size,
 		plane0=plane0,
 		θ_min=0,
 		θ_max=π,
-		Δθ=0.001,
-		direction=direction,return_angles =true)
+		Δθ=0.01,
+		direction=direction)
 		
 	#@show length(angles)
 	#@show length(lyaps)
@@ -89,7 +89,7 @@ for (i,b) in enumerate(b_vals)
 		ylabel=L"n_{PSOS}/T,~S_{KS},~\Lambda,~<k>",
 		framestyle=:box)
 	=#
-	    savefig(pl_b, "rotating_plane_roessler_b_$(b)"*"_dir$direction"*"T_$T"*".svg")
+	    savefig(pl_b, "figs/rotating_plane_roessler_b_$(b)"*"_dir$direction"*"T_$T"*".svg")
 	    
 	
 end
@@ -100,7 +100,7 @@ l = @layout [a{0.33h}; b{0.33h}; c{0.33h}]
 
 plot_all = plot(plots...;layout=l,size=(1000,1000),margin=5Plots.mm)
 
-savefig(plot_all,"rotplane_measures_roessler.pdf")
+savefig(plot_all,"figs/rotplane_measures_roessler.pdf")
 
 
 

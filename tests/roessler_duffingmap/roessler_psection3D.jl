@@ -18,12 +18,12 @@ plane = (2,0.0) #y = 0
 plot_plane = (0,1,0.01,0.0) #close plane hack
 
 
-ds = Systems.roessler()
+ds = PredefinedDynamicalSystems.roessler()
 set_parameter!(ds,2,0.42)
 
-traj = trajectory(ds,100;Ttr = 500)
-psection_plus = ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=1)
-psection_minus = ChaosTools.poincaresos(traj, plane; idxs=[1,2,3],warning=true,direction=-1)
+traj, = trajectory(ds,100;Ttr = 500)
+psection_plus = DynamicalSystemsBase.poincaresos(traj, plane; save_idxs=[1,2,3],warning=true,direction=1)
+psection_minus = DynamicalSystemsBase.poincaresos(traj, plane; save_idxs=[1,2,3],warning=true,direction=-1)
 
 
 pl = plot(traj[:,1],traj[:,2],traj[:,3],
@@ -70,5 +70,5 @@ x = [-10,12]
 
 surface!(pl,x,y,(x,y)->plane_surface(x,y;plane=plot_plane),c=:greens,alpha=0.4,zlims=(0,12),colorbar=false,clim=(0,0))
 
-savefig(pl,"roessler3D.pdf")
+savefig(pl,"figs/roessler3D.pdf")
 

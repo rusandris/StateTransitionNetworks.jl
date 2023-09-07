@@ -64,8 +64,8 @@ end
 plot!(special_as,fill(0.98,4),st=:scatter,mc=colors,ms=8,markerstrokewidth=0.001)
 plot!([special_as[2],special_as[2]],[0.8,1.0],lc=:red,lw=0.3)
 
-=#
 
+#predictability not implemented in v3!
 
 for a in special_as
 	@show a 
@@ -75,7 +75,7 @@ for a in special_as
 	pred = predictability(ds;Ttr = 1000,λ_max = lyapunov(ds, 5000;Ttr=1000))
 	@show pred
 end
-
+=#
 
 trajectories = []
 stns = []
@@ -89,7 +89,7 @@ for (i,a) in enumerate(special_as)
 	@show a	
 
 
-	timeseries = trajectory(ds, T; Ttr=Ttr);
+	timeseries,  = trajectory(ds, T; Ttr=Ttr);
 
 	ms = i == 3 ? 4 : 1.5
 	yticks = i == 1 ? true : false
@@ -119,8 +119,7 @@ for (i,a) in enumerate(special_as)
 	push!(trajectories,traj)
 	
 	
-	d_traj, v_names = timeseries_to_grid(timeseries, grid_size);
-	stn, retcode = create_stn(d_traj, v_names;make_ergodic=true,verbose=true);
+	stn, retcode = create_stn(timeseries,grid_size;make_ergodic=true,verbose=true);
 	
 	if retcode == :Success
 		P = prob_matrix(stn)
@@ -130,7 +129,7 @@ for (i,a) in enumerate(special_as)
 		p_nodes /= sum(p_nodes)
 
 
-		plot_stn(stn;filename="stn_duffingmap_a_$a"*".pdf",
+		plot_stn(stn;filename="figs/stn_duffingmap_a_$a"*".pdf",
 			nodesize=0.2,
 			nodefillc=[RGBA(c.r,c.g,c.b,x) for x in p_nodes .^ (1/8)],
 			linetype="curve",
@@ -149,4 +148,4 @@ l = @layout [a{0.25w} b{0.25w} c{0.25w} d{0.25w}]
 
 plot_all = plot(trajectories...,layout=l,size=(1200,400))
 
-savefig(plot_all,"duffingmap_trajectories.pdf")
+savefig(plot_all,"figs/duffingmap_trajectories.pdf")
