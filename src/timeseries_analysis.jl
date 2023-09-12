@@ -21,7 +21,7 @@ Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created fr
 
 function stn_analysis(timeseries::DynamicalSystemsBase.StateSpaceSet;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false,use_stored_distribution=false)
 
-	stn,retcode = create_stn(timeseries,grid::Int64,plane,save_idxs;make_ergodic=make_ergodic, verbose=verbose)
+	stn,retcode = create_stn(timeseries,grid::Int64,plane,idxs;make_ergodic=make_ergodic, verbose=verbose)
 	
 	entropy,lyapunov = NaN,NaN #initialize variables
 	
