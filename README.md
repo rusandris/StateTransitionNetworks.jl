@@ -22,62 +22,59 @@ Constructing state-transition network for the [Henon map](https://juliadynamics.
 ```julia
 using DynamicalSystems
 ds = PredefinedDynamicalSystems.henon()
-traj = trajectory(ds,10000;Ttr = 1000) #generate timeseries
+traj, = trajectory(ds,10000;Ttr = 1000) #generate timeseries
 ```
-This can be fed into `timeseries_to_grid` which discretizes the timeseries and returns the name of the vertices:
-```julia
-traj_grid, vertex_names = timeseries_to_grid(traj,20) # 20x20 grid
-```
-These vertices (nodes) will be the states of our state-transition network. If the discretized trajectory contains a transition from state `i` to `j`, there will be an edge between two vertices `i -> j`.
+
 Use `create_stn` to construct the graph object `stn` that corresponds to the STN:
+
 ```julia
-stn,retcode = create_stn(traj_grid,vertex_names); #output might be long
+stn,retcode = create_stn(traj,20); #using 20x20 grid
 ```
-The function also returns a `retcode` which can take the following values:
-* `:Success` : every vertex has at least one incoming and outgoing edge
-* `:NoIncoming` : the graph contains vertex(es) that have no incoming edges
-* `:NoOutgoing` : the graph contains vertex(es) that have no outgoing edges
-* `:DeadEnd` : self-loop vertex (fixed point)
+Internally, the phase space of the system is discretized using a grid of predefined size. The cells of this grid  will be the states (nodes) of our state-transition network. If the discretized trajectory contains a transition from state `i` to `j`, there will be an edge between two vertices `i -> j`.
+
+The function also returns a `retcode` that informs the user about the state of the produced network which can take the following values:
+
+* `:Success`  : graph is strongly connected
+* `:NotConnected`  : graph isn't strongly connected
+* `:Unusable`  : only when `make_ergodic` is enabled and the component with the most number of vertices is too small 
 
 
 The network is a directed MetaGraph object which contains the vertices and edges of the STN which have metadata (attributes of predefined type) attached to them.
 
-```julia
+#### Vertex properties
+* **Grid coordinates** : position (`:X` and `:y`) of the vertex point in the discretized phase space 
+* **Probability **: probability of occurrence of the given state (vertex) 
 
- MetaGraph(DiGraph(),Label = Int64, 
-		VertexData = Dict{Symbol, Int64}, 
-		EdgeData = Dict{Symbol,Float64}, 
-		default_weight = 0.0)
+```julia
+stn[1] #returns the properties of vertex with label 1
+Dict{Symbol, Union{Float64, Int64}} with 3 entries:
+  :y    => 16
+  :prob => 0.0354965
+  :x    => 13
 ```
 
-#### Vertex properties
-* **Grid coordinates** (position of the vertex point in the discretized phase space) 
 #### Edge properties 
-* **Transition probabilities** and **weights**
+* **Transition probabilities** (`:prob`) : conditional probability of the given transition 
+* **Weights** (`:weight`) : probability of occurrence (non-conditional) of a given transition
 
-Accesing vertex and edge properties:
 ```julia
-stn[1] #returns properties of vertex with label 1
-Dict{Symbol, Int64} with 2 entries:
-  :y => 15
-  :x => 12
-
 stn[1,2] #returns properties of edge 1 -> 2
 Dict{Symbol, Float64} with 2 entries:
-  :weight => 0.023
-  :prob   => 0.741935
-
+  :weight => 0.0318
+  :prob   => 0.895775
 ```
 
+#### Stochastic (transition matrix) and weight matrix
 
 Access the whole matrices `P[i,j]` and `Q[i,j]`
+
 ```julia
 #sparse adjacency matrices 
 P = prob_matrix(stn)
 Q = weight_matrix(stn)
 ```
 
-Calculate entropy and lyapunov measures with `network_measures`:
+Use `network_measures` on the `stn` to calculate Sinai-Kolmogorov entropy and the Lyapunov network measure with numerical (random walk method) :
 ```julia
 ensemble = 100 #number of random walks on the network
 N_steps = 1e4 #number of steps taken in a random walk
@@ -85,7 +82,11 @@ N_steps = 1e4 #number of steps taken in a random walk
 entropy, lyapunov = network_measures(stn,ensemble, N_steps)
 ```
 
+Use `network_measures` on the `P` stochastic matrix to calculate Sinai-Kolmogorov entropy and the Lyapunov network measure using the analytic formula :
 
+```jul
+entropy, lyapunov = network_measures(prob_matrix(stn))
+```
 
 Calculate the network measures for different parameters (dynamics) of the Henon map:
 
@@ -106,7 +107,7 @@ for (i,a) in enumerate(a_values)
     @show a
     timeseries,  = trajectory(system, traj_length, [0, 0]; Ttr=trans)
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
-    stn,retcode = create_stn(discrete_timeseries, vertex_names)
+    stn,retcode = create_stn(timeseries, grid_size)
     entropy_measures[i], lyapunov_measures[i] = network_measures(stn,ensemble, N_steps)
 end
 ```
@@ -118,56 +119,15 @@ Constructing state-transition network for the [Lorenz system](https://juliadynam
 ```julia
 ds = PredefinedDynamicalSystems.lorenz()
 plane = (1,15.0) #plane in 3D phase space with x = 15.0
+n = 20 #using 20 x 20 grid
+idxs = [2,3] #save y,z component of the PSOS
+stn,retcode = create_stn(traj,n,plane,idxs)
 ```
-Calculate the `PSOS` with `poincaresos`
-
+## Time series analysis
+There is a higher level function that accepts a time series and returns the corresponding `stn` and network measures.
 ```julia
-T = 500
-psection = poincaresos(ds, plane, T; Ttr=300, direction=+1); 
-traj = psection[:,2:end] #select y,z variables only
+stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false,use_stored_distribution=false)
 ```
-
-> **_NOTE:_** The default tolerances for the `poincaresos` are `rootkw = (xrtol = 1e-6, atol = 1e-6)`. These might not be low enough for all purposes (for ex. periodic attractors).
-
-This can be treated as a 2D map:
-```julia
-traj_grid, vertex_names = timeseries_to_grid(traj,20) # 20x20 grid
-stn,retcode = create_stn(traj_grid,vertex_names)
-```
-We can also study the network measures for different parameters. 
-```julia
-rho_values = 180:0.003:182;
-T = 5000
-grid_size = 20
-ensemble = 100
-N_steps = 10000
-plane = (1,15.0) #plane in 3D phase space with x = 15.0
-lyap_measures = zeros(length(rho_values))
-entropy_measures = zeros(length(rho_values))
-for (i,ρ) in enumerate(rho_values)
-    ds = PredefinedDynamicalSystems.lorenz(ρ=ρ)
-    @show ρ
-    psection = DynamicalSystemsBase.poincaresos(ds, plane, T; Ttr=500, idxs = [2,3],direction=+1,rootkw = (xrtol = 1e-8, atol = 1e-8))
-    discrete_timeseries, vertex_names = timeseries_to_grid(psection, grid_size)
-    stn,retcode = create_stn(discrete_timeseries, vertex_names)
-    entropy_measures[i], lyap_measures[i] = network_measures(stn,ensemble, N_steps)
-end
-```
-## Network measures from data
-There is a function that accepts a timeseries and returns the corresponding `stn` and network measures.
-```julia
-stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,return_stn=false)
-```
-
-#### Keyword arguments
-* `grid` : size of grid used for discretization 
-* `plane` : PSOS plane propagated to `poincaresos` from [ChaosTools](https://github.com/JuliaDynamics/ChaosTools.jl)
-* `idxs` : choose which variables to save
-* `ensemble` : number of individual random walks on the STN
-* `N_steps` : number of steps in each random walk
-* `return_stn` : returns only the `stn` and the `retcode`
-
-
 
 
 
