@@ -283,18 +283,12 @@ end
 
 function calculate_weight_matrix(P::AbstractMatrix)
 	Q = spzeros(size(P))
-	λ, X = eigen(transpose(Matrix(P)))
-	if real(λ[end]) ≈ 1  
-		x = real(transpose(X[:,end]./sum(X[:,end])))
-	else
-		@warn "No eigenvalues close to 1. Couldn't calculate the weight matrix."
-		return Q  
-	end
+	x = stationary_distribution(P)
 	
 	for i in 1:size(P)[1]
 		Q[i,:] = x[i] .* P[i,:]
 	end
-	Q
+	return Q
 end
 
 function isnormalized(P::AbstractMatrix)

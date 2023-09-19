@@ -96,6 +96,16 @@ function sinai_kolmogorov_entropy(stn)
 end
 
 """
+	stationary_distribution(P) -> x
+Calculates the stationary probability based on the probability matrix P. Each element of the resulting vector is the probability of finding the system in node i.
+"""
+function stationary_distribution(P::AbstractMatrix)
+	x = nullspace(Matrix(P' - I))
+	x = x ./sum(x)
+	return x
+end
+
+"""
 	sinai_kolmogorov_entropy(Q,P) -> S
 Calculates analytically the Sinai-Kolmogorov entropy given the Q weight matrix and P transition probability matrix of the STN. 
 
@@ -112,8 +122,7 @@ Calculates analytically the Sinai-Kolmogorov entropy given the P transition prob
 function sinai_kolmogorov_entropy(P::AbstractMatrix;x=nothing)
 		
 	if isnothing(x)
-		x = nullspace(Matrix(P' - I))
-		x = x ./sum(x)
+		x = stationary_distribution(P)
 	end
 	
 	v = ones(length(x))
@@ -134,8 +143,7 @@ Calculates analytically the Lyapunov measure given the the P transition probabil
 function lyapunov_measure(P::AbstractMatrix;x=nothing)
 	
 	if isnothing(x)
-		x = nullspace(Matrix(P' - I))
-		x = x ./sum(x)
+		x = stationary_distribution(P)
 	end
 	x = x'
 	v = ones(length(x))
