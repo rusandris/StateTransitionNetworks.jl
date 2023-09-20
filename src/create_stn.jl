@@ -116,7 +116,7 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 
 	#normalize Q and fill P by normalizing rows
     Q = Q./sum(Q)
-	P = renormalize(Q)
+	P = calculate_transition_matrix(Q)
 
 	#create directed metagraph with static label and metadata types and default weight 0
 	stn = MetaGraph(
@@ -138,7 +138,7 @@ function create_stn(discrete_timeseries,vertex_names;make_ergodic=false,verbose=
 	
 	for i in 1:length(vertex_names)
         for j in 1:length(vertex_names)
-            if P[i, j] != 0
+            if P[i, j] > 0
 				stn[i,j] = Dict(:prob => P[i,j],:weight => Q[i,j])
             end
         end
@@ -157,7 +157,9 @@ The network is a directed metagraph object. No error checking in this case.
 	stn[i,j] -> (:prob => P[i,j])
 """
 function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
-	renormalize!(P)
+	if !(isnormalized(P))
+		renormalize!(P)
+	end
 
 	nr_vertices = size(P)[1]
 
@@ -177,12 +179,10 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,verbose=false)
 		stn[v] = Dict(:x => v, :y => 0, :prob => 0.)
 	end
 	
-	Q = calculate_weight_matrix(P)
-	
 	for i in 1:nr_vertices
         for j in 1:nr_vertices
-            if P[i, j] != 0
-				stn[i,j] = Dict(:prob => P[i,j], :weight => Q[i,j])
+            if P[i, j] > 0
+				stn[i,j] = Dict(:prob => P[i,j], :weight => NaN)
             end
         end
     end
@@ -246,7 +246,7 @@ function renormalize!(stn)
 	Q = calculate_weight_matrix(P)
     for i in 1:nr_vertices
         for j in 1:nr_vertices
-            if P[i, j] != 0
+            if P[i, j] > 0
             	ilabel = label_for(stn,i)
 				jlabel = label_for(stn,j)
 				stn[ilabel,jlabel] = Dict(:prob => P[i,j],:weight => Q[i,j])
@@ -259,24 +259,17 @@ end
 function renormalize!(P::AbstractMatrix)
 	for i in 1:size(P)[1]
 		sumPi = sum(P[i,:])
-		if sumPi != 0
-    		P[i,:] = P[i,:]./sumPi
-    	end
-        all(i -> isfinite(i),P[i,:]) || @warn "Stochastic matrix cannot be normalized. Inf/NaN values in the transition matrix P[i,j]!"
+		P[i,:] = P[i,:]./sumPi
+        all(i -> isfinite(i),P[i,:]) || @warn "The matrix is not stochastic!"
     end
 end
 
-function renormalize(Q::AbstractMatrix)
+function calculate_transition_matrix(Q::AbstractMatrix; verbose=true)
 	P = spzeros(size(Q))
 	for i in 1:size(Q)[1]
 		sumQi = sum(Q[i,:])
-		if sumQi != 0
-    		P[i,:] = Q[i,:]./sumQi
-    	else
-    		P[i,:] = Q[i,:]
-    		#@warn "Stochastic matrix cannot be normalized."
-    	end
-        all(i -> isfinite(i),P[i,:]) || @warn "Stochastic matrix cannot be normalized. Inf/NaN values in the transition matrix P[i,j]!"
+		P[i,:] = Q[i,:]./sumQi
+        all(i -> isfinite(i),P[i,:]) || !verbose || @warn "The matrix is not stochastic!"
     end
     return P
 end
@@ -306,6 +299,10 @@ function check_stn!(stn;make_ergodic=false,verbose=false)
 	nr_comps = length(comps)
 	nr_vertices0 = nv(stn)
 	if nr_comps == 1
+		Q = weight_matrix(stn)
+		if !(sum(Q) ≈ 1)
+			renormalize!(stn)
+		end
 		return :Success
 	else
 		verbose && @warn "STN is not strongly connected! $nr_comps"*" strongly connected components were found."
@@ -329,11 +326,11 @@ function check_stn!(stn;make_ergodic=false,verbose=false)
 			if nr_vertices0 - nr_deleted_vertices <= nr_deleted_vertices 
 				@warn "Too many deleted vertices! Unusable STN."
 				return :Unusable
+			else
+				# Rebuild, renormalize
+				renormalize!(stn)
+				return :Success
 			end
-			
-			#rebuild, renormalize here!!!!
-			renormalize!(stn)
-			return :Success
 		else
 			return :NotConnected
 		end

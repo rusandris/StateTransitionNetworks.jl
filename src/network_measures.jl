@@ -91,7 +91,7 @@ function sinai_kolmogorov_entropy(stn)
     Q = weight_matrix(stn)
     P = prob_matrix(stn)
 
-    entropy = -sum(Q[Q .!=0] .* log.(P[P .!=0]))
+    entropy = -sum(Q[Q .> 0] .* log.(P[P .> 0]))
     return entropy
 end
 
@@ -111,7 +111,7 @@ Calculates analytically the Sinai-Kolmogorov entropy given the Q weight matrix a
 
 """
 function sinai_kolmogorov_entropy(Q,P)
-    entropy = -sum(Q[Q .!=0] .* log.(P[P .!=0]))
+    entropy = -sum(Q[Q .> 0] .* log.(P[P .> 0]))
 end
 
 """

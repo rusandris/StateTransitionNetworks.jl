@@ -81,7 +81,7 @@ function add_timeseries(symbolic_ts_list, grid; make_ergodic=false, verbose=fals
 	#normalize Q and fill P by normalizing rows
     Q = Q./sum(Q)
 
-	P = renormalize(Q)
+	P = calculate_transition_matrix(Q)
 	#create directed metagraph with static label and metadata types and default weight 0
 	stn, ret_code = create_stn(P; make_ergodic=make_ergodic, verbose=verbose)
 	

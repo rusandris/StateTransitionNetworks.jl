@@ -12,7 +12,7 @@ using DelimitedFiles
 
 import StateTransitionNetworks.lyapunov_measure
 import SparseArrays: spzeros 
-import StateTransitionNetworks.renormalize
+import StateTransitionNetworks.calculate_transition_matrix
 import Graphs: DiGraph
 
 function timeseries_to_common_grid(timeseries, grid, x_min, x_max, y_min, y_max)    
@@ -73,7 +73,7 @@ function add_timeseries(dt_list, grid;make_ergodic=make_ergodic,verbose=verbose)
 	#normalize Q and fill P by normalizing rows
     Q = Q./sum(Q)
 
-	P = renormalize(Q)
+	P = calculate_transition_matrix(Q)
 	#create directed metagraph with static label and metadata types and default weight 0
     stn, ret_code = create_stn(P;make_ergodic=make_ergodic,verbose=verbose)
     for v in 1:nr_vertices
