@@ -14,12 +14,12 @@ using LaTeXStrings
 ### Measures for a single value
 ###############################
 
-grid_size = 200;
+grid_size = 1000;
 b = 0.3;
 a = 1.4;
 ds = Systems.henon([0.1, 0.123]; a=a, b=b);
 λ = lyapunov(ds, 10000; d0 = 1e-7, threshold = 1e-4, Ttr = 500);
-timeseries = trajectory(ds, 100000, [0, 0]; Ttr=1000);
+timeseries, = trajectory(ds, 100000, [0, 0]; Ttr=1000);
 discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
 @time stn,retcode = create_stn(discrete_timeseries, vertex_names);
 P = prob_matrix(stn);
@@ -151,11 +151,11 @@ dpi=300)
 ####################
 
 b = 0.3;
-a_values = 1:0.001:1.4;
+a_values = 1.0:0.001:1.4;
 #a_values = 1.21:0.0001:1.23;
 traj_length = 1000000;
 trans = 1000;
-grid_size = 200;
+grid_size = 2000;
 ensemble = 1000;
 N_steps = 10000;
 
@@ -163,6 +163,10 @@ sim_entropy_measures = zeros(length(a_values))
 sim_lyapunov_measures = zeros(length(a_values))
 theor_entropy_measures = zeros(length(a_values))
 theor_lyapunov_measures = zeros(length(a_values))
+C1_measures = zeros(length(a_values))
+C2_measures = zeros(length(a_values))
+variance_measures = zeros(length(a_values))
+covariance_measures = zeros(length(a_values))
 
 #a = 1.4
 #i = 1
@@ -172,18 +176,23 @@ for (i,a) in enumerate(a_values)
     timeseries,  = trajectory(system, traj_length, [0, 0]; Ttr=trans)
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
     stn,retcode = create_stn(discrete_timeseries, vertex_names)
-    sim_entropy_measures[i], sim_lyapunov_measures[i] = network_measures(stn, ensemble, N_steps)
+    #sim_entropy_measures[i], sim_lyapunov_measures[i] = network_measures(stn, ensemble, N_steps)
     P = prob_matrix(stn);
-    theor_entropy_measures[i], theor_lyapunov_measures[i] = network_measures(P)
+    #theor_entropy_measures[i], theor_lyapunov_measures[i] = network_measures(P)
+    theor_entropy_measures[i], ret_code = sinai_kolmogorov_entropy(P)
+    theor_lyapunov_measures[i], variance_measures[i], covariance_measures[i], ret_code = lyapunov_measure(P)
 end
 
-data = hcat(a_values, sim_entropy_measures, sim_lyapunov_measures, theor_entropy_measures, theor_lyapunov_measures)
+data = hcat(a_values, sim_entropy_measures, sim_lyapunov_measures, theor_entropy_measures, theor_lyapunov_measures, C1_measures, C2_measures, variance_measures, covariance_measures)
 
 #save data
 #f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
 #f_name = "./tests/henon_measures_a=1.21-1.23_da=0.0001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
 #f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_ens=1000_tmax=300000_ttrans=1000_grid=100.dat"
 f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_ens=1000_tmax=1000000_ttrans=1000_grid=200.dat"
+
+f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_ens=1000_tmax=10^6_ttrans=1000_grid=20_varcov.dat"
+f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_ens=1000_tmax=10^6_ttrans=1000_grid=2000_varcov.dat"
 writedlm(f_name,data)
 # load data
 f_name = "./tests/henon_measures_a=1.0-1.4_da=0.001_t=10^5_ens=1000_tmax=30000_ttrans=1000.dat"
