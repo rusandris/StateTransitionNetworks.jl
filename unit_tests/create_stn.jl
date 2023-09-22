@@ -55,7 +55,7 @@ end
     inc_stn, inc_retcode = create_stn(incomplete_timeseries, grid_size,plane1,idxs; make_ergodic=false,verbose=false);
     @test inc_retcode == :NotConnected
     
-    inc_stn, inc_retcode = create_stn(incomplete_timeseries, grid_size,plane1,idxs; make_ergodic=true,verbose=false);
+    inc_stn, inc_retcode = create_stn(incomplete_timeseries, grid_size,plane1,idxs; make_ergodic=true,verbose=true);
     @test inc_retcode == :Unusable
 	
 	
