@@ -1,11 +1,13 @@
+TimeSeries = Union{AbstractStateSpaceSet,AbstractArray}
+
 """
-	timeseries_to_grid(timeseries, grid) -> cell_coordinates,vertex_names
+	timeseries_to_grid(timeseries, grid_size) -> cell_coordinates,vertex_names
 Discretizes a 2D timeseries/trajectory on a grid. Returns
 a discrete timeseries containing the the cell coordinates and the list
 of vertices with cell coordinates. 
 """
-function timeseries_to_grid(timeseries, grid; grid_edges = [])    
-    M = zeros(grid,grid)
+function timeseries_to_grid(timeseries::TimeSeries, grid_size::Integer; grid_edges = [])    
+    M = zeros(grid_size,grid_size)
     T = length(timeseries[:,1])
     
     if isempty(grid_edges)		
@@ -18,9 +20,9 @@ function timeseries_to_grid(timeseries, grid; grid_edges = [])
     end
     
 	#partitioning between [`x_min`, `x_max`] into `grid` number of cells
-    x_grid = range(x_min, nextfloat(x_max, 100), grid+1);
+    x_grid = range(x_min, nextfloat(x_max, 100), grid_size+1);
     x_min = x_grid[1]
-    y_grid = range(y_min, nextfloat(y_max, 100), grid+1);
+    y_grid = range(y_min, nextfloat(y_max, 100), grid_size+1);
     y_min = y_grid[1]
     
     #arrays for space-discrete timeseries 
@@ -46,7 +48,7 @@ function timeseries_to_grid(timeseries, grid; grid_edges = [])
 end
 
 """
-	create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn,retcode
+	create_stn(ts,grid_size::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn,retcode
 Higher level function that creates a state transition network (STN) directly from the timeseries of a continuous system `ts` using `DynamicalSystemsBase.poincaresos`. The returned `stn` is a directed metagraph object. \\
 
 Keyword arguments:
@@ -57,13 +59,13 @@ Other `kwargs` get propageted into `DynamicalSystemsBase.poincaresos`.
 
 For more info about PSOS  go to https://juliadynamics.github.io/DynamicalSystems.jl/v1.3/chaos/orbitdiagram/#DynamicalSystemsBase.poincaresos
 """
-function create_stn(ts,grid::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...)
+function create_stn(ts::TimeSeries,grid_size::Integer,plane,idxs;make_ergodic=false, verbose=false,kwargs...)
 	
 	#psos
 	psection = DynamicalSystemsBase.poincaresos(DynamicalSystemsBase.StateSpaceSet(ts), plane; save_idxs=idxs,warning=true,kwargs...)
 
 	#method for time-discrete trajectory
-	create_stn(psection,grid; make_ergodic=make_ergodic, verbose=verbose)
+	create_stn(psection,grid_size; make_ergodic=make_ergodic, verbose=verbose)
 	
 end
 
@@ -79,8 +81,8 @@ Keyword arguments:
 
 For more info about the network checking go to Graphs.jl: https://juliagraphs.org/Graphs.jl/dev/algorithms/connectivity/#Graphs.strongly_connected_components 
 """
-function create_stn(time_discrete_ts,grid::Int64; make_ergodic=false, verbose=false)
-	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid)
+function create_stn(time_discrete_ts::TimeSeries,grid_size::Integer; make_ergodic=false, verbose=false)
+	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size)
 	create_stn(symbolic_timeseries,vertex_positions;make_ergodic=make_ergodic,verbose=verbose)
 end
 
@@ -96,7 +98,7 @@ Keyword arguments:
 ## Edge properties 
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
-function create_stn(symbolic_timeseries,vertex_positions;make_ergodic=false,verbose=false)
+function create_stn(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict;make_ergodic=false,verbose=false)
 	nr_vertices = length(vertex_positions)
 	
 	#weight and transition probability matrices
@@ -114,7 +116,7 @@ function create_stn(symbolic_timeseries,vertex_positions;make_ergodic=false,verb
         state_probabilities[vertex_positions[state]] += 1
     end
     
-    #update end (final) state 
+    #update end (final) state grid
     end_state = symbolic_timeseries[end]
     state_probabilities[vertex_positions[end_state]] += 1
     
