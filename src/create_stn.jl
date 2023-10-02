@@ -220,7 +220,7 @@ end
 
 
 
-function prob_matrix(stn)
+function get_transition_matrix(stn)
 	nr_vertices = nv(stn)
 	P = spzeros(Float64,(nr_vertices,nr_vertices))
 	for edge in collect(edges(stn))
@@ -233,7 +233,7 @@ function prob_matrix(stn)
 	return P
 end
 
-function weight_matrix(stn)
+function get_weight_matrix(stn)
 	nr_vertices = nv(stn)
 	Q = spzeros(Float64,(nr_vertices,nr_vertices))
 	for edge in collect(edges(stn))

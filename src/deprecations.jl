@@ -1,0 +1,2 @@
+@deprecate prob_matrix get_transition_matrix
+@deprecate weight_matrix get_weight_matrix
