@@ -70,8 +70,8 @@ Access the whole matrices `P[i,j]` and `Q[i,j]`
 
 ```julia
 #sparse adjacency matrices 
-P = prob_matrix(stn)
-Q = weight_matrix(stn)
+P = get_transition_matrix(stn)
+Q = get_weight_matrix(stn)
 ```
 
 Use `network_measures` on the `stn` to calculate Sinai-Kolmogorov entropy and the Lyapunov network measure with numerical (random walk method) :
@@ -82,10 +82,10 @@ N_steps = 1e4 #number of steps taken in a random walk
 entropy, lyapunov = network_measures(stn,ensemble, N_steps)
 ```
 
-Use `network_measures` on the `P` stochastic matrix to calculate Sinai-Kolmogorov entropy and the Lyapunov network measure using the analytic formula :
+Use `network_measures` on the `P` stochastic transition matrix to calculate Sinai-Kolmogorov entropy and the Lyapunov network measure using the analytic formula :
 
 ```jul
-entropy, lyapunov = network_measures(prob_matrix(stn))
+entropy, lyapunov = network_measures(get_transition_matrix(stn))
 ```
 
 Calculate the network measures for different parameters (dynamics) of the Henon map:
@@ -96,8 +96,6 @@ a_values = 1:0.001:1.4;
 traj_length = 30000;
 trans = 1000;
 grid_size = 20;
-ensemble = 100;
-N_steps = 10000;
 
 entropy_measures = zeros(length(a_values))
 lyapunov_measures = zeros(length(a_values))
@@ -105,10 +103,10 @@ lyapunov_measures = zeros(length(a_values))
 for (i,a) in enumerate(a_values)
     system = PredefinedDynamicalSystems.henon([0.0, 0.0]; a=a, b=b)
     @show a
-    timeseries,  = trajectory(system, traj_length, [0, 0]; Ttr=trans)
+    timeseries, = trajectory(system, traj_length, [0, 0]; Ttr=trans)
     discrete_timeseries, vertex_names = timeseries_to_grid(timeseries, grid_size);
-    stn,retcode = create_stn(timeseries, grid_size)
-    entropy_measures[i], lyapunov_measures[i] = network_measures(stn,ensemble, N_steps)
+    stn, retcode = create_stn(timeseries, grid_size)
+    entropy_measures[i], lyapunov_measures[i] = network_measures(get_transition_matrix(stn))
 end
 ```
 
