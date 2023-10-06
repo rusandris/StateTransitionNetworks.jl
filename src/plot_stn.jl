@@ -6,7 +6,7 @@ function plot_stn(stn;filename="stn.pdf",nodesize=1,nodefillc="orange",linetype=
 	x = pos_states[:,1]
 	y = pos_states[:,2]
 	
-	w = weight_matrix(stn)
+	w = get_weight_matrix(stn)
 	
 	gp = gplot(stn,x,-y;kwargs...,
 		edgelinewidth = reduce(vcat, [w[i,:].nzval for i in 1:nv(stn)]) .^ weight_exponent,

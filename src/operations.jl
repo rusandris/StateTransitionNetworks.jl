@@ -90,8 +90,8 @@ function add_timeseries(symbolic_ts_list, grid; make_ergodic=false, verbose=fals
 end
 
 function are_equal(stn1, stn2)
-    Q1 = weight_matrix(stn1)
-    Q2 = weight_matrix(stn2)
+    Q1 = get_weight_matrix(stn1)
+    Q2 = get_weight_matrix(stn2)
     if size(Q1) != size(Q2)
         return false
     end

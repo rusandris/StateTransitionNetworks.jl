@@ -1,6 +1,6 @@
-function randomwalk_step(stn,source,prob_matrix)
+function randomwalk_step(stn,source,P)
 	neigh = outneighbors(stn, source)
-	neigh_weights = prob_matrix[source,:]
+	neigh_weights = P[source,:]
 	destination = sample(neigh, Weights(neigh_weights.nzval))
 	w = neigh_weights[destination]
 	
@@ -15,7 +15,7 @@ Returns the normalized walk length.
 function random_walk_on_stn(stn, N_steps)
     source = sample(1:nv(stn));
     walk_length = 0.0;
-    P = prob_matrix(stn)
+    P = get_transition_matrix(stn)
 
     for n in 1:N_steps
 		source, l = randomwalk_step(stn,source,P)
@@ -64,7 +64,7 @@ function measure_convergence(stn,ensemble,N_max)
 		source = sample(1:nv(stn));
 		walk_length_timeseries = zeros(N_max) #container for individual walk lengths for every step 
 		walk_length = 0
-		P = prob_matrix(stn)
+		P = get_transition_matrix(stn)
 		
 		for n in 1:N_max
 			source, l = randomwalk_step(stn,source,P) #make one step in the graph
@@ -88,8 +88,8 @@ end
 Calculates analytically the Sinai-Kolmogorov entropy on a STN by extracting the Q weight matrix and P transition probability matrix.
 """
 function sinai_kolmogorov_entropy(stn)
-    Q = weight_matrix(stn)
-    P = prob_matrix(stn)
+    Q = get_weight_matrix(stn)
+    P = get_transition_matrix(stn)
 
     entropy = -sum(Q[Q .> 0] .* log.(P[P .> 0]))
     return entropy

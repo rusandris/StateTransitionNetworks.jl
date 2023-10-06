@@ -27,7 +27,7 @@ function stn_analysis(timeseries::DynamicalSystemsBase.StateSpaceSet;grid,plane,
 	
 	if retcode ==:Success
 		if use_analytic
-			P = prob_matrix(stn)
+			P = get_transition_matrix(stn)
 			entropy,lyapunov = use_stored_distribution ? network_measures(P;x=state_distribution(stn)[1]) : network_measures(P)
 		else
 			entropy,lyapunov = network_measures(stn,ensemble,N_steps)

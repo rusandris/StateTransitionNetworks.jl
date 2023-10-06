@@ -306,7 +306,7 @@ function check_stn!(stn;make_ergodic=false,verbose=false)
 	nr_comps = length(comps)
 	nr_vertices0 = nv(stn)
 	if nr_comps == 1
-		Q = weight_matrix(stn)
+		Q = get_weight_matrix(stn)
 		if !(sum(Q) ≈ 1)
 			renormalize!(stn;verbose=verbose)
 		end
