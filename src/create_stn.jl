@@ -164,7 +164,7 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,
 	(!(all(x -> isnan(x), state_probabilities)) && !(sum(Q) ≈ 1.0)) && throw(ArgumentError("Non-conditional probabilities of transitions (weights) must sum up to 1!"))
 	
 	if !(isnormalized(P))
-		renormalize!(P)
+		renormalize!(P;verbose=verbose)
 	end
 	
 	nr_vertices = size(P)[1]
@@ -246,10 +246,10 @@ function get_weight_matrix(stn)
 	return Q
 end
 
-function renormalize!(stn)
+function renormalize!(stn;verbose=false)
 	nr_vertices = nv(stn)
 	P = prob_matrix(stn)
-	renormalize!(P)
+	renormalize!(P;verbose=verbose)
 	Q = calculate_weight_matrix(P)
     for i in 1:nr_vertices
         for j in 1:nr_vertices
@@ -263,21 +263,21 @@ function renormalize!(stn)
 
 end
 
-function renormalize!(P::AbstractMatrix)
+function renormalize!(P::AbstractMatrix;verbose=false)
 	for i in 1:size(P)[1]
 		sumPi = sum(P[i,:])
 		P[i,:] = P[i,:]./sumPi
-        all(i -> isfinite(i),P[i,:]) || @warn "The matrix is not stochastic!"
     end
+    !all(p -> isfinite(p),P) && verbose && @warn "The matrix is not stochastic!";
 end
 
-function calculate_transition_matrix(Q::AbstractMatrix; verbose=true)
+function calculate_transition_matrix(Q::AbstractMatrix;verbose=false)
 	P = spzeros(size(Q))
 	for i in 1:size(Q)[1]
 		sumQi = sum(Q[i,:])
 		P[i,:] = Q[i,:]./sumQi
-        all(i -> isfinite(i),P[i,:]) || !verbose || @warn "The matrix is not stochastic!"
     end
+    !all(p -> isfinite(p),P) && verbose && @warn "The matrix is not stochastic!";
     return P
 end
 
@@ -308,7 +308,7 @@ function check_stn!(stn;make_ergodic=false,verbose=false)
 	if nr_comps == 1
 		Q = weight_matrix(stn)
 		if !(sum(Q) ≈ 1)
-			renormalize!(stn)
+			renormalize!(stn;verbose=verbose)
 		end
 		return :Success
 	else
@@ -336,7 +336,7 @@ function check_stn!(stn;make_ergodic=false,verbose=false)
 				return :Unusable
 			else
 				# Rebuild, renormalize
-				renormalize!(stn)
+				renormalize!(stn;verbose=verbose)
 				return :Success
 			end
 		else
