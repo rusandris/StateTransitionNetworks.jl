@@ -4,47 +4,58 @@ function get_grid_edges(psections)
     return [x_min, y_min, x_max, y_max]
 end
 
-function timeseries_to_common_grid(list_of_timeseries, grid)
+function timeseries_to_common_grid(list_of_timeseries, grid_size::Int)
     grid_edges = get_grid_edges(list_of_timeseries)
     
     symbolic_ts_list = []
     
     for ts in list_of_timeseries
-    	sym_ts,vnames = timeseries_to_grid(ts, grid; grid_edges = grid_edges)
+    	sym_ts,vnames = timeseries_to_grid(ts, grid_size; grid_edges = grid_edges)
     	push!(symbolic_ts_list,sym_ts)
     end
 	return symbolic_ts_list 
 end
 
-function add_timeseries(list_of_timeseries,grid,plane;idxs,make_ergodic=false, verbose=false,kwargs...)
+function add_timeseries(list_of_timeseries,grid_size::Int,plane;idxs,make_ergodic=false, verbose=false,return_intersected=false,kwargs...)
 	psections = []
 	for ts in list_of_timeseries
 		psection = poincaresos(DynamicalSystemsBase.StateSpaceSet(ts), plane; save_idxs=idxs,kwargs...)
-		push!(psections,psection)
+		if length(psection) != 0
+			push!(psections,psection)
+		end
 	end
 	
-	symbolic_ts_list = timeseries_to_common_grid(psections,grid)
-	add_timeseries(symbolic_ts_list,grid;verbose=verbose,make_ergodic=make_ergodic) 
-
+	if length(psections) == 0
+		@warn "None of the time series produced intersections with the plane!"
+		return nothing
+	end
+	
+	symbolic_ts_list = timeseries_to_common_grid(psections,grid_size)
+	
+	stn,retcode = add_timeseries(symbolic_ts_list,grid_size;verbose=verbose,make_ergodic=make_ergodic) 
+	
+	return_intersected && return stn,retcode,length(psections)
+	
+	return stn,retcode
 end
 
 
-function add_timeseries(symbolic_ts_list, grid; make_ergodic=false, verbose=false)
-    Q_null = zeros(Int32, grid*grid, grid*grid) # Null matrix with all possible transitions
+function add_timeseries(symbolic_ts_list, grid_size::Int; make_ergodic=false, verbose=false)
+    Q_null = zeros(Int32, grid_size*grid_size, grid_size*grid_size) # Null matrix with all possible transitions
     vertex_positions = OrderedDict{Tuple{Int64,Int64},Int64}() 
     vertex_place = [];  # Rows, and column number in Q_null for a given vertex
-    M = zeros(grid,grid)
+    M = zeros(grid_size,grid_size)
     nr_vertices = 0;
     #probability distribution of states
     state_probabilities = zeros(nr_vertices)
     
     for ts in symbolic_ts_list
-        O = zeros(Int32, grid*grid, grid*grid)
+        O = zeros(Int32, grid_size*grid_size, grid_size*grid_size)
         
         
         for (i,state) in enumerate(ts)
             x, y = state
-            v = (x-1)*grid + y
+            v = (x-1)*grid_size + y
             
             if M[y,x] == 0
                 nr_vertices += 1 
@@ -56,7 +67,7 @@ function add_timeseries(symbolic_ts_list, grid; make_ergodic=false, verbose=fals
             
             if i < length(ts) 
             	x_next,y_next = ts[i+1]
-            	v_next = (x_next-1)*grid + y_next
+            	v_next = (x_next-1)*grid_size + y_next
             	O[v,v_next] +=1
             	state_probabilities[vertex_positions[state]] += 1
             end
