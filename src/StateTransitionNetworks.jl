@@ -16,7 +16,7 @@ include("timeseries_analysis.jl")
 include("operations.jl")
 include("deprecations.jl")
 
-export timeseries_to_grid, create_stn, check_stn!, get_transition_matrix, get_weight_matrix, state_distribution, calculate_weight_matrix, random_walk_on_stn, randomwalk_step, isnormalized,calculate_transition_matrix,renormalize!
+export timeseries_to_grid, create_stn, check_stn!, get_transition_matrix, get_weight_matrix, get_state_distribution, calculate_weight_matrix, random_walk_on_stn, randomwalk_step, isnormalized,calculate_transition_matrix,renormalize!
 export network_measures, sinai_kolmogorov_entropy, measure_convergence, lyapunov_measure, stationary_distribution
 export plot_stn
 export stn_analysis,read_bin,ndensity

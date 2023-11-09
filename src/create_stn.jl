@@ -201,10 +201,10 @@ end
 
 
 """
-	state_distribution(stn) -> prob_states,pos_states
+	get_state_distribution(stn) -> prob_states,pos_states
 Returns the probability distribution of states and the positions of the vertices that correspond to these states.  
 """
-function state_distribution(stn)
+function get_state_distribution(stn)
 	prob_states = zeros(nv(stn))	#probability of vertices(states)
 	pos_states = zeros(Int32,nv(stn),2)	#position of vertices
 	

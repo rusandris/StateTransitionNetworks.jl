@@ -1,6 +1,6 @@
 function plot_stn(stn;filename="stn.pdf",nodesize=1,nodefillc="orange",linetype="straight",max_edgelinewidth=1,weight_exponent=1,nodelabels=false,kwargs...)
 	
-	prob_states,pos_states = state_distribution(stn)
+	prob_states,pos_states = get_state_distribution(stn)
 	#vertex alphas could be a function of their probability
 	
 	x = pos_states[:,1]
