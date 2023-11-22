@@ -26,8 +26,7 @@ function add_timeseries(list_of_timeseries,grid_size::Int,plane;idxs,make_ergodi
 	end
 	
 	if length(psections) == 0
-		@warn "None of the time series produced intersections with the plane!"
-		return nothing
+		error("None of the time series produced intersections with the plane!")
 	end
 	
 	symbolic_ts_list = timeseries_to_common_grid(psections,grid_size)
