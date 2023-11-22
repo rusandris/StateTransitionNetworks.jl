@@ -13,7 +13,7 @@ using Test
 	
 	timeseries, = trajectory(ds,5000;Ttr = 1000,Δt = 1e-2)
 
-	stn,retcode, nm1 = stn_analysis(timeseries; grid=grid_size,
+	stn,retcode, nm1 = stn_analysis(timeseries; grid_size=grid_size,
 		plane = plane1, 
 		idxs = idxs, 
 		ensemble = 100, 
@@ -22,11 +22,12 @@ using Test
 		verbose = false, 
 		return_stn = true, 
 		use_analytic = false, 
-		use_stored_distribution = false)
+		use_stored_distribution = false,
+		direction=-1)
 
 	@test retcode == :Success
 	
-	nm2 = stn_analysis(timeseries; grid=grid_size,
+	nm2 = stn_analysis(timeseries; grid_size=grid_size,
 		plane = plane2, 
 		idxs = idxs,  
 		make_ergodic = true, 
@@ -35,7 +36,7 @@ using Test
 		use_analytic = true, 
 		use_stored_distribution = false)
 
-	nm3 = stn_analysis(timeseries; grid=grid_size,
+	nm3 = stn_analysis(timeseries; grid_size=grid_size,
 		plane = plane1, 
 		idxs = idxs, 
 		ensemble = 100, 

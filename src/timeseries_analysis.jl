@@ -1,4 +1,4 @@
-stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false,use_stored_distribution=false) = stn_analysis(DynamicalSystemsBase.StateSpaceSet(timeseries);grid=grid,plane=plane,idxs=idxs,ensemble=ensemble,N_steps=N_steps,make_ergodic=make_ergodic, verbose=verbose,return_stn=return_stn,use_analytic=use_analytic,use_stored_distribution=use_stored_distribution)
+stn_analysis(timeseries::Matrix;grid_size,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false,use_stored_distribution=false,kwargs...) = stn_analysis(DynamicalSystemsBase.StateSpaceSet(timeseries);grid_size=grid_size,plane=plane,idxs=idxs,ensemble=ensemble,N_steps=N_steps,make_ergodic=make_ergodic, verbose=verbose,return_stn=return_stn,use_analytic=use_analytic,use_stored_distribution=use_stored_distribution,kwargs...)
 
 
 
@@ -19,9 +19,9 @@ Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN created fr
 * `use_stored_distribution` : use the already stored stationary distribution
 """
 
-function stn_analysis(timeseries::DynamicalSystemsBase.StateSpaceSet;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false,use_stored_distribution=false)
+function stn_analysis(timeseries::DynamicalSystemsBase.StateSpaceSet;grid_size,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false,use_stored_distribution=false,kwargs...)
 
-	stn,retcode = create_stn(timeseries,grid::Int64,plane,idxs;make_ergodic=make_ergodic, verbose=verbose)
+	stn,retcode = create_stn(timeseries,grid_size,plane,idxs;make_ergodic=make_ergodic, verbose=verbose,kwargs...)
 	
 	entropy,lyapunov = NaN,NaN #initialize variables
 	
