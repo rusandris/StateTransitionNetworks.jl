@@ -1,3 +1,19 @@
+"""
+	sparse_log(A::AbstractMatrix) -> log(A)
+Calculates the piecewise logarithm of a sparse matrix without explicitely converting it to dense matrix.
+"""
+function sparse_log(A::AbstractMatrix)
+	P = copy(A)
+	vals = nonzeros(P)
+	m, n = size(P)
+	for j = 1:n
+		for i in nzrange(P, j)
+			vals[i] = log(vals[i])
+		end
+	end
+	return P
+end
+
 function randomwalk_step(stn,source,P)
 	neigh = outneighbors(stn, source)
 	neigh_weights = P[source,:]
@@ -91,7 +107,7 @@ function sinai_kolmogorov_entropy(stn)
     Q = get_weight_matrix(stn)
     P = get_transition_matrix(stn)
 
-    entropy = -sum(Q[Q .> 0] .* log.(P[P .> 0]))
+    entropy = -sum(Q .* -sparse_log(P))
     return entropy
 end
 
@@ -111,7 +127,8 @@ Calculates analytically the Sinai-Kolmogorov entropy given the Q weight matrix a
 
 """
 function sinai_kolmogorov_entropy(Q,P)
-    entropy = -sum(Q[Q .> 0] .* log.(P[P .> 0]))
+    entropy = -sum(Q .* -sparse_log(P))
+	return entropy
 end
 
 """
@@ -127,8 +144,7 @@ function sinai_kolmogorov_entropy(P::AbstractMatrix;x=nothing)
 	
 	v = ones(length(x))
 
-	L = Matrix(-log.(P))
-	replace!(L, Inf=>0.0)
+	L = -sparse_log(P)
 	L = P.*L
 	entropy = (x'*L*v)[1]
 	return real(entropy), :Success
@@ -148,11 +164,11 @@ function lyapunov_measure(P::AbstractMatrix;x=nothing)
 	x = x'
 	v = ones(length(x))
 	
-	L = Matrix(-log.(P))
-	replace!(L, Inf=>0.0)
+	L = -sparse_log(P)
 	L2 = P.*L.^2
 	L = P.*L
-	S = (I-v*x)+(P-v*x)*inv(I-P+v*x)
+	vx = v*x
+	S = (I-vx)+(P-vx)*inv(I-P+vx)
 	covariance = (x*L*S*L*v)[1]
 	variance = (x*L2*v)[1] -(x*L*v)[1]^2
 	lyapunov =  variance + 2*covariance
