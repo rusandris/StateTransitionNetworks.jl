@@ -7,7 +7,7 @@ a discrete timeseries containing the the cell coordinates and the list
 of vertices with cell coordinates. 
 """
 function timeseries_to_grid(timeseries::TimeSeries, grid_size::Integer; grid_edges = [])    
-    M = zeros(grid_size,grid_size)
+    M = spzeros(grid_size,grid_size)
     T = length(timeseries[:,1])
     
     if isempty(grid_edges)		
@@ -24,7 +24,7 @@ function timeseries_to_grid(timeseries::TimeSeries, grid_size::Integer; grid_edg
     x_min = x_grid[1]
     y_grid = range(y_min, nextfloat(y_max, 100), grid_size+1);
     y_min = y_grid[1]
-    
+   
     #arrays for space-discrete timeseries 
     x_n = Vector{Int64}(undef, T)
     y_n = Vector{Int64}(undef, T)
@@ -59,13 +59,13 @@ Other `kwargs` get propageted into `DynamicalSystemsBase.poincaresos`.
 
 For more info about PSOS  go to https://juliadynamics.github.io/DynamicalSystems.jl/v1.3/chaos/orbitdiagram/#DynamicalSystemsBase.poincaresos
 """
-function create_stn(ts::TimeSeries,grid_size::Integer,plane,idxs;make_ergodic=false, verbose=false,kwargs...)
+function create_stn(ts::TimeSeries,grid_size::Integer,plane,idxs;make_ergodic=false, verbose=false,grid_edges=[],kwargs...)
 	
 	#psos
 	psection = DynamicalSystemsBase.poincaresos(DynamicalSystemsBase.StateSpaceSet(ts), plane; save_idxs=idxs,warning=true,kwargs...)
 
 	#method for time-discrete trajectory
-	create_stn(psection,grid_size; make_ergodic=make_ergodic, verbose=verbose)
+	create_stn(psection,grid_size; make_ergodic=make_ergodic, verbose=verbose,grid_edges=grid_edges)
 	
 end
 
@@ -81,8 +81,8 @@ Keyword arguments:
 
 For more info about the network checking go to Graphs.jl: https://juliagraphs.org/Graphs.jl/dev/algorithms/connectivity/#Graphs.strongly_connected_components 
 """
-function create_stn(time_discrete_ts::TimeSeries,grid_size::Integer; make_ergodic=false, verbose=false)
-	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size)
+function create_stn(time_discrete_ts::TimeSeries,grid_size::Integer; make_ergodic=false, verbose=false,grid_edges=[])
+	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size,grid_edges=grid_edges)
 	create_stn(symbolic_timeseries,vertex_positions;make_ergodic=make_ergodic,verbose=verbose)
 end
 
@@ -99,6 +99,38 @@ Keyword arguments:
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
 function create_stn(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict;make_ergodic=false,verbose=false)
+	
+	P,Q,state_probabilities = calculate_transition_matrix(symbolic_timeseries,vertex_positions; returnQ=true,return_state_distribution=true)
+	
+	stn, retcode = create_stn(P; make_ergodic=make_ergodic,
+		vertex_positions=vertex_positions,
+		state_probabilities=state_probabilities,
+		Q=Q,
+		verbose=verbose)
+	
+	return stn,retcode
+end
+
+
+"""
+	calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false) -> P
+Calculates the transition matrix `P` from a time-discrete time series `time_discrete_ts` by dividing the state space into cells (`grid_size`x`grid_size`).
+If `returnQ` is set to `true`, the weight matrix `Q` is also returned. Grid edges can be specified explicitly with `grid_edges`, otherwise they're inferred from the data.
+
+"""
+function calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false,return_state_distribution=false)
+	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size;grid_edges=grid_edges)
+	calculate_transition_matrix(symbolic_timeseries,vertex_positions; returnQ=returnQ,return_state_distribution=return_state_distribution)
+end
+
+"""
+	calculate_transition_matrix(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict; returnQ=false) -> P
+Calculates the transition matrix `P` from `symbolic_timeseries` and symbol dictionary `vertex_positions` (the output of `timeseries_to_grid`).
+If `returnQ` is set to `true`, the weight matrix `Q` is also returned. If `return_state_distribution` is set to `true`, the estimated probability distribution over the states is also returned.
+
+"""
+function calculate_transition_matrix(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict; returnQ=false,return_state_distribution=false)
+	
 	nr_vertices = length(vertex_positions)
 	
 	#weight and transition probability matrices
@@ -127,14 +159,30 @@ function create_stn(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDi
     Q = Q./sum(Q)
 	P = calculate_transition_matrix(Q)
 
-	stn, retcode = create_stn(P; make_ergodic=make_ergodic,
-		vertex_positions=vertex_positions,
-		state_probabilities=state_probabilities,
-		Q=Q,
-		verbose=verbose)
+	if returnQ
+		if return_state_distribution
+			return P,Q,state_probabilities
+		else
+			return P,Q
+		end
+	else
+		return P
+	end
+end
 
-	
-	return stn,retcode
+"""
+	calculate_transition_matrix(Q::AbstractMatrix;verbose=false) -> P
+Calculates the transition matrix `P` from  the weight matrix `Q`. Warns if `P` is not stochastic if `verbose` is `true`.
+
+"""
+function calculate_transition_matrix(Q::AbstractMatrix;verbose=false)
+	P = spzeros(size(Q))
+	for i in 1:size(Q)[1]
+		sumQi = sum(Q[i,:])
+		P[i,:] = Q[i,:]./sumQi
+    end
+    !all(p -> isfinite(p),P) && verbose && @warn "The matrix is not stochastic!";
+    return P
 end
 
 """
@@ -271,15 +319,6 @@ function renormalize!(P::AbstractMatrix;verbose=false)
     !all(p -> isfinite(p),P) && verbose && @warn "The matrix is not stochastic!";
 end
 
-function calculate_transition_matrix(Q::AbstractMatrix;verbose=false)
-	P = spzeros(size(Q))
-	for i in 1:size(Q)[1]
-		sumQi = sum(Q[i,:])
-		P[i,:] = Q[i,:]./sumQi
-    end
-    !all(p -> isfinite(p),P) && verbose && @warn "The matrix is not stochastic!";
-    return P
-end
 
 function calculate_weight_matrix(P::AbstractMatrix)
 	Q = spzeros(size(P))
