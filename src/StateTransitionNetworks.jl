@@ -9,6 +9,7 @@ using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,Abstr
 import LinearAlgebra: eigen, Diagonal, I, nullspace
 import DataStructures: OrderedDict
 
+include("transition_matrix.jl")
 include("create_stn.jl")
 include("network_measures.jl")
 include("plot_stn.jl")

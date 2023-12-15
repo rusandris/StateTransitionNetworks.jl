@@ -1,4 +1,4 @@
-TimeSeries = Union{AbstractStateSpaceSet,AbstractArray}
+
 
 """
 	timeseries_to_grid(timeseries, grid_size) -> cell_coordinates,vertex_names
@@ -100,7 +100,7 @@ Keyword arguments:
 """
 function create_stn(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict;make_ergodic=false,verbose=false)
 	
-	P,Q,state_probabilities = calculate_transition_matrix(symbolic_timeseries,vertex_positions; returnQ=true,return_state_distribution=true)
+	P,Q,state_probabilities = calculate_transition_matrix(symbolic_timeseries;symbol_dictionary=vertex_positions,returnQ=true,return_state_distribution=true)
 	
 	stn, retcode = create_stn(P; make_ergodic=make_ergodic,
 		vertex_positions=vertex_positions,
@@ -111,79 +111,6 @@ function create_stn(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDi
 	return stn,retcode
 end
 
-
-"""
-	calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false) -> P
-Calculates the transition matrix `P` from a time-discrete time series `time_discrete_ts` by dividing the state space into cells (`grid_size`x`grid_size`).
-If `returnQ` is set to `true`, the weight matrix `Q` is also returned. Grid edges can be specified explicitly with `grid_edges`, otherwise they're inferred from the data.
-
-"""
-function calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false,return_state_distribution=false)
-	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size;grid_edges=grid_edges)
-	calculate_transition_matrix(symbolic_timeseries,vertex_positions; returnQ=returnQ,return_state_distribution=return_state_distribution)
-end
-
-"""
-	calculate_transition_matrix(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict; returnQ=false) -> P
-Calculates the transition matrix `P` from `symbolic_timeseries` and symbol dictionary `vertex_positions` (the output of `timeseries_to_grid`).
-If `returnQ` is set to `true`, the weight matrix `Q` is also returned. If `return_state_distribution` is set to `true`, the estimated probability distribution over the states is also returned.
-
-"""
-function calculate_transition_matrix(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict; returnQ=false,return_state_distribution=false)
-	
-	nr_vertices = length(vertex_positions)
-	
-	#weight and transition probability matrices
-	Q = spzeros(nr_vertices, nr_vertices)
-    P = spzeros(nr_vertices, nr_vertices)
-    
-    #probability distribution of states
-    state_probabilities = zeros(nr_vertices)
-    
-    #count transitions
-    for i in eachindex(symbolic_timeseries[1:end-1])
-    	state = symbolic_timeseries[i]
-    	next_state = symbolic_timeseries[i+1]
-        Q[vertex_positions[state],vertex_positions[next_state]] += 1
-        state_probabilities[vertex_positions[state]] += 1
-    end
-    
-    #update end (final) state grid
-    end_state = symbolic_timeseries[end]
-    state_probabilities[vertex_positions[end_state]] += 1
-    
-    #normalize state distribution
-	state_probabilities = state_probabilities ./ sum(state_probabilities)
-
-	#normalize Q and fill P by normalizing rows
-    Q = Q./sum(Q)
-	P = calculate_transition_matrix(Q)
-
-	if returnQ
-		if return_state_distribution
-			return P,Q,state_probabilities
-		else
-			return P,Q
-		end
-	else
-		return P
-	end
-end
-
-"""
-	calculate_transition_matrix(Q::AbstractMatrix;verbose=false) -> P
-Calculates the transition matrix `P` from  the weight matrix `Q`. Warns if `P` is not stochastic if `verbose` is `true`.
-
-"""
-function calculate_transition_matrix(Q::AbstractMatrix;verbose=false)
-	P = spzeros(size(Q))
-	for i in 1:size(Q)[1]
-		sumQi = sum(Q[i,:])
-		P[i,:] = Q[i,:]./sumQi
-    end
-    !all(p -> isfinite(p),P) && verbose && @warn "The matrix is not stochastic!";
-    return P
-end
 
 """
 	create_stn(P;kwargs...) -> stn,retcode
