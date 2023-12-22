@@ -1,3 +1,4 @@
+export random_walk_on_stn, randomwalk_step,network_measures, sinai_kolmogorov_entropy, measure_convergence, lyapunov_measure, stationary_distribution
 """
 	sparse_log(A::AbstractMatrix) -> log(A)
 Calculates the piecewise logarithm of a sparse matrix without explicitely converting it to dense matrix.

@@ -1,3 +1,5 @@
+export add_timeseries,are_equal,timeseries_to_common_grid
+
 function get_grid_edges(psections)
     x_max, y_max = maximum(reduce(vcat, maximum.(Matrix.(psections); dims=1)); dims=1)
     x_min, y_min = minimum(reduce(vcat, minimum.(Matrix.(psections); dims=1)); dims=1)
