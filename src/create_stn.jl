@@ -1,51 +1,4 @@
-
-
-"""
-	timeseries_to_grid(timeseries, grid_size) -> cell_coordinates,vertex_names
-Discretizes a 2D timeseries/trajectory on a grid. Returns
-a discrete timeseries containing the the cell coordinates and the list
-of vertices with cell coordinates. 
-"""
-function timeseries_to_grid(timeseries::TimeSeries, grid_size::Integer; grid_edges = [])    
-    M = spzeros(grid_size,grid_size)
-    T = length(timeseries[:,1])
-    
-    if isempty(grid_edges)		
-		x_min = minimum(timeseries[:, 1])
-		y_min = minimum(timeseries[:, 2])
-		x_max = maximum(timeseries[:, 1])
-		y_max = maximum(timeseries[:, 2])
-    else
-    	x_min,y_min,x_max,y_max = grid_edges 
-    end
-    
-	#partitioning between [`x_min`, `x_max`] into `grid` number of cells
-    x_grid = range(x_min, nextfloat(x_max, 100), grid_size+1);
-    x_min = x_grid[1]
-    y_grid = range(y_min, nextfloat(y_max, 100), grid_size+1);
-    y_min = y_grid[1]
-   
-    #arrays for space-discrete timeseries 
-    x_n = Vector{Int64}(undef, T)
-    y_n = Vector{Int64}(undef, T)
-    num_vertex = 0
-    vertex_positions = OrderedDict{Tuple{Int64,Int64},Int64}()
-    x_n, y_n = [], [];
-
-    for row in timeseries
-        y = floor(Int,(row[2]-y_min)/Float64(y_grid.step))+1
-        x = floor(Int,(row[1]-x_min)/Float64(x_grid.step))+1
-        if M[y,x] == 0
-            num_vertex += 1 
-            vertex_positions[(x,y)] = num_vertex
-            M[y,x] = 1
-        end
-        push!(x_n, x)
-        push!(y_n, y)
-    end
-    symbolic_timeseries = collect(zip(x_n,y_n))
-    return symbolic_timeseries, vertex_positions
-end
+export create_stn, check_stn!, get_transition_matrix, get_weight_matrix, get_state_distribution, calculate_weight_matrix,isnormalized,renormalize!
 
 """
 	create_stn(ts,grid_size::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn,retcode
@@ -82,8 +35,8 @@ Keyword arguments:
 For more info about the network checking go to Graphs.jl: https://juliagraphs.org/Graphs.jl/dev/algorithms/connectivity/#Graphs.strongly_connected_components 
 """
 function create_stn(time_discrete_ts::TimeSeries,grid_size::Integer; make_ergodic=false, verbose=false,grid_edges=[])
-	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size,grid_edges=grid_edges)
-	create_stn(symbolic_timeseries,vertex_positions;make_ergodic=make_ergodic,verbose=verbose)
+	symbolic_timeseries = timeseries_to_grid(time_discrete_ts,grid_size,grid_edges=grid_edges)
+	create_stn(symbolic_timeseries;make_ergodic=make_ergodic,verbose=verbose)
 end
 
 """
@@ -98,12 +51,11 @@ Keyword arguments:
 ## Edge properties 
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
-function create_stn(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict;make_ergodic=false,verbose=false)
+function create_stn(symbolic_timeseries::TimeSeries;make_ergodic=false,verbose=false)
 	
-	P,Q,state_probabilities = calculate_transition_matrix(symbolic_timeseries;symbol_dictionary=vertex_positions,returnQ=true,return_state_distribution=true)
+	P,Q,state_probabilities = calculate_transition_matrix(symbolic_timeseries;returnQ=true,return_state_distribution=true)
 	
 	stn, retcode = create_stn(P; make_ergodic=make_ergodic,
-		vertex_positions=vertex_positions,
 		state_probabilities=state_probabilities,
 		Q=Q,
 		verbose=verbose)
@@ -130,7 +82,7 @@ Optional keyword arguments:
 	stn[i,j] -> (:prob,:weight)
 """
 function create_stn(P::AbstractMatrix;make_ergodic=false,
-	vertex_positions::AbstractDict{Tuple{Int64, Int64}, Int64}=Dict([(v,0) => v for v in 1:size(P)[1]]),
+	vertex_positions::AbstractDict{Tuple{Int64, Int64}, Int64}=Dict([(x,y) => x*size(P)[1]+y for x in 0:size(P)[1]-1 for y in 0:size(P)[1]-1]),
 	state_probabilities::Vector{Float64}=fill(NaN,size(P)[1]),	
 	Q::AbstractMatrix=fill(NaN,(size(P)[1],size(P)[1])),
 	verbose=false)
