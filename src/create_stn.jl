@@ -82,7 +82,7 @@ Optional keyword arguments:
 	stn[i,j] -> (:prob,:weight)
 """
 function create_stn(P::AbstractMatrix;make_ergodic=false,
-	vertex_positions::AbstractDict{Tuple{Int64, Int64}, Int64}=Dict([(x,y) => x*size(P)[1]+y for x in 0:size(P)[1]-1 for y in 0:size(P)[1]-1]),
+	vertex_positions::AbstractDict{Int64,Tuple{Int64, Int64}}=Dict([x => (x,0) for x in 1:size(P)[1]]),
 	state_probabilities::Vector{Float64}=fill(NaN,size(P)[1]),	
 	Q::AbstractMatrix=fill(NaN,(size(P)[1],size(P)[1])),
 	verbose=false)
@@ -111,7 +111,7 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,
 	#Properties: vertices ->  Dict{Symbol,Int64}, edges -> Dict{Symbol,Float64}
 	
 	for state in keys(vertex_positions)
-		stn[vertex_positions[state]] = Dict(:x => state[1],:y => state[2],:prob => state_probabilities[vertex_positions[state]])
+		stn[state] = Dict(:x => vertex_positions[state][1], :y => vertex_positions[state][2], :prob => state_probabilities[state])
 	end
 	
 	for i in 1:length(vertex_positions)
