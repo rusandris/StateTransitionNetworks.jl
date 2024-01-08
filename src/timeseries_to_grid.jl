@@ -1,11 +1,11 @@
 export timeseries_to_grid,timeseries_to_grid_1D
-TimeSeries = Union{AbstractStateSpaceSet,AbstractArray}
+TimeSeries{T,D} = Union{StateSpaceSet{D,T},AbstractArray{T,D}} where {T,D}
 
 """
 	timeseries_to_grid(timeseries, grid_size) -> symbolic_timeseries
 Discretizes a 2D timeseries/trajectory on a grid.
 """
-function timeseries_to_grid(timeseries::TimeSeries, grid_size::Integer; grid_edges = [],return_vertex_positions=false)    
+function timeseries_to_grid(timeseries::TimeSeries{T,2}, grid_size::Integer; grid_edges = [],return_vertex_positions=false) where T <: Real   
     L = length(timeseries[:,1])
     
     
@@ -33,7 +33,7 @@ function timeseries_to_grid(timeseries::TimeSeries, grid_size::Integer; grid_edg
     return symbolic_timeseries
 end
 
-function timeseries_to_grid_1D(timeseries::TimeSeries, grid_size::Integer; grid_edges = [],return_vertex_positions=false)    
+function timeseries_to_grid(timeseries::TimeSeries{T,1}, grid_size::Integer; grid_edges = [],return_vertex_positions=false)  where T <: Real    
     L = length(timeseries)
 
     if isempty(grid_edges)		
