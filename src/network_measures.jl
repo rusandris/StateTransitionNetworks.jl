@@ -117,8 +117,9 @@ end
 Calculates the stationary probability based on the probability matrix P. Each element of the resulting vector is the probability of finding the system in node i.
 """
 function stationary_distribution(P::AbstractMatrix)
-	x = nullspace(Matrix(P' - I))
-	x = x ./sum(x)
+	vals, vecs, info = eigsolve(P',1,:LR)
+	info.converged < 1 && @warn "KrylovKit.eigsolve did not converge!" 
+	x = real.(vecs[1]) ./sum(real.(vecs[1]))
 	return x
 end
 
