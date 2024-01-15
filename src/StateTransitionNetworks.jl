@@ -8,6 +8,7 @@ import SparseArrays: spzeros, nonzeros, nzrange
 using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,AbstractStateSpaceSet
 import LinearAlgebra: eigen, Diagonal, I, nullspace
 import DataStructures: OrderedDict
+using KrylovKit
 
 include("timeseries_to_grid.jl")
 include("transition_matrix.jl")
