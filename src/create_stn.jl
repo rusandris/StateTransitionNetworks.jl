@@ -35,8 +35,8 @@ Keyword arguments:
 For more info about the network checking go to Graphs.jl: https://juliagraphs.org/Graphs.jl/dev/algorithms/connectivity/#Graphs.strongly_connected_components 
 """
 function create_stn(time_discrete_ts::TimeSeries,grid_size::Integer; make_ergodic=false, verbose=false,grid_edges=[])
-	symbolic_timeseries = timeseries_to_grid(time_discrete_ts,grid_size,grid_edges=grid_edges)
-	create_stn(symbolic_timeseries;make_ergodic=make_ergodic,verbose=verbose)
+	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size,grid_edges=grid_edges,return_vertex_positions=true)
+	create_stn(symbolic_timeseries;make_ergodic=make_ergodic,verbose=verbose,vertex_positions=vertex_positions)
 end
 
 """
@@ -51,12 +51,21 @@ Keyword arguments:
 ## Edge properties 
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
-function create_stn(symbolic_timeseries::TimeSeries;make_ergodic=false,verbose=false)
+function create_stn(symbolic_timeseries::TimeSeries;make_ergodic=false,verbose=false,
+vertex_positions::AbstractDict{A,Tuple{T, T}} where T <: Integer where A <: Any = Dict{Any,Tuple{Int64,Int64}}() )
 	
-	P,Q,state_probabilities = calculate_transition_matrix(symbolic_timeseries;returnQ=true,return_state_distribution=true)
+	P,Q,state_probabilities_vec,symbol_dictionary = calculate_transition_matrix(symbolic_timeseries;map_symbols=true,return_everything=true)
 	
+	symbols = keys(symbol_dictionary)
+	
+	#create a dict with (state => state_probability) pairs
+	state_probabilities = Dict(state => state_probabilities_vec[symbol_dictionary[state]] for state in symbols)
+	
+	#build stn from the matrix and additional data
 	stn, retcode = create_stn(P; make_ergodic=make_ergodic,
-		state_probabilities=state_probabilities,
+		vertex_positions = vertex_positions,
+		state_probabilities = state_probabilities,
+		symbol_dictionary=symbol_dictionary,
 		Q=Q,
 		verbose=verbose)
 	
@@ -82,14 +91,22 @@ Optional keyword arguments:
 	stn[i,j] -> (:prob,:weight)
 """
 function create_stn(P::AbstractMatrix;make_ergodic=false,
-	vertex_positions::AbstractDict{Int64,Tuple{Int64, Int64}}=Dict([x => (x,0) for x in 1:size(P)[1]]),
-	state_probabilities::Vector{Float64}=fill(NaN,size(P)[1]),	
+	vertex_positions::AbstractDict{A,Tuple{T, T}} where T <: Integer where A <: Any = Dict{Any,Tuple{Int64,Int64}}(),
+	state_probabilities::AbstractDict{A,T} where A <: Any where T <: AbstractFloat = Dict(state => NaN for state in 1:size(P)[1]),
+	symbol_dictionary::AbstractDict{S,I} where S <: Any where I <: Integer = Dict(s => s for s in 1:size(P)[1]),
 	Q::AbstractMatrix=fill(NaN,(size(P)[1],size(P)[1])),
 	verbose=false)
 
-	(!(all(x -> isnan(x), state_probabilities)) && !(sum(state_probabilities) ≈ 1.0)) && throw(ArgumentError("Probabilities of states must sum up to 1!"))
-	(!(all(x -> isnan(x), state_probabilities)) && !(sum(Q) ≈ 1.0)) && throw(ArgumentError("Non-conditional probabilities of transitions (weights) must sum up to 1!"))
+	#warning state_probability values contain NaN or aren't normalized
 	
+	(!(all(x -> isnan(x), values(state_probabilities))) && !(sum(values(state_probabilities)) ≈ 1.0)) && throw(ArgumentError("Probabilities of states must sum up to 1!"))
+	
+	#warning state_probability values contain NaN or Q isn't normalized
+
+	(!(all(x -> isnan(x), values(state_probabilities))) && !(sum(Q) ≈ 1.0)) && throw(ArgumentError("Non-conditional probabilities of transitions (weights) must sum up to 1!"))
+	
+	
+	#check if P is stochastiv, otherwise normalize it row-wise
 	if !(isnormalized(P))
 		renormalize!(P;verbose=verbose)
 	end
@@ -100,20 +117,38 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,
 	stn = MetaGraph(
         DiGraph(),
         Int64,
-        Dict{Symbol, Union{Int64,Float64}},
+        Dict{Symbol, Any},
         Dict{Symbol, Float64},
         nothing,
         edge_data -> 1.0,
         0.0)
 
-	
-	#add edges and properties
-	#Properties: vertices ->  Dict{Symbol,Int64}, edges -> Dict{Symbol,Float64}
-	
-	for state in keys(vertex_positions)
-		stn[state] = Dict(:x => vertex_positions[state][1], :y => vertex_positions[state][2], :prob => state_probabilities[state])
+	#access vertex information contained in the stn like:
+		# stn[i] where i should be the same as its index in P
+	#access edge information contained in the stn like:
+		# stn[i,j] where i,j should be the same as its index in P
+		
+	#pack every vertex info into stn metagraph object:
+		# x grid position
+		# y grid position
+		# probability of state
+		# symbol from the symbolic time series
+		
+	if length(vertex_positions) == 0
+		for symbol in keys(symbol_dictionary)
+			vertex_positions[symbol] = (symbol_dictionary[symbol],0) 
+		end
 	end
 	
+	
+	for symbol in keys(symbol_dictionary)
+		stn[symbol_dictionary[symbol]] = Dict(:x => vertex_positions[symbol][1], :y => vertex_positions[symbol][2], :prob => state_probabilities[symbol],:symbol => symbol)
+	end
+	
+	#pack every edge info into stn metagraph object:
+		# P values
+		# Q values
+
 	for i in 1:length(vertex_positions)
         for j in 1:length(vertex_positions)
             if P[i, j] > 0
