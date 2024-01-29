@@ -5,7 +5,7 @@ using Test
 
 @testset "network measures" begin
 
-	as = [1.2,1.2265,1.27,1.24]
+	as = [1.2,1.2265,1.24,1.27]
 	
 	ensemble = 10000
 	nr_steps = 10000
@@ -23,6 +23,7 @@ using Test
 		P = calculate_transition_matrix(sts)
 		#analytic formula
 		analytic_nm = network_measures(P)
+		@show analytic_nm
 		#lyapunov_measure(P;maxiter=1000)
 		
 		#analytic formula - presaved stationary distribution

@@ -63,7 +63,7 @@ end
 Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
 by using the analytical definitions of both quantities
 """
-function network_measures(P::AbstractMatrix;x=nothing,ϵ=1e-10,maxiter=1000)
+function network_measures(P::AbstractMatrix;x=nothing,ϵ=1e-12,maxiter=1000)
    	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
     lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x,ϵ=ϵ,maxiter=maxiter)
 	return entropy, lyapunov
@@ -159,10 +159,11 @@ Calculates analytically the Lyapunov measure given the the P transition probabil
 
 Optional Keyword arguments:
 * `x`: probability distribution of states. If nothing is provided, it is calculated from `P'*x = x` using `stationary_distribution` (`Krylovkit`'s `eigsolve`).
+* `alg`: linear solver (`hybrid_solve` by default) -> `iterative_linsolve`, `Krylov.linsolve`,`hybrid_solve` are the options
 * `ϵ`: tolerance for `iterative_linsolve`
 * `maxiter`: maxiter for `iterative_linsolve`
 """
-function lyapunov_measure(P::AbstractMatrix;x=nothing,ϵ=1e-10,maxiter=1000)
+function lyapunov_measure(P::AbstractMatrix;x=nothing,alg=hybrid_solve,ϵ=1e-12,maxiter=1000)
 	
 	if isnothing(x)
 		x = stationary_distribution(P)
@@ -177,7 +178,7 @@ function lyapunov_measure(P::AbstractMatrix;x=nothing,ϵ=1e-10,maxiter=1000)
 	
 	X = PseudoDenseMatrix(x) 
 	
-	z = iterative_linsolve(P,X,L*v;ϵ = ϵ,maxiter=maxiter)
+	z = alg(P,X,L*v;ϵ = ϵ,maxiter=maxiter)
 	covariance = 2*xt*L*(z - X*L*v)
 	
 	variance = (xt*L2*v)[1] - (xt*L*v)[1]^2

@@ -1,4 +1,4 @@
-export iterative_linsolve, PseudoDenseMatrix
+export iterative_linsolve, hybrid_solve, PseudoDenseMatrix
 
 
 #--------------pseudo dense matrices-------------------
@@ -29,11 +29,11 @@ Base.:+(M::PseudoDenseMatrix,S::SparseMatrixCSC) = S + M
 
 
 """
-	iterative_linsolve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-2 ) -> z
+	iterative_linsolve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000) -> z::AbstractVector
 Solves for a linear system of equations of the form `(S+D)z = y` iteratively. Here `S` is a sparse matrix, `D` is a dense matrix with rank 1 (PseudoDenseMatrix).
 Not guaranteed to converge.
 """
-function iterative_linsolve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-2,maxiter=1000)
+function iterative_linsolve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000)
 	
 	norm_diff = Inf
 	z = z0
@@ -47,11 +47,28 @@ function iterative_linsolve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractV
 		#@show norm_diff/length(z)
 		
 		i+=1
-		i > maxiter && error("Maximum number of iterations exceeded! Your system converges slowly/might not converge at all. Try setting `maxiter` kwarg to bigger than 200, or `ϵ` to a higher value!")
+		i > maxiter && error("iterative_linsolve did not converge! Your system converges slowly/might not converge at all. Try setting `maxiter` kwarg to bigger than 200, or `ϵ` to a higher value!")
 		
 		z0 = z
 	end
 
 	return z
 
+end
+
+"""
+	hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000) -> z::AbstractVector
+Solves for a linear system of equations of the form `(S+D)z = y`. Here `S` is a sparse matrix, `D` is a dense matrix with rank 1 (PseudoDenseMatrix). If size of S is bigger than `30x30` than it uses `iterative_linsolve`, otherwise `KrylovKit.linsolve` is used
+"""
+function hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000)
+	N = size(S)[1]
+	
+	if N > 30
+		return iterative_linsolve(S,D,y;ϵ = ϵ,maxiter=maxiter)
+	else
+		z,info = linsolve(I - S + D,y;tol = ϵ,maxiter=maxiter)
+		info.converged < 1 && @warn "KrylovKit.linsolve did not converge!" 
+		return z
+	end
+	
 end
