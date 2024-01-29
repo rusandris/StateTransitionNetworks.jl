@@ -63,9 +63,9 @@ end
 Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
 by using the analytical definitions of both quantities
 """
-function network_measures(P::AbstractMatrix;x=nothing)
+function network_measures(P::AbstractMatrix;x=nothing,ϵ=1e-10,maxiter=1000)
    	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
-    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x)
+    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x,ϵ=ϵ,maxiter=maxiter)
 	return entropy, lyapunov
 end
 
@@ -155,25 +155,33 @@ end
 
 """
 	lyapunov_measure(P) -> Λ
-Calculates analytically the Lyapunov measure given the the P transition probability matrix of the STN. 
+Calculates analytically the Lyapunov measure given the the P transition probability matrix. Uses `iterative_linsolve to find needed matrix inverses.`
 
+Optional Keyword arguments:
+* `x`: probability distribution of states. If nothing is provided, it is calculated from `P'*x = x` using `stationary_distribution` (`Krylovkit`'s `eigsolve`).
+* `ϵ`: tolerance for `iterative_linsolve`
+* `maxiter`: maxiter for `iterative_linsolve`
 """
-function lyapunov_measure(P::AbstractMatrix;x=nothing)
+function lyapunov_measure(P::AbstractMatrix;x=nothing,ϵ=1e-10,maxiter=1000)
 	
 	if isnothing(x)
 		x = stationary_distribution(P)
 	end
-	x = x'
+	
+	xt = transpose(x)
 	v = ones(length(x))
 	
 	L = -sparse_log(P)
 	L2 = P.*L.^2
 	L = P.*L
-	vx = v*x
-	S = (I-vx)+(P-vx)*inv(I-P+vx)
-	covariance = (x*L*S*L*v)[1]
-	variance = (x*L2*v)[1] -(x*L*v)[1]^2
-	lyapunov =  variance + 2*covariance
+	
+	X = PseudoDenseMatrix(x) 
+	
+	z = iterative_linsolve(P,X,L*v;ϵ = ϵ,maxiter=maxiter)
+	covariance = 2*xt*L*(z - X*L*v)
+	
+	variance = (xt*L2*v)[1] - (xt*L*v)[1]^2
+	lyapunov =  variance + covariance[1]
 	if imag(covariance) < 1.0e-3
 	   return lyapunov, variance, covariance, :Success
 	else

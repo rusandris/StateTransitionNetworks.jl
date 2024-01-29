@@ -4,15 +4,16 @@ import Graphs: DiGraph,add_edge!, inneighbors,outneighbors, nv, ne, weights, is_
 import StatsBase: sample, mean, var, Weights
 using MetaGraphsNext
 using GraphPlot,Cairo,Compose
-import SparseArrays: spzeros, nonzeros, nzrange 
+using SparseArrays
 using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,AbstractStateSpaceSet
-import LinearAlgebra: eigen, Diagonal, I, nullspace
+import LinearAlgebra: eigen, Diagonal, I, nullspace, norm
 import DataStructures: OrderedDict
 using KrylovKit
 
 include("timeseries_to_grid.jl")
 include("transition_matrix.jl")
 include("create_stn.jl")
+include("iterative_linsolve.jl")
 include("network_measures.jl")
 include("plot_stn.jl")
 include("timeseries_analysis.jl")
