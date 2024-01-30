@@ -60,12 +60,17 @@ end
 
 """
 	network_measures(P::AbstractMatrix) -> S, Λ
-Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
-by using the analytical definitions of both quantities
+Calculates the Sinai-Kolmogorov Entropy (S) and Lyapunov measure (Λ) from P by using the analytical definitions of both quantities.
+
+Optional Keyword arguments:
+* `x`: probability distribution of states. If nothing is provided, it is calculated from `P'*x = x` using `stationary_distribution` (`Krylovkit`'s `eigsolve`).
+* `alg`: linear solver (`hybrid_solve` by default) for Λ -> `iterative_linsolve`, `linsolve` (`KrylovKit`),`hybrid_solve` are the options
+* `ϵ`: tolerance for Λ calculation
+* `maxiter`: maxiter for Λ calculation
 """
-function network_measures(P::AbstractMatrix;x=nothing,ϵ=1e-12,maxiter=1000)
+function network_measures(P::AbstractMatrix;x=nothing,ϵ=1e-12,maxiter=1000,alg)
    	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
-    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x,ϵ=ϵ,maxiter=maxiter)
+    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x,ϵ=ϵ,maxiter=maxiter,alg=alg)
 	return entropy, lyapunov
 end
 
@@ -159,9 +164,9 @@ Calculates analytically the Lyapunov measure given the the P transition probabil
 
 Optional Keyword arguments:
 * `x`: probability distribution of states. If nothing is provided, it is calculated from `P'*x = x` using `stationary_distribution` (`Krylovkit`'s `eigsolve`).
-* `alg`: linear solver (`hybrid_solve` by default) -> `iterative_linsolve`, `Krylov.linsolve`,`hybrid_solve` are the options
-* `ϵ`: tolerance for `iterative_linsolve`
-* `maxiter`: maxiter for `iterative_linsolve`
+* `alg`: linear solver (`hybrid_solve` by default) -> `iterative_linsolve`, `linsolve` (`KrylovKit`),`hybrid_solve` are the options
+* `ϵ`: tolerance for linear solvers
+* `maxiter`: maxiter for linear solvers
 """
 function lyapunov_measure(P::AbstractMatrix;x=nothing,alg=hybrid_solve,ϵ=1e-12,maxiter=1000)
 	
@@ -178,7 +183,15 @@ function lyapunov_measure(P::AbstractMatrix;x=nothing,alg=hybrid_solve,ϵ=1e-12,
 	
 	X = PseudoDenseMatrix(x) 
 	
-	z = alg(P,X,L*v;ϵ = ϵ,maxiter=maxiter)
+	if alg == iterative_linsolve || alg == hybrid_solve
+		z = alg(P,X,L*v;ϵ = ϵ,maxiter=maxiter)
+	elseif alg == KrylovKit.linsolve
+		z,info = KrylovKit.linsolve(I - P + X,L*v)
+		info.converged < 1 && @warn "KrylovKit.linsolve did not converge!" 
+	else
+		error("This algorithm is not implemented yet!")
+	end
+	
 	covariance = 2*xt*L*(z - X*L*v)
 	
 	variance = (xt*L2*v)[1] - (xt*L*v)[1]^2

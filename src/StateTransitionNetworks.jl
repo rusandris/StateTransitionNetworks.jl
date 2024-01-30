@@ -9,6 +9,8 @@ using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,Abstr
 import LinearAlgebra: eigen, Diagonal, I, nullspace, norm
 import DataStructures: OrderedDict
 using KrylovKit
+export linsolve
+
 
 include("timeseries_to_grid.jl")
 include("transition_matrix.jl")
