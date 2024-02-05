@@ -68,7 +68,7 @@ Optional Keyword arguments:
 * `ϵ`: tolerance for Λ calculation
 * `maxiter`: maxiter for Λ calculation
 """
-function network_measures(P::AbstractMatrix;x=nothing,ϵ=1e-12,maxiter=1000,alg)
+function network_measures(P::AbstractMatrix;x=nothing,ϵ=1e-12,maxiter=1000,alg=hybrid_solve)
    	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
     lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x,ϵ=ϵ,maxiter=maxiter,alg=alg)
 	return entropy, lyapunov
@@ -189,7 +189,7 @@ function lyapunov_measure(P::AbstractMatrix;x=nothing,alg=hybrid_solve,ϵ=1e-12,
 		z,info = KrylovKit.linsolve(I - P + X,L*v)
 		info.converged < 1 && @warn "KrylovKit.linsolve did not converge!" 
 	else
-		error("This algorithm is not implemented yet!")
+		error("This algorithm is not implemented yet! See the function's docstring for available options.")
 	end
 	
 	covariance = 2*xt*L*(z - X*L*v)
