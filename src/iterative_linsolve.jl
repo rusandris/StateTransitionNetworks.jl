@@ -36,11 +36,12 @@ Not guaranteed to converge.
 """
 function iterative_linsolve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000)
 	
+	converged = false
 	norm_diff = Inf
 	z = z0
 	i = 0
 	
-	while norm_diff > ϵ
+	while i < maxiter
 		z = y + S*z - D*z
 		norm_diff = norm(z-z0)
 		
@@ -48,12 +49,16 @@ function iterative_linsolve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractV
 		#@show norm_diff/length(z)
 		
 		i+=1
-		i > maxiter && error("iterative_linsolve did not converge! Your system converges slowly/might not converge at all. Try setting `maxiter` kwarg to bigger than 200, or `ϵ` to a higher value!")
 		
+		if norm_diff < ϵ 
+			converged = true
+			return z,converged  
+		end
+
 		z0 = z
 	end
 
-	return z
+	return z,converged
 
 end
 
@@ -61,15 +66,25 @@ end
 	hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000) -> z::AbstractVector
 Solves for a linear system of equations of the form `(S+D)z = y`. Here `S` is a sparse matrix, `D` is a dense matrix with rank 1 (PseudoDenseMatrix). If size of S is bigger than `Ns x Ns` than it uses `iterative_linsolve`, otherwise `KrylovKit.linsolve` is used
 """
-function hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000,Ns=1000)
+function hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000,Ns=1000,fallback=true)
 	N = size(S)[1]
 	
-	if N > Ns
-		return iterative_linsolve(S,D,y;ϵ = ϵ,maxiter=maxiter)
-	else
-		z,info = linsolve(I - S + D,y;tol = ϵ,maxiter=maxiter)
-		info.converged < 1 && @warn "KrylovKit.linsolve did not converge!" 
-		return z
-	end
+	#if size of matrix N is small, try KrylovKit.linsolve
+	if N < Ns
+		return linsolve(I - S + D,y;tol = ϵ,maxiter=maxiter)
 	
+	#else try own iterative_linsolve
+	else
+		z, converged = iterative_linsolve(S,D,y;ϵ = ϵ,maxiter=maxiter)
+		
+		#if that didn't converge go back to fallback case (KrylovKit.linsolve)
+		if !converged && fallback
+			return linsolve(I - S + D,y;tol = ϵ,maxiter=maxiter)
+		else
+			return z, converged
+		end
+		
+		
+		
+	end
 end

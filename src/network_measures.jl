@@ -184,10 +184,17 @@ function lyapunov_measure(P::AbstractMatrix;x=nothing,alg=hybrid_solve,ϵ=1e-12,
 	X = PseudoDenseMatrix(x) 
 	
 	if alg == iterative_linsolve || alg == hybrid_solve
-		z = alg(P,X,L*v;ϵ = ϵ,maxiter=maxiter)
+		z,convergence_info = alg(P,X,L*v;ϵ = ϵ,maxiter=maxiter)
+		
+		if convergence_info isa KrylovKit.ConvergenceInfo
+			convergence_info.converged != 1 && @warn "KrylovKit.linsolve did not converge!"
+		elseif convergence_info isa Bool
+			convergence_info || @warn "iterative_linsolve did not converge! Your system converges slowly/might not converge at all. Try setting `maxiter` kwarg to bigger or `ϵ` to a higher value!"
+		end
+		
 	elseif alg == KrylovKit.linsolve
 		z,info = KrylovKit.linsolve(I - P + X,L*v)
-		info.converged < 1 && @warn "KrylovKit.linsolve did not converge!" 
+		info.converged != 1 && @warn "KrylovKit.linsolve did not converge!" 
 	else
 		error("This algorithm is not implemented yet! See the function's docstring for available options.")
 	end
