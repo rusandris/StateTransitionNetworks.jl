@@ -21,3 +21,11 @@ function higher_order_symbolics!(symbolic_timeseries, order; delays = collect(0:
     end
     return nothing
 end
+
+function higher_order_state(states, nr_symbols)
+    hs = 0
+    for (i,s) in enumerate(states)
+        hs += s*nr_symbols^(i-1)
+    end
+    return hs
+end
