@@ -1,4 +1,4 @@
-export timeseries_to_grid,timeseries_to_grid_1D
+export timeseries_to_grid,timeseries_to_grid!
 TimeSeries{T,D} = Union{StateSpaceSet{D,T},AbstractArray{T,D}} where {T,D}
 
 """
@@ -75,5 +75,29 @@ function timeseries_to_grid(timeseries::TimeSeries{T,1}, grid_size::Integer; gri
     	return symbolic_timeseries,vertex_positions
     end
     return symbolic_timeseries
+end
+
+function timeseries_to_grid!(symbolic_timeseries::TimeSeries{T1,1},timeseries::TimeSeries{T2,1}, grid_size::Integer; grid_edges::AbstractVector = Float64[])  where T1 <: Integer where T2 <: Real
+    L = length(timeseries)
+
+    if isempty(grid_edges)		
+		x_min,x_max = extrema(timeseries)
+    else
+    	x_min,x_max = grid_edges 
+    end
+	
+	x_max_plus = nextfloat(x_max,100)
+   
+	x_grid_step = (x_max_plus - x_min)/grid_size
+
+    for i in 1:L
+		symbolic_timeseries[i] = floor(Int,(timeseries[i][1]-x_min)/x_grid_step) + 1
+    end
+	return nothing
+end
+
+function extrema(s::StateSpaceSet)
+	min,max = minmaxima(s)
+	return min[1],max[1]
 end
 
