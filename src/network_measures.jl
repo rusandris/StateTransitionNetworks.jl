@@ -143,18 +143,20 @@ end
  
 #Schlogl notation: C1,C2
 
-function bit_number_measures(P::AbstractMatrix)
-	x = stationary_distribution(P)
+function bit_number_measures(x::Vector{Float64})
 
 	l = -log.(x)
 	replace!(l, Inf=>0.0)
 	entropy = sum((x .* l)) #C1
     variance =  sum(x .* l .* l) - entropy^2 #C2
+	
 	return real(entropy), real(variance), :Success
 end
 
 #----------------Renyi entropy spectrum---------------
 function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q; x=nothing, n=Inf, sparse=false,tol=1e-8, maxiter=10^4,verbosity=0)
+
+
     if n==Inf
         if q==1
             H = sinai_kolmogorov_entropy(P; x)[1]
