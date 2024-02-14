@@ -7,6 +7,7 @@ If `returnQ` is set to `true`, the weight matrix `Q` is also returned. Grid edge
 
 """
 function calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false,return_state_distribution=false)
+	error("Not implemented yet!")
 	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size;grid_edges=grid_edges)
 	calculate_transition_matrix(symbolic_timeseries;symbol_dictionary=vertex_positions,returnQ=returnQ,return_state_distribution=return_state_distribution)
 end
@@ -17,7 +18,7 @@ Calculates the transition matrix `P` from `symbolic_timeseries`. The symbol dict
 If `returnQ` is set to `true`, the weight matrix `Q` is also returned. If `return_state_distribution` is set to `true`, the estimated probability distribution over the states is also returned.
 
 """
-function calculate_transition_matrix(symbolic_timeseries::TimeSeries;map_symbols=true,return_everything=false)
+function calculate_transition_matrix(symbolic_timeseries::AbstractVector;map_symbols=true,return_everything=false)
 	
     
 	if map_symbols
