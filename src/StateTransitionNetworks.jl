@@ -6,6 +6,7 @@ import Base: extrema
 using MetaGraphsNext
 using GraphPlot,Cairo,Compose
 using SparseArrays
+using LuxurySparse
 using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,AbstractStateSpaceSet,minmaxima
 import LinearAlgebra: eigen, Diagonal, I, nullspace, norm
 import DataStructures: OrderedDict
@@ -14,6 +15,7 @@ export linsolve
 
 
 include("timeseries_to_grid.jl")
+include("transitions.jl")
 include("transition_matrix.jl")
 include("higher_order_symbolics.jl")
 
