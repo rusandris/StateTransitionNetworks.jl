@@ -88,32 +88,39 @@ function calculate_transition_matrix(symbolic_timeseries::AbstractVector;map_sym
 	end
 end
 
-"""
-	calculate_transition_matrix(Q::AbstractMatrix;verbose=false) -> P
-Calculates the transition matrix `P` from  the weight matrix `Q`. Warns if `P` is not stochastic if `verbose` is `true`.
+function calculate_transition_matrix(S::SparseMatrixCSC;verbose=true)
+	S_returned = deepcopy(S)
+	calculate_transition_matrix!(S_returned,verbose=verbose)
+	return S_returned
+end
 
-"""
-function calculate_transition_matrix(Q::AbstractMatrix; verbose=false)
-	P = spzeros(size(Q))
-	# compute transpose sparse matrix, so that normalization is done over rows
-    Pt = spzeros(size(Q))
-    ftranspose!(Pt, Q, x->x)
-	vals = nonzeros(Pt)
-	m, n = size(Pt)
-    # loop over columns
-	for j = 1:n
-        sumQi = 0.
-        # loop over nonzero values from that column
-        nzi = nzrange(Pt, j)
-		for i in nzi
-			sumQi += vals[i]
-		end
+function calculate_transition_matrix!(S::SparseMatrixCSC;verbose=true)
+
+    stochasticity = true
+
+    St = spzeros(size(S))
+    ftranspose!(St,S, x -> x)
+    vals = nonzeros(St)
+    _,n = size(St)
+
+    #loop over columns
+	for j in 1:n
+        sumSi = 0.0
+        #loop nonzero values from that column
+        nzi = nzrange(St,j)
         for i in nzi
-			vals[i] /= sumQi
-		end
-	end
-	# compute back transpose
-    ftranspose!(P, Pt, x->x)
-    !all(p -> isfinite(p),P) && verbose && @warn "The matrix is not stochastic!";
-	return P
+            sumSi += vals[i]
+        end
+
+        #catch rows (columns) with only zero values
+        sumSi == 0.0 && (stochasticity=false)
+
+        #normalize
+        for i in nzi
+            vals[i] /= sumSi
+        end
+    end
+    ftranspose!(S,St, x->x)
+    (stochasticity == false && verbose) && @warn "Transition matrix is not stochastic!"
+    nothing
 end

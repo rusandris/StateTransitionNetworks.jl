@@ -112,33 +112,3 @@ function calculate_transition_matrix(trs::GeneralTransitions)
     return P
 end
 
-function normalize_rows!(S::SparseMatrixCSC;verbose=true)
-
-    stochasticity = true
-
-    St = spzeros(size(S))
-    ftranspose!(St,S, x -> x)
-    vals = nonzeros(St)
-    _,n = size(St)
-
-    #loop over columns
-	for j in 1:n
-        sumSi = 0.0
-        #loop nonzero values from that column
-        nzi = nzrange(St,j)
-        for i in nzi
-            sumSi += vals[i]
-        end
-
-        #catch rows (columns) with only zero values
-        sumSi == 0.0 && (stochasticity=false)
-
-        #normalize
-        for i in nzi
-            vals[i] /= sumSi
-        end
-    end
-    ftranspose!(S,St, x->x)
-    (stochasticity == false && verbose) && @warn "Transition matrix is not stochastic!"
-    nothing
-end
