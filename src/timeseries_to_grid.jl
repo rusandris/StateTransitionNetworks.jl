@@ -99,7 +99,7 @@ function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeri
 		u = timeseries[i,:]
 		y_cell = assign_grid_cell(u[1],x_min,x_grid_step)
 		x_cell = assign_grid_cell(u[2],y_min,y_grid_step)
-		symbolic_timeseries[i] = x_cell*grid_size + y_cell + 1
+		symbolic_timeseries[i] = (x_cell-1)*grid_size + y_cell 
 		
 	end
 end
