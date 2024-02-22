@@ -37,7 +37,7 @@ function calculate_transition_matrix(trs::IntegerTransitions)
     #get row and column of every used symbol
     P = P[used_symbols,used_symbols] 
     #slice empty rows and columns
-    normalize_rows!(P)
+    calculate_transition_matrix!(P)
     return P
 end
 
