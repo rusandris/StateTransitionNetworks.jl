@@ -108,7 +108,7 @@ function calculate_transition_matrix(trs::GeneralTransitions)
     #easy slice
     P = sparse(trs.Q)
     P = P[nzrows,nzrows]
-    normalize_rows!(P)
+    calculate_transition_matrix!(P)
     return P
 end
 
