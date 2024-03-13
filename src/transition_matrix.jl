@@ -1,4 +1,4 @@
-export calculate_transition_matrix
+export calculate_transition_matrix,is_stochastic
 
 """
 	calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false) -> P
@@ -123,4 +123,28 @@ function calculate_transition_matrix!(S::SparseMatrixCSC;verbose=true)
     ftranspose!(S,St, x->x)
     (stochasticity == false && verbose) && @warn "Transition matrix is not stochastic!"
     nothing
+end
+
+function is_stochastic(S::SparseMatrixCSC)
+
+    St = spzeros(size(S))
+    ftranspose!(St,S, x -> x)
+    vals = nonzeros(St)
+    _,n = size(St)
+
+    #loop over columns
+	for j in 1:n
+        sumSi = 0.0
+        #loop nonzero values from that column
+        nzi = nzrange(St,j)
+        for i in nzi
+            sumSi += vals[i]
+        end
+
+        #catch rows (columns) with only zero values
+        if sumSi == 0.0 
+            return false
+        end
+    end
+    return true
 end
