@@ -1,11 +1,10 @@
+export randomwalk_step,random_walk_on_stn,network_measures
 
-function randomwalk_step(stn,source,P)
-	neigh = outneighbors(stn, source)
-	neigh_weights = P[source,:]
-	destination = sample(neigh, Weights(neigh_weights.nzval))
-	w = neigh_weights[destination]
+function randomwalk_step(P::SparseMatrixCSC,src)
+	src_row = P[src,:]
+	dst = sample(src_row.nzind, Weights(nonzeros(src_row)))
 	
-	return destination,-log(w)
+	return dst,-log(P[src,dst])
 end
 
 """
@@ -13,13 +12,12 @@ Conducts a random walk process on a STN for `N_steps`.
 Returns the normalized walk length.
 """
 #took out transient, and uses randomwalk_step now
-function random_walk_on_stn(stn, N_steps)
-    source = sample(1:nv(stn));
+function random_walk_on_stn(P::SparseMatrixCSC, N_steps)
+    src = sample(1:size(P)[1]);
     walk_length = 0.0;
-    P = get_transition_matrix(stn)
 
-    for n in 1:N_steps
-		source, l = randomwalk_step(stn,source,P)
+    for _ in 1:N_steps
+		src, l = randomwalk_step(P,src)
 		walk_length = walk_length + l
     end
     
@@ -32,10 +30,10 @@ Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
 by calculating the average walk length and the variance of walk lenghts
 over an ensemble of random walks on a STN
 """
-function network_measures(stn, ensemble, N_steps)
+function network_measures(P::SparseMatrixCSC, ensemble, N_steps)
     walk_length = Vector{Float64}(undef, ensemble)
     for i in 1:ensemble
-        walk_length[i] = random_walk_on_stn(stn, N_steps)
+        walk_length[i] = random_walk_on_stn(P, N_steps)
     end
    	entropy = mean(walk_length)/N_steps
     lyapunov_measure = var(walk_length,corrected=false)/N_steps
@@ -50,6 +48,7 @@ Calculates and returns network measures for an ensemble at every step in the ran
 """
 #calc variance without correction
 function measure_convergence(stn,ensemble,N_max)
+	error("This function is not updated yet!")
 	ensemble_walk_lengths = [] #container for walk lengths for every step for every random_walk
 	
 	for i in 1:ensemble
