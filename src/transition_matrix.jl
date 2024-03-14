@@ -141,8 +141,8 @@ function is_stochastic(S::SparseMatrixCSC)
             sumSi += vals[i]
         end
 
-        #catch rows (columns) with only zero values
-        if sumSi == 0.0 
+        #catch rows (columns) that don't sum up to 1
+        if !isapprox(sumSi,1.0) 
             return false
         end
     end
