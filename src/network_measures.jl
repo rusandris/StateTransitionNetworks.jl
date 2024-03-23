@@ -154,39 +154,41 @@ function bit_number_measures(x::Vector{Float64})
 end
 
 #----------------Renyi entropy spectrum---------------
-function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q; x=nothing, n=Inf, sparse=false,tol=1e-8, maxiter=10^4,verbosity=0)
 
+function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64; x::Vector{Float64}=stationary_distribution(P),tol::Float64=1e-8, maxiter::Int64=10^4,verbosity::Int64=0)
 
-    if n==Inf
-        if q==1
-            H = sinai_kolmogorov_entropy(P; x)[1]
-        else
-            if sparse
-                P_q = P.^q
-                l, V, i = eigsolve(P_q; verbosity=verbosity, issymmetric=false, ishermitian=false, tol=tol, maxiter=maxiter)
-            else
-                P_q = Matrix(P.^q)
-                l, V = eigen(P_q)
-            end
-            λ_max, i_max = findmax(abs.(l))
-            # for PPC there are multiple eigenvalues of the same magnitude and some are complex
-            #abs(imag(l[i_max]))<0.01 ? H = log(λ_max)/(1-q) : H = -1
-            H = log(abs(λ_max))/(1-q)
-        end
-    else
-        x_q = (stationary_distribution(P)).^q
-        P_q = P .^ q
-        v_q = ones(length(x_q))
-        H = log((x_q' * P_q^n * v_q)[1])/(n*(1-q))
-    end
-    return H
+	P_q = P.^q
+	l, = eigsolve(P_q; verbosity=verbosity, issymmetric=false, ishermitian=false, tol=tol, maxiter=maxiter)
+
+	λ_max, = findmax(abs.(l))
+
+	# for PPC there are multiple eigenvalues of the same magnitude and some are complex
+	#abs(imag(l[i_max]))<0.01 ? H = log(λ_max)/(1-q) : H = -1
+
+	H = log(abs(λ_max))/(1-q)
+	return H
+	
 end
 
-function renyi_entropy_spectrum(P::SparseMatrixCSC{Float64, Int64}, qs; x=nothing, n=Inf, verbose=true, sparse=false)
+
+function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64,n::Float64; x::Vector{Float64}=stationary_distribution(P))
+
+	x_q = x .^ q
+	P_q = P .^ q
+	v_q = ones(length(x_q))
+	return log((x_q' * P_q^n * v_q))/(n*(1-q))
+
+end
+
+function renyi_entropy_spectrum(P::SparseMatrixCSC{Float64, Int64}, qs::Vector{Float64}; x::Vector{Float64}=stationary_distribution(P), verbose=true)
     Hs = zeros(length(qs))
     for (i,q) in enumerate(qs)
         verbose && @show q
-        Hs[i] = renyi_entropy(P, q; x=x, n=n, sparse=sparse)
+		if q == 1.0
+			Hs[i] = sinai_kolmogorov_entropy(P;x=x)[1]
+			continue 
+		end
+        Hs[i] = renyi_entropy(P, q; x=x)
     end
     return Hs
 end
