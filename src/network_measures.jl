@@ -1,6 +1,6 @@
 export random_walk_on_stn, randomwalk_step,network_measures, sinai_kolmogorov_entropy, measure_convergence, lyapunov_measure, stationary_distribution
 export bit_number_measures,renyi_entropy,renyi_entropy_spectrum
-
+export sparse_log
 
 """
 	network_measures(P::AbstractMatrix) -> S, Λ
@@ -56,11 +56,7 @@ end
 Calculates analytically the Sinai-Kolmogorov entropy given the P transition probability matrix of the STN. 
 
 """
-function sinai_kolmogorov_entropy(P::AbstractMatrix;x=nothing)
-		
-	if isnothing(x)
-		x = stationary_distribution(P)
-	end
+function sinai_kolmogorov_entropy(P::AbstractMatrix;x=stationary_distribution(P))		
 	
 	v = ones(length(x))
 
@@ -81,11 +77,7 @@ Optional Keyword arguments:
 * `ϵ`: tolerance for linear solvers
 * `maxiter`: maxiter for linear solvers
 """
-function lyapunov_measure(P::AbstractMatrix;x=nothing,alg=hybrid_solve,ϵ=1e-12,maxiter=1000)
-	
-	if isnothing(x)
-		x = stationary_distribution(P)
-	end
+function lyapunov_measure(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P),alg::Function=hybrid_solve,ϵ=1e-12,maxiter=1000)
 	
 	xt = transpose(x)
 	v = ones(length(x))
@@ -114,8 +106,8 @@ function lyapunov_measure(P::AbstractMatrix;x=nothing,alg=hybrid_solve,ϵ=1e-12,
 	
 	covariance = 2*xt*L*(z - X*L*v)
 	
-	variance = (xt*L2*v)[1] - (xt*L*v)[1]^2
-	lyapunov =  variance + covariance[1]
+	variance = (xt*L2*v) - (xt*L*v)^2
+	lyapunov =  variance + covariance
 	if imag(covariance) < 1.0e-3
 	   return lyapunov, variance, covariance, :Success
 	else
