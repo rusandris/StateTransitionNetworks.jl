@@ -63,7 +63,7 @@ end
 	hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector;z0::AbstractVector = rand(length(y)), ϵ = 1e-12,maxiter=1000) -> z::AbstractVector
 Solves for a linear system of equations of the form `(S+D)z = y`. Here `S` is a sparse matrix, `D` is a dense matrix with rank 1 (PseudoDenseMatrix). If size of S is bigger than `Ns x Ns` than it uses `iterative_linsolve`, otherwise `KrylovKit.linsolve` is used
 """
-function hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector,z0::AbstractVector = rand(length(y)); ϵ = 1e-12,maxiter=1000,Ns=1000,fallback=true)
+function hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector,z0::AbstractVector = rand(length(y)); ϵ = 1e-12,maxiter=100000,Ns=1000,fallback=true)
 	N = size(S)[1]
 	
 	#if size of matrix N is small, try KrylovKit.linsolve
@@ -73,7 +73,7 @@ function hybrid_solve(S::SparseMatrixCSC,D::PseudoDenseMatrix,y::AbstractVector,
 	#else try own iterative_linsolve
 	else
 		z, converged = iterative_linsolve(S,D,y;ϵ = ϵ,maxiter=maxiter)
-		
+		converged || @warn "iterative_linsolve did not converge for ϵ=$ϵ, maxiter=$(maxiter)!. Switching to KrylovKit.linsolve..."
 		#if that didn't converge go back to fallback case (KrylovKit.linsolve)
 		if !converged && fallback
 			return linsolve(I - S + D,y;tol = ϵ,maxiter=maxiter)

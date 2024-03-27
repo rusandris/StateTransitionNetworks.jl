@@ -12,7 +12,7 @@ Optional Keyword arguments:
 * `ϵ`: tolerance for Λ calculation
 * `maxiter`: maxiter for Λ calculation
 """
-function network_measures(P::AbstractMatrix;x=nothing,ϵ=1e-12,maxiter=1000,alg=hybrid_solve)
+function network_measures(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P),ϵ=1e-12,maxiter=100000,alg=hybrid_solve)
    	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
     lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x,ϵ=ϵ,maxiter=maxiter,alg=alg)
 	return entropy, lyapunov
@@ -34,7 +34,7 @@ end
 	stationary_distribution(P) -> x
 Calculates the stationary probability based on the probability matrix P. Each element of the resulting vector is the probability of finding the system in node i.
 """
-function stationary_distribution(P::AbstractMatrix)
+function stationary_distribution(P::SparseMatrixCSC)
 	vals, vecs, info = eigsolve(P',1,:LR)
 	info.converged < 1 && @warn "KrylovKit.eigsolve did not converge!" 
 	x = real.(vecs[1]) ./sum(real.(vecs[1]))
@@ -56,7 +56,7 @@ end
 Calculates analytically the Sinai-Kolmogorov entropy given the P transition probability matrix of the STN. 
 
 """
-function sinai_kolmogorov_entropy(P::AbstractMatrix;x=stationary_distribution(P))		
+function sinai_kolmogorov_entropy(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P))		
 	
 	v = ones(length(x))
 
@@ -77,7 +77,7 @@ Optional Keyword arguments:
 * `ϵ`: tolerance for linear solvers
 * `maxiter`: maxiter for linear solvers
 """
-function lyapunov_measure(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P),alg::Function=hybrid_solve,ϵ=1e-12,maxiter=1000)
+function lyapunov_measure(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P),alg::Function=hybrid_solve,ϵ=1e-12,maxiter=100000)
 	
 	xt = transpose(x)
 	v = ones(length(x))
