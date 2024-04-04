@@ -1,5 +1,5 @@
 export timeseries_to_grid,timeseries_to_grid!,assign_grid_cell
-TimeSeries{T,D} = Union{StateSpaceSet{D,T},AbstractArray{T,D}} where {T,D}
+TimeSeries{T,D} = Union{StateSpaceSet{D,T},Array{T,D}} where {T,D}
 
 #------------------------------------------1D methods----------------------------------------
 
@@ -96,10 +96,8 @@ function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeri
 	y_grid_step = (y_max_plus - y_min)/grid_size
 
 	for i in 1:L
-		u = timeseries[i,:]
-		y_cell = assign_grid_cell(u[1],x_min,x_grid_step)
-		x_cell = assign_grid_cell(u[2],y_min,y_grid_step)
+		y_cell = assign_grid_cell(timeseries[i,1],x_min,x_grid_step)
+		x_cell = assign_grid_cell(timeseries[i,2],y_min,y_grid_step)
 		symbolic_timeseries[i] = (x_cell-1)*grid_size + y_cell 
-		
 	end
 end
