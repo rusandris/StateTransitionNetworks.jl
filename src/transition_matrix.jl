@@ -18,7 +18,7 @@ Calculates the transition matrix `P` from `symbolic_timeseries`. The symbol dict
 If `returnQ` is set to `true`, the weight matrix `Q` is also returned. If `return_state_distribution` is set to `true`, the estimated probability distribution over the states is also returned.
 
 """
-function calculate_transition_matrix(symbolic_timeseries;map_symbols=true,return_everything=false)
+function calculate_transition_matrix(symbolic_timeseries;map_symbols=true,return_everything=false,verbose=true)
 	L = length(symbolic_timeseries)
     
 	if map_symbols
@@ -70,7 +70,7 @@ function calculate_transition_matrix(symbolic_timeseries;map_symbols=true,return
 
 	#normalize Q and fill P by normalizing rows
     Q .= Q./sum(Q)
-	P = calculate_transition_matrix(Q)
+	P = calculate_transition_matrix(Q; verbose=verbose)
 
 	if return_everything
 		if map_symbols
