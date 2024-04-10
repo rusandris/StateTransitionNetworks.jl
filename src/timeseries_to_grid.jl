@@ -17,8 +17,10 @@ function timeseries_to_grid(timeseries::TimeSeries{T,1}, grid_size::Int64; grid_
 end
 
 
-function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeries{T,1}, grid_size::Integer; grid_edges::Vector{Float64} = Float64[])  where {I<:Integer,T<:AbstractFloat}
+function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeries{T,1}, grid_size::Integer; grid_edges::Vector{Float64} = Float64[],nfloat::Int=100)  where {I<:Integer,T<:AbstractFloat}
     L = length(timeseries)
+	grid_border_iter = 1
+	grid_step = 0.0
 
     if isempty(grid_edges)		
 		x_min,x_max = extrema(timeseries)
@@ -26,13 +28,29 @@ function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeri
     	x_min,x_max = grid_edges 
     end
 	
-	x_max_plus = nextfloat(x_max,100)
-   
-	x_grid_step = (x_max_plus - x_min)/grid_size
+	#iterate until grid border padding ins enough
+	while true
 
+		#add padding to right border of the grid
+		#so the point on the edge isn't singled out 
+		x_max_plus = nextfloat(x_max,grid_border_iter*nfloat)
+		grid_step = (x_max_plus - x_min)/grid_size
+		max_symbol = assign_grid_cell(x_max,x_min,grid_step)
+
+		if max_symbol <= grid_size 
+			break
+		end
+
+		grid_border_iter+=1
+
+	end
+
+	#loop through the time series
+	#assign symbols 
     for i in 1:L
-		symbolic_timeseries[i] = assign_grid_cell(timeseries[i][1],x_min,x_grid_step)
+		symbolic_timeseries[i] = assign_grid_cell(timeseries[i][1],x_min,grid_step)
     end
+
 	return nothing
 end
 
@@ -79,9 +97,13 @@ function timeseries_to_grid(timeseries::TimeSeries{T,2}, grid_size::Int64; grid_
     return symbolic_timeseries
 end
 
-function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeries{T,2}, grid_size::Int64; grid_edges::Vector{Float64} = Float64[]) where {I<:Integer,T <:AbstractFloat}    
+function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeries{T,2}, grid_size::Int64; grid_edges::Vector{Float64} = Float64[],nfloat::Int=100) where {I<:Integer,T <:AbstractFloat}    
     L = size(timeseries)[1]
+	grid_border_iter = 1
+	x_grid_step = 0.0
+	y_grid_step = 0.0
 
+	#decide if grid_edges are needed 
 	if isempty(grid_edges)		
 		x_min,x_max = extrema(timeseries[:, 1])
 		y_min,y_max = extrema(timeseries[:, 2])
@@ -89,12 +111,31 @@ function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeri
 		x_min,y_min,x_max,y_max = grid_edges 
 	end
 
-	x_max_plus = nextfloat(x_max,100)
-	y_max_plus = nextfloat(y_max,100)
+	#iterate until grid border padding ins enough
+	while true
 
-	x_grid_step = (x_max_plus - x_min)/grid_size
-	y_grid_step = (y_max_plus - y_min)/grid_size
+		#add padding to right border of the grid
+		#so the point on the edge isn't singled out 
+		x_max_plus = nextfloat(x_max,grid_border_iter*nfloat)
+		y_max_plus = nextfloat(y_max,grid_border_iter*nfloat)
+	
+		#grid cell width
+		x_grid_step = (x_max_plus - x_min)/grid_size
+		y_grid_step = (y_max_plus - y_min)/grid_size
+	
+		#test if largest symbol goes out of bounds
+		max_x_symbol = assign_grid_cell(x_max,x_min,x_grid_step)
+		max_y_symbol = assign_grid_cell(y_max,y_min,y_grid_step)
 
+		if max_x_symbol <= grid_size && max_y_symbol <= grid_size
+			break
+		end
+		grid_border_iter+=1
+	end
+
+	#loop through the time series
+	#assign symbols for each axis
+	#combine them into one symbol
 	for i in 1:L
 		y_cell = assign_grid_cell(timeseries[i,1],x_min,x_grid_step)
 		x_cell = assign_grid_cell(timeseries[i,2],y_min,y_grid_step)
