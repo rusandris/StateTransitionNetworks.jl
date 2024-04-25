@@ -7,7 +7,8 @@ using MetaGraphsNext
 using GraphPlot,Cairo,Compose
 using SparseArrays
 using LuxurySparse
-using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,AbstractStateSpaceSet,minmaxima
+using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,AbstractStateSpaceSet
+import DynamicalSystemsBase: minmaxima
 import LinearAlgebra: eigen, Diagonal, I, nullspace, norm
 import DataStructures: OrderedDict
 using KrylovKit
