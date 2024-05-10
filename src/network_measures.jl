@@ -145,12 +145,14 @@ function bit_number_measures(x::Vector{Float64})
 	return real(entropy), real(variance), :Success
 end
 
-#----------------Renyi entropy spectrum---------------
+#---------------------------------------------------------------Renyi entropy spectrum------------------------------------------------------------------------
 
 function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64; x::Vector{Float64}=stationary_distribution(P),tol::Float64=1e-8, maxiter::Int64=10^4,verbosity::Int64=0)
 
-	P_q = P.^q
-	l, = eigsolve(P_q; verbosity=verbosity, issymmetric=false, ishermitian=false, tol=tol, maxiter=maxiter)
+	P_q = deepcopy(P)
+	nonzeros(P_q) .= nonzeros(P_q) .^ q
+	λs,_,info = eigsolve(P_q; verbosity=verbosity, issymmetric=false, ishermitian=false, tol=tol, maxiter=maxiter)
+	info.converged < 1 && @warn "Eigenvalue calculation did not converge! "
 
 	λ_max, = findmax(abs.(l))
 
@@ -166,7 +168,8 @@ end
 function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64,n::Float64; x::Vector{Float64}=stationary_distribution(P))
 
 	x_q = x .^ q
-	P_q = P .^ q
+	P_q = deepcopy(P)
+	nonzeros(P_q) .= nonzeros(P_q) .^ q
 	v_q = ones(length(x_q))
 	return log((x_q' * P_q^n * v_q))/(n*(1-q))
 
