@@ -147,18 +147,21 @@ end
 
 #---------------------------------------------------------------Renyi entropy spectrum------------------------------------------------------------------------
 
-function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64; x::Vector{Float64}=stationary_distribution(P),tol::Float64=1e-8, maxiter::Int64=10^4,verbosity::Int64=0)
+function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64; tol::Float64=1e-8, maxiter::Int64=10^4,verbosity::Int64=0)
 
 	P_q = deepcopy(P)
 	nonzeros(P_q) .= nonzeros(P_q) .^ q
 	λs,_,info = eigsolve(P_q; verbosity=verbosity, issymmetric=false, ishermitian=false, tol=tol, maxiter=maxiter)
 	info.converged < 1 && @warn "Eigenvalue calculation did not converge! "
 
+	#select the eigenvalue with largest absolute value
 	λ_max, = findmax(abs.(λs))
 
 	# for PPC there are multiple eigenvalues of the same magnitude and some are complex
 	#abs(imag(l[i_max]))<0.01 ? H = log(λ_max)/(1-q) : H = -1
 
+	#λ_max might be complex, but the absolute value is 
+	#approximately the same as the real eigenvalue 
 	H = log(abs(λ_max))/(1-q)
 	return H
 	
