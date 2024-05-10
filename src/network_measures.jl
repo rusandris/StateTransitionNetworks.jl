@@ -154,7 +154,7 @@ function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64; x::Vector
 	λs,_,info = eigsolve(P_q; verbosity=verbosity, issymmetric=false, ishermitian=false, tol=tol, maxiter=maxiter)
 	info.converged < 1 && @warn "Eigenvalue calculation did not converge! "
 
-	λ_max, = findmax(abs.(l))
+	λ_max, = findmax(abs.(λs))
 
 	# for PPC there are multiple eigenvalues of the same magnitude and some are complex
 	#abs(imag(l[i_max]))<0.01 ? H = log(λ_max)/(1-q) : H = -1
