@@ -1,4 +1,4 @@
-export calculate_transition_matrix,is_stochastic
+export calculate_transition_matrix,calculate_transition_matrix!,calculate_transition_matrix_no_remap,is_stochastic
 
 """
 	calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false) -> P
@@ -18,52 +18,39 @@ Calculates the transition matrix `P` from `symbolic_timeseries`. The symbol dict
 If `returnQ` is set to `true`, the weight matrix `Q` is also returned. If `return_state_distribution` is set to `true`, the estimated probability distribution over the states is also returned.
 
 """
-function calculate_transition_matrix(symbolic_timeseries;map_symbols=true,return_everything=false,verbose=true)
+function calculate_transition_matrix(symbolic_timeseries::Vector{T};symbol_dictionary=Dict{T,Int64}(),verbose=true) where T <: Integer
+	symbolic_timeseries_copy = deepcopy(symbolic_timeseries)
+	P,Q,state_probabilities = calculate_transition_matrix!(symbolic_timeseries_copy;symbol_dictionary=symbol_dictionary,verbose=verbose)
+	return P,Q,state_probabilities
+end
+
+function calculate_transition_matrix!(symbolic_timeseries::Vector{T};symbol_dictionary=Dict{T,Int64}(),verbose=true) where T <: Integer
 	L = length(symbolic_timeseries)
     
-	if map_symbols
+	if isempty(symbol_dictionary)
 		symbols = unique(symbolic_timeseries)
 		nr_symbols = length(symbols)
-
-		#weight and transition probability matrices
-		Q = spzeros(nr_symbols, nr_symbols)
-
-		#probability distribution of states
-		state_probabilities = zeros(nr_symbols) 
-	
 		symbol_dictionary = Dict(symbols .=> 1:nr_symbols)
-
-		state = symbol_dictionary[symbolic_timeseries[1]]
-		symbolic_timeseries[1] = state
-		next_state = 0
-		#count transitions and map symbols to indices
-		for i in 1:(L - 1)
-			next_state = symbol_dictionary[symbolic_timeseries[i+1]]
-		    Q[state,next_state] += 1
-		    state_probabilities[state] += 1
-			symbolic_timeseries[i+1] = next_state
-			state = next_state 
-		end
-    	state_probabilities[symbolic_timeseries[end]] += 1.0
-	else
-		#assuming symbols are integers 1:n
-		#assuming indices are the symbols themselves 
-		nr_symbols = maximum(symbolic_timeseries)
-
-		#weight and transition probability matrices
-		Q = spzeros(nr_symbols, nr_symbols)
-		
-		#probability distribution of states
-		state_probabilities = zeros(nr_symbols) 
-		
-		#count transitions, assuming indices are the symbols themselves 
-		for i in 1:(L - 1)
-		    Q[symbolic_timeseries[i],symbolic_timeseries[i+1]] += 1
-		    state_probabilities[i] += 1.0
-		end
-    	state_probabilities[symbolic_timeseries[end]] += 1.0
-		
 	end
+
+	#weight and transition probability matrices
+	Q = spzeros(nr_symbols, nr_symbols)
+
+	#probability distribution of states
+	state_probabilities = zeros(nr_symbols) 
+
+	state = symbol_dictionary[symbolic_timeseries[1]]
+	symbolic_timeseries[1] = state
+	next_state = 0
+	#count transitions and map symbols to indices
+	for i in 1:(L - 1)
+		next_state = symbol_dictionary[symbolic_timeseries[i+1]]
+		Q[state,next_state] += 1
+		state_probabilities[state] += 1
+		symbolic_timeseries[i+1] = next_state
+		state = next_state 
+	end
+	state_probabilities[symbolic_timeseries[end]] += 1.0
 	
     #normalize state distribution
 	state_probabilities = state_probabilities ./ sum(state_probabilities)
@@ -71,16 +58,40 @@ function calculate_transition_matrix(symbolic_timeseries;map_symbols=true,return
 	#normalize Q and fill P by normalizing rows
     Q .= Q./sum(Q)
 	P = calculate_transition_matrix(Q; verbose=verbose)
+	
+	return P,Q,state_probabilities
 
-	if return_everything
-		if map_symbols
-			return P,Q,state_probabilities,symbol_dictionary
-		else
-			return P,Q,state_probabilities
-		end
-	else
-		return P
+end
+
+#method that doesn't use a dictionary
+function calculate_transition_matrix_no_remap(symbolic_timeseries::Vector{T};verbose=true) where T <: Integer
+
+	#assuming symbols are integers 1:n
+	#assuming indices are the symbols themselves 
+	nr_symbols = maximum(symbolic_timeseries)
+
+	#weight and transition probability matrices
+	Q = spzeros(nr_symbols, nr_symbols)
+
+	#probability distribution of states
+	state_probabilities = zeros(nr_symbols) 
+
+	#count transitions, assuming indices are the symbols themselves 
+	for i in 1:(L - 1)
+		Q[symbolic_timeseries[i],symbolic_timeseries[i+1]] += 1
+		state_probabilities[i] += 1.0
 	end
+	state_probabilities[symbolic_timeseries[end]] += 1.0
+
+	 #normalize state distribution
+	 state_probabilities = state_probabilities ./ sum(state_probabilities)
+
+	 #normalize Q and fill P by normalizing rows
+	 Q .= Q./sum(Q)
+	 P = calculate_transition_matrix(Q; verbose=verbose)
+
+	 return P,Q,state_probabilities
+
 end
 
 function calculate_transition_matrix(S::SparseMatrixCSC;verbose=true)
