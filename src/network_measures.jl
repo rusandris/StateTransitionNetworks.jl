@@ -168,7 +168,7 @@ function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64; tol::Floa
 end
 
 
-function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64,n::Float64; x::Vector{Float64}=stationary_distribution(P))
+function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64,n::Int64; x::Vector{Float64}=stationary_distribution(P))
 
 	x_q = x .^ q
 	P_q = deepcopy(P)
@@ -186,7 +186,7 @@ function renyi_entropy_spectrum(P::SparseMatrixCSC{Float64, Int64}, qs::Vector{F
 			Hs[i] = sinai_kolmogorov_entropy(P;x=x)[1]
 			continue 
 		end
-        Hs[i] = renyi_entropy(P, q; x=x)
+        Hs[i] = renyi_entropy(P, q)
     end
     return Hs
 end
