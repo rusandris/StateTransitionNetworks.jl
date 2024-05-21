@@ -18,13 +18,13 @@ Calculates the transition matrix `P` from `symbolic_timeseries`. The symbol dict
 If `returnQ` is set to `true`, the weight matrix `Q` is also returned. If `return_state_distribution` is set to `true`, the estimated probability distribution over the states is also returned.
 
 """
-function calculate_transition_matrix(symbolic_timeseries::Vector{T};symbol_dictionary=Dict{T,Int64}(),verbose=true) where T <: Integer
+function calculate_transition_matrix(symbolic_timeseries::AbstractArray{T};symbol_dictionary=Dict{T,Int64}(),verbose=true) where T <: Integer
 	symbolic_timeseries_copy = deepcopy(symbolic_timeseries)
 	P,Q,state_probabilities = calculate_transition_matrix!(symbolic_timeseries_copy;symbol_dictionary=symbol_dictionary,verbose=verbose)
 	return P,Q,state_probabilities
 end
 
-function calculate_transition_matrix!(symbolic_timeseries::Vector{T};symbol_dictionary=Dict{T,Int64}(),verbose=true) where T <: Integer
+function calculate_transition_matrix!(symbolic_timeseries::AbstractArray{T};symbol_dictionary=Dict{T,Int64}(),verbose=true) where T <: Integer
 	L = length(symbolic_timeseries)
     
 	if isempty(symbol_dictionary)
@@ -34,6 +34,7 @@ function calculate_transition_matrix!(symbolic_timeseries::Vector{T};symbol_dict
 	end
 
 	#weight and transition probability matrices
+	nr_symbols = length(keys(symbol_dictionary))
 	Q = spzeros(nr_symbols, nr_symbols)
 
 	#probability distribution of states
@@ -64,7 +65,8 @@ function calculate_transition_matrix!(symbolic_timeseries::Vector{T};symbol_dict
 end
 
 #method that doesn't use a dictionary
-function calculate_transition_matrix_no_remap(symbolic_timeseries::Vector{T};verbose=true) where T <: Integer
+function calculate_transition_matrix_no_remap(symbolic_timeseries;verbose=true) 
+	L = length(symbolic_timeseries)
 
 	#assuming symbols are integers 1:n
 	#assuming indices are the symbols themselves 
@@ -79,7 +81,7 @@ function calculate_transition_matrix_no_remap(symbolic_timeseries::Vector{T};ver
 	#count transitions, assuming indices are the symbols themselves 
 	for i in 1:(L - 1)
 		Q[symbolic_timeseries[i],symbolic_timeseries[i+1]] += 1
-		state_probabilities[i] += 1.0
+		state_probabilities[symbolic_timeseries[i]] += 1.0
 	end
 	state_probabilities[symbolic_timeseries[end]] += 1.0
 
