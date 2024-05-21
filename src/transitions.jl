@@ -59,7 +59,7 @@ function calculate_transition_matrix(trs::IntegerTransitions)
 end
 
 
-function add_transitions!(trs::IntegerTransitions,symbolic_timeseries::Vector{I}) where I <: Integer
+function add_transitions!(trs::AbstractTransitions, symbolic_timeseries)  
 
     n = length(symbolic_timeseries)
 
@@ -69,7 +69,7 @@ function add_transitions!(trs::IntegerTransitions,symbolic_timeseries::Vector{I}
 
 end
 
-function calculate_symbol_probabilities(trs::AbstractTransitions) 
+function calculate_symbol_probabilities(trs::T) where T <: AbstractTransitions
     x_nz = nonzeros(trs.x) 
     return x_nz ./ sum(x_nz)  
 end
@@ -110,10 +110,10 @@ function add_transition!(trs::GeneralTransitions,tr::Tuple{S,S} where S<:Any)
 
     #count occurrence of symbols in x 
     if trs.nr_transitions == 0
-        trs.x[src] += 1.0   
-        trs.x[dst] += 1.0   
+        trs.x[trs.symbol_dict[src]] += 1.0   
+        trs.x[trs.symbol_dict[dst]] += 1.0   
     else
-        trs.x[dst] += 1.0
+        trs.x[trs.symbol_dict[dst]] += 1.0
     end
 
     return nothing
