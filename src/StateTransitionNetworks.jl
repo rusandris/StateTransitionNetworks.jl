@@ -1,6 +1,6 @@
 module StateTransitionNetworks
 
-import Graphs: DiGraph,add_edge!, inneighbors,outneighbors, nv, ne, weights, is_strongly_connected,strongly_connected_components,edges,degree_histogram,vertices
+import Graphs: SimpleDiGraph,DiGraph,add_edge!, inneighbors,outneighbors, nv, ne, weights, is_strongly_connected,strongly_connected_components,edges,degree_histogram,vertices
 import StatsBase: sample, mean, var, Weights
 import Base: extrema
 using MetaGraphsNext

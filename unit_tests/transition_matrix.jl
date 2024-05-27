@@ -1,8 +1,22 @@
 using Revise
 using StateTransitionNetworks
+using SparseArrays
 using DynamicalSystems
 using Random
 using Test
+
+
+@testset "Stochasticity and ergodicity" begin
+    P = sparse([1.0 1.0 0; 1.0 1.0 0; 0 0 1.0])
+    @test !(is_stochastic(P))
+    @test !(is_strongly_connected(P))
+
+    Pn = calculate_transition_matrix(P) #normalize
+    @test is_stochastic(Pn)
+
+    Pc = sparse([1.0 1.0; 1.0 1.0 ]) #make it connected
+    @test is_strongly_connected(Pc)
+end
 
 @testset "2D system tests" begin
 
@@ -19,11 +33,14 @@ using Test
         P1,Q,x = calculate_transition_matrix(sts)
 
         @test is_stochastic(P1)
+        @test is_strongly_connected(P1)
         @test sum(Q) ≈ 1     
         @test sum(x) ≈ 1
         
         symbol_dictionary = Dict(shuffle(symbs) .=> 1:nr_symbs)
         P2,_,_ = calculate_transition_matrix(sts;symbol_dictionary=symbol_dictionary,verbose=true)
+        @test is_stochastic(P2)
+        @test is_strongly_connected(P2)
 
         #test if we still get the same measures even if the matrix is shuffled
         @test all(network_measures(P1) .≈ network_measures(P2))
@@ -36,6 +53,7 @@ using Test
         @test all(unique(sts_copy) .== 1:nr_symbs)
 
         @test is_stochastic(P)
+        @test is_strongly_connected(P)
         @test sum(Q) ≈ 1     
         @test sum(x) ≈ 1
     
@@ -66,6 +84,7 @@ end
         #test if sts_copy was remapped in-place
 
         @test is_stochastic(P)
+        @test is_strongly_connected(P)
         @test sum(Q) ≈ 1     
         @test sum(x) ≈ 1
     end
@@ -76,6 +95,7 @@ end
         P1,Q,x = calculate_transition_matrix(sts)
 
         @test is_stochastic(P1)
+        @test is_strongly_connected(P1)
         @test sum(Q) ≈ 1     
         @test sum(x) ≈ 1
         
@@ -93,6 +113,7 @@ end
         @test all(unique(sts_copy) .== 1:nr_symbs)
 
         @test is_stochastic(P)
+        @test is_strongly_connected(P)
         @test sum(Q) ≈ 1     
         @test sum(x) ≈ 1
     
@@ -102,3 +123,5 @@ end
     end
 
 end
+
+

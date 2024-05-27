@@ -1,4 +1,4 @@
-export calculate_transition_matrix,calculate_transition_matrix!,calculate_transition_matrix_no_remap,is_stochastic
+export calculate_transition_matrix,calculate_transition_matrix!,calculate_transition_matrix_no_remap,is_stochastic,is_strongly_connected
 
 """
 	calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false) -> P
@@ -156,3 +156,5 @@ function is_stochastic(S::SparseMatrixCSC)
     end
     return true
 end
+
+is_strongly_connected(P::SparseMatrixCSC) = is_strongly_connected(SimpleDiGraph(P))
