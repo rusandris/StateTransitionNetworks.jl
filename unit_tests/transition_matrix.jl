@@ -14,8 +14,9 @@ using Test
     Pn = calculate_transition_matrix(P) #normalize
     @test is_stochastic(Pn)
 
-    Pc = sparse([1.0 1.0; 1.0 1.0 ]) #make it connected
+    Pc = make_strongly_connected(P) #make it connected
     @test is_strongly_connected(Pc)
+    @test is_stochastic(Pc)
 end
 
 @testset "2D system tests" begin
