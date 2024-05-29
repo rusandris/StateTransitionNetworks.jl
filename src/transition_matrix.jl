@@ -1,4 +1,4 @@
-export calculate_transition_matrix,calculate_transition_matrix!,calculate_transition_matrix_no_remap,is_stochastic,is_strongly_connected,make_strongly_connected
+export calculate_transition_matrix,calculate_transition_matrix!,calculate_transition_matrix_no_remap,is_stochastic,is_strongly_connected,make_strongly_connected,strongly_connected_components
 
 """
 	calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false) -> P
@@ -158,24 +158,33 @@ function is_stochastic(S::SparseMatrixCSC)
 end
 
 function make_strongly_connected(P::SparseMatrixCSC)
-	n = sizeof(P)[1] #nr. of states (symbols) 
-	strong_comps = strongly_connected_components(SimpleDiGraph(P)) #get strongly connected components
+	strong_comps = strongly_connected_components(P) #get strongly connected components
 	largest_strong_comp = strong_comps[argmax(length.(strong_comps))] #largest
+	sort!(largest_strong_comp)
 	nc = length(largest_strong_comp) #length of largest -> Pc : nc x nc matrix
-
 
 	Pc = spzeros((nc,nc))
 	rows = rowvals(P)
 	vals = nonzeros(P)
-	m, n = size(P)
+	n,_ = size(P)
 
 	#loop through P
 	#select rows and columns only from largest_strong_comp
 	for j in 1:length(largest_strong_comp)
-		for (i,v) in enumerate(nzrange(P, largest_strong_comp[j]))
-			#i = rows[v]
+		n = largest_strong_comp[j] #jth state from largest_strong_comp
+		vals_from_col = nzrange(P, n) #all indices from col
+		for v in vals_from_col
+			i = rows[v] #row in P
+
+			#skip rows that aren't in largest_strong_comp
+			if !(i in largest_strong_comp)
+				continue
+			end
+
+			ic = findfirst(x -> x == i, largest_strong_comp) #row in Pc
+			#write val into Pc
 			val = vals[v]
-			Pc[i,j] = val
+			Pc[ic,j] = val
 	   end
 	end
 
