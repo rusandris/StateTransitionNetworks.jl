@@ -171,9 +171,9 @@ function make_strongly_connected(P::SparseMatrixCSC)
 
 	#loop through P
 	#select rows and columns only from largest_strong_comp
-	for j in largest_strong_comp
-		for v in nzrange(P, j)
-			i = rows[v]
+	for j in 1:length(largest_strong_comp)
+		for (i,v) in enumerate(nzrange(P, largest_strong_comp[j]))
+			#i = rows[v]
 			val = vals[v]
 			Pc[i,j] = val
 	   end
