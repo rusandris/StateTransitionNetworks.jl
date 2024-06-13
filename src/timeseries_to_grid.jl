@@ -82,7 +82,7 @@ function timeseries_to_grid(timeseries::TimeSeries{T,1}, grid_size::Int,grid_edg
 	return symbolic_timeseries
 end
 
-function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeries{T,1}, grid_size::Integer,grid_edges::Vector{Float64},grid_steps::Vector{Float64};method=error_outside_grid)  where {I<:Integer,T<:AbstractFloat}\
+function timeseries_to_grid!(symbolic_timeseries::Vector{I},timeseries::TimeSeries{T,1}, grid_size::Integer,grid_edges::Vector{Float64},grid_steps::Vector{Float64};method=error_outside_grid)  where {I<:Integer,T<:AbstractFloat}
 
 	if length(grid_edges) != 2
 		throw(ArgumentError("Length of `grid_edges` should be 2 in case of 1D time series, got $(length(grid_edges)) !"))
