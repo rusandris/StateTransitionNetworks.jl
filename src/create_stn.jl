@@ -1,51 +1,4 @@
-TimeSeries = Union{AbstractStateSpaceSet,AbstractArray}
-
-"""
-	timeseries_to_grid(timeseries, grid_size) -> cell_coordinates,vertex_names
-Discretizes a 2D timeseries/trajectory on a grid. Returns
-a discrete timeseries containing the the cell coordinates and the list
-of vertices with cell coordinates. 
-"""
-function timeseries_to_grid(timeseries::TimeSeries, grid_size::Integer; grid_edges = [])    
-    M = spzeros(grid_size,grid_size)
-    T = length(timeseries[:,1])
-    
-    if isempty(grid_edges)		
-		x_min = minimum(timeseries[:, 1])
-		y_min = minimum(timeseries[:, 2])
-		x_max = maximum(timeseries[:, 1])
-		y_max = maximum(timeseries[:, 2])
-    else
-    	x_min,y_min,x_max,y_max = grid_edges 
-    end
-    
-	#partitioning between [`x_min`, `x_max`] into `grid` number of cells
-    x_grid = range(x_min, nextfloat(x_max, 100), grid_size+1);
-    x_min = x_grid[1]
-    y_grid = range(y_min, nextfloat(y_max, 100), grid_size+1);
-    y_min = y_grid[1]
-   
-    #arrays for space-discrete timeseries 
-    x_n = Vector{Int64}(undef, T)
-    y_n = Vector{Int64}(undef, T)
-    num_vertex = 0
-    vertex_positions = OrderedDict{Tuple{Int64,Int64},Int64}()
-    x_n, y_n = [], [];
-
-    for row in timeseries
-        y = floor(Int,(row[2]-y_min)/Float64(y_grid.step))+1
-        x = floor(Int,(row[1]-x_min)/Float64(x_grid.step))+1
-        if M[y,x] == 0
-            num_vertex += 1 
-            vertex_positions[(x,y)] = num_vertex
-            M[y,x] = 1
-        end
-        push!(x_n, x)
-        push!(y_n, y)
-    end
-    symbolic_timeseries = collect(zip(x_n,y_n))
-    return symbolic_timeseries, vertex_positions
-end
+export create_stn, check_stn!, get_transition_matrix, get_weight_matrix, get_state_distribution, calculate_weight_matrix,isnormalized,renormalize!
 
 """
 	create_stn(ts,grid_size::Int64,plane,idxs;make_ergodic=false, verbose=false,kwargs...) -> stn,retcode
@@ -82,8 +35,8 @@ Keyword arguments:
 For more info about the network checking go to Graphs.jl: https://juliagraphs.org/Graphs.jl/dev/algorithms/connectivity/#Graphs.strongly_connected_components 
 """
 function create_stn(time_discrete_ts::TimeSeries,grid_size::Integer; make_ergodic=false, verbose=false,grid_edges=[])
-	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size,grid_edges=grid_edges)
-	create_stn(symbolic_timeseries,vertex_positions;make_ergodic=make_ergodic,verbose=verbose)
+	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size,grid_edges=grid_edges,return_vertex_positions=true)
+	create_stn(symbolic_timeseries;make_ergodic=make_ergodic,verbose=verbose,vertex_positions=vertex_positions)
 end
 
 """
@@ -98,92 +51,27 @@ Keyword arguments:
 ## Edge properties 
 	stn[i,j] -> (:prob => P[i,j],:weight => Q[i,j])
 """
-function create_stn(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict;make_ergodic=false,verbose=false)
+function create_stn(symbolic_timeseries::TimeSeries;make_ergodic=false,verbose=false,
+vertex_positions::AbstractDict{A,Tuple{T, T}} where T <: Integer where A <: Any = Dict{Any,Tuple{Int64,Int64}}() )
 	
-	P,Q,state_probabilities = calculate_transition_matrix(symbolic_timeseries,vertex_positions; returnQ=true,return_state_distribution=true)
+	P,Q,state_probabilities_vec,symbol_dictionary = calculate_transition_matrix(symbolic_timeseries;map_symbols=true,return_everything=true)
 	
+	symbols = keys(symbol_dictionary)
+	
+	#create a dict with (state => state_probability) pairs
+	state_probabilities = Dict(state => state_probabilities_vec[symbol_dictionary[state]] for state in symbols)
+	
+	#build stn from the matrix and additional data
 	stn, retcode = create_stn(P; make_ergodic=make_ergodic,
-		vertex_positions=vertex_positions,
-		state_probabilities=state_probabilities,
+		vertex_positions = vertex_positions,
+		state_probabilities = state_probabilities,
+		symbol_dictionary=symbol_dictionary,
 		Q=Q,
 		verbose=verbose)
 	
 	return stn,retcode
 end
 
-
-"""
-	calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false) -> P
-Calculates the transition matrix `P` from a time-discrete time series `time_discrete_ts` by dividing the state space into cells (`grid_size`x`grid_size`).
-If `returnQ` is set to `true`, the weight matrix `Q` is also returned. Grid edges can be specified explicitly with `grid_edges`, otherwise they're inferred from the data.
-
-"""
-function calculate_transition_matrix(time_discrete_ts::TimeSeries,grid_size::Integer;grid_edges=[],returnQ=false,return_state_distribution=false)
-	symbolic_timeseries,vertex_positions = timeseries_to_grid(time_discrete_ts,grid_size;grid_edges=grid_edges)
-	calculate_transition_matrix(symbolic_timeseries,vertex_positions; returnQ=returnQ,return_state_distribution=return_state_distribution)
-end
-
-"""
-	calculate_transition_matrix(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict; returnQ=false) -> P
-Calculates the transition matrix `P` from `symbolic_timeseries` and symbol dictionary `vertex_positions` (the output of `timeseries_to_grid`).
-If `returnQ` is set to `true`, the weight matrix `Q` is also returned. If `return_state_distribution` is set to `true`, the estimated probability distribution over the states is also returned.
-
-"""
-function calculate_transition_matrix(symbolic_timeseries::TimeSeries,vertex_positions::AbstractDict; returnQ=false,return_state_distribution=false)
-	
-	nr_vertices = length(vertex_positions)
-	
-	#weight and transition probability matrices
-	Q = spzeros(nr_vertices, nr_vertices)
-    P = spzeros(nr_vertices, nr_vertices)
-    
-    #probability distribution of states
-    state_probabilities = zeros(nr_vertices)
-    
-    #count transitions
-    for i in eachindex(symbolic_timeseries[1:end-1])
-    	state = symbolic_timeseries[i]
-    	next_state = symbolic_timeseries[i+1]
-        Q[vertex_positions[state],vertex_positions[next_state]] += 1
-        state_probabilities[vertex_positions[state]] += 1
-    end
-    
-    #update end (final) state grid
-    end_state = symbolic_timeseries[end]
-    state_probabilities[vertex_positions[end_state]] += 1
-    
-    #normalize state distribution
-	state_probabilities = state_probabilities ./ sum(state_probabilities)
-
-	#normalize Q and fill P by normalizing rows
-    Q = Q./sum(Q)
-	P = calculate_transition_matrix(Q)
-
-	if returnQ
-		if return_state_distribution
-			return P,Q,state_probabilities
-		else
-			return P,Q
-		end
-	else
-		return P
-	end
-end
-
-"""
-	calculate_transition_matrix(Q::AbstractMatrix;verbose=false) -> P
-Calculates the transition matrix `P` from  the weight matrix `Q`. Warns if `P` is not stochastic if `verbose` is `true`.
-
-"""
-function calculate_transition_matrix(Q::AbstractMatrix;verbose=false)
-	P = spzeros(size(Q))
-	for i in 1:size(Q)[1]
-		sumQi = sum(Q[i,:])
-		P[i,:] = Q[i,:]./sumQi
-    end
-    !all(p -> isfinite(p),P) && verbose && @warn "The matrix is not stochastic!";
-    return P
-end
 
 """
 	create_stn(P;kwargs...) -> stn,retcode
@@ -203,14 +91,22 @@ Optional keyword arguments:
 	stn[i,j] -> (:prob,:weight)
 """
 function create_stn(P::AbstractMatrix;make_ergodic=false,
-	vertex_positions::AbstractDict{Tuple{Int64, Int64}, Int64}=Dict([(v,0) => v for v in 1:size(P)[1]]),
-	state_probabilities::Vector{Float64}=fill(NaN,size(P)[1]),	
+	vertex_positions::AbstractDict{A,Tuple{T, T}} where T <: Integer where A <: Any = Dict{Any,Tuple{Int64,Int64}}(),
+	state_probabilities::AbstractDict{A,T} where A <: Any where T <: AbstractFloat = Dict(state => NaN for state in 1:size(P)[1]),
+	symbol_dictionary::AbstractDict{S,I} where S <: Any where I <: Integer = Dict(s => s for s in 1:size(P)[1]),
 	Q::AbstractMatrix=fill(NaN,(size(P)[1],size(P)[1])),
 	verbose=false)
 
-	(!(all(x -> isnan(x), state_probabilities)) && !(sum(state_probabilities) ≈ 1.0)) && throw(ArgumentError("Probabilities of states must sum up to 1!"))
-	(!(all(x -> isnan(x), state_probabilities)) && !(sum(Q) ≈ 1.0)) && throw(ArgumentError("Non-conditional probabilities of transitions (weights) must sum up to 1!"))
+	#warning state_probability values contain NaN or aren't normalized
 	
+	(!(all(x -> isnan(x), values(state_probabilities))) && !(sum(values(state_probabilities)) ≈ 1.0)) && throw(ArgumentError("Probabilities of states must sum up to 1!"))
+	
+	#warning state_probability values contain NaN or Q isn't normalized
+
+	(!(all(x -> isnan(x), values(state_probabilities))) && !(sum(Q) ≈ 1.0)) && throw(ArgumentError("Non-conditional probabilities of transitions (weights) must sum up to 1!"))
+	
+	
+	#check if P is stochastiv, otherwise normalize it row-wise
 	if !(isnormalized(P))
 		renormalize!(P;verbose=verbose)
 	end
@@ -221,20 +117,38 @@ function create_stn(P::AbstractMatrix;make_ergodic=false,
 	stn = MetaGraph(
         DiGraph(),
         Int64,
-        Dict{Symbol, Union{Int64,Float64}},
+        Dict{Symbol, Any},
         Dict{Symbol, Float64},
         nothing,
         edge_data -> 1.0,
         0.0)
 
-	
-	#add edges and properties
-	#Properties: vertices ->  Dict{Symbol,Int64}, edges -> Dict{Symbol,Float64}
-	
-	for state in keys(vertex_positions)
-		stn[vertex_positions[state]] = Dict(:x => state[1],:y => state[2],:prob => state_probabilities[vertex_positions[state]])
+	#access vertex information contained in the stn like:
+		# stn[i] where i should be the same as its index in P
+	#access edge information contained in the stn like:
+		# stn[i,j] where i,j should be the same as its index in P
+		
+	#pack every vertex info into stn metagraph object:
+		# x grid position
+		# y grid position
+		# probability of state
+		# symbol from the symbolic time series
+		
+	if length(vertex_positions) == 0
+		for symbol in keys(symbol_dictionary)
+			vertex_positions[symbol] = (symbol_dictionary[symbol],0) 
+		end
 	end
 	
+	
+	for symbol in keys(symbol_dictionary)
+		stn[symbol_dictionary[symbol]] = Dict(:x => vertex_positions[symbol][1], :y => vertex_positions[symbol][2], :prob => state_probabilities[symbol],:symbol => symbol)
+	end
+	
+	#pack every edge info into stn metagraph object:
+		# P values
+		# Q values
+
 	for i in 1:length(vertex_positions)
         for j in 1:length(vertex_positions)
             if P[i, j] > 0

@@ -1,25 +1,32 @@
 module StateTransitionNetworks
 
-import Graphs: DiGraph,add_edge!, inneighbors,outneighbors, nv, ne, weights, is_strongly_connected,strongly_connected_components,edges,degree_histogram,vertices
+import Graphs: SimpleDiGraph,DiGraph,add_edge!, inneighbors,outneighbors, nv, ne, weights, is_strongly_connected,strongly_connected_components,edges,degree_histogram,vertices
 import StatsBase: sample, mean, var, Weights
+import Base: extrema
 using MetaGraphsNext
 using GraphPlot,Cairo,Compose
-import SparseArrays: spzeros, nonzeros, nzrange 
+using SparseArrays
+using LuxurySparse
 using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,AbstractStateSpaceSet
-import LinearAlgebra: eigen, Diagonal, I, nullspace
+import DynamicalSystemsBase: minmaxima
+import LinearAlgebra: eigen, Diagonal, I, nullspace, norm
 import DataStructures: OrderedDict
+using KrylovKit
+export linsolve
 
-include("create_stn.jl")
+
+include("timeseries_to_grid.jl")
+include("transitions.jl")
+include("transition_matrix.jl")
+include("higher_order_symbolics.jl")
+
+include("iterative_linsolve.jl")
 include("network_measures.jl")
+include("create_stn.jl")
+include("simulate_random_walks.jl")
 include("plot_stn.jl")
 include("timeseries_analysis.jl")
 include("operations.jl")
 include("deprecations.jl")
-
-export timeseries_to_grid, create_stn, check_stn!, get_transition_matrix, get_weight_matrix, get_state_distribution, calculate_weight_matrix, random_walk_on_stn, randomwalk_step, isnormalized,calculate_transition_matrix,renormalize!
-export network_measures, sinai_kolmogorov_entropy, measure_convergence, lyapunov_measure, stationary_distribution
-export plot_stn
-export stn_analysis,read_bin,ndensity
-export add_timeseries,are_equal,timeseries_to_common_grid
 
 end

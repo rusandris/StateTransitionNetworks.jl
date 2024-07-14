@@ -1,102 +1,21 @@
-"""
-	sparse_log(A::AbstractMatrix) -> log(A)
-Calculates the piecewise logarithm of a sparse matrix without explicitely converting it to dense matrix.
-"""
-function sparse_log(A::AbstractMatrix)
-	P = copy(A)
-	vals = nonzeros(P)
-	m, n = size(P)
-	for j = 1:n
-		for i in nzrange(P, j)
-			vals[i] = log(vals[i])
-		end
-	end
-	return P
-end
-
-function randomwalk_step(stn,source,P)
-	neigh = outneighbors(stn, source)
-	neigh_weights = P[source,:]
-	destination = sample(neigh, Weights(neigh_weights.nzval))
-	w = neigh_weights[destination]
-	
-	return destination,-log(w)
-end
-
-"""
-Conducts a random walk process on a STN for `N_steps`.
-Returns the normalized walk length.
-"""
-#took out transient, and uses randomwalk_step now
-function random_walk_on_stn(stn, N_steps)
-    source = sample(1:nv(stn));
-    walk_length = 0.0;
-    P = get_transition_matrix(stn)
-
-    for n in 1:N_steps
-		source, l = randomwalk_step(stn,source,P)
-		walk_length = walk_length + l
-    end
-    
-    return walk_length
-end
-
-"""
-	network_measures(stn::MetaDiGraph,ensemble,N_steps) -> S, Λ
-Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
-by calculating the average walk length and the variance of walk lenghts
-over an ensemble of random walks on a STN
-"""
-function network_measures(stn, ensemble, N_steps)
-    walk_length = Vector{Float64}(undef, ensemble)
-    for i in 1:ensemble
-        walk_length[i] = random_walk_on_stn(stn, N_steps)
-    end
-   	entropy = mean(walk_length)/N_steps
-    lyapunov_measure = var(walk_length,corrected=false)/N_steps
-    return entropy, lyapunov_measure
-end
+export random_walk_on_stn, randomwalk_step,network_measures, sinai_kolmogorov_entropy, measure_convergence, lyapunov_measure, stationary_distribution
+export bit_number_measures,renyi_entropy,renyi_entropy_spectrum
+export sparse_log
 
 """
 	network_measures(P::AbstractMatrix) -> S, Λ
-Calculates the Sinai-Kolmogorov Entropy and Lyapunov measure of a STN
-by using the analytical definitions of both quantities
-"""
-function network_measures(P::AbstractMatrix;x=nothing)
-   	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
-    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x)
-	return entropy, lyapunov
-end
+Calculates the Sinai-Kolmogorov Entropy (S) and Lyapunov measure (Λ) from P by using the analytical definitions of both quantities.
 
+Optional Keyword arguments:
+* `x`: probability distribution of states. If nothing is provided, it is calculated from `P'*x = x` using `stationary_distribution` (`Krylovkit`'s `eigsolve`).
+* `alg`: linear solver (`hybrid_solve` by default) for Λ -> `iterative_linsolve`, `linsolve` (`KrylovKit`),`hybrid_solve` are the options
+* `ϵ`: tolerance for Λ calculation
+* `maxiter`: maxiter for Λ calculation
 """
-	measure_convergence(stn::MetaDiGraph,ensemble,N_max) -> entropy_timeseries,lyapunov_timeseries
-Calculates and returns network measures for an ensemble at every step in the random walk up to N_max.
-"""
-#calc variance without correction
-function measure_convergence(stn,ensemble,N_max)
-	ensemble_walk_lengths = [] #container for walk lengths for every step for every random_walk
-	
-	for i in 1:ensemble
-		source = sample(1:nv(stn));
-		walk_length_timeseries = zeros(N_max) #container for individual walk lengths for every step 
-		walk_length = 0
-		P = get_transition_matrix(stn)
-		
-		for n in 1:N_max
-			source, l = randomwalk_step(stn,source,P) #make one step in the graph
-			walk_length += l
-			walk_length_timeseries[n] = walk_length  
-		end
-		push!(ensemble_walk_lengths,walk_length_timeseries) #save individual walk length timeseries
-	end
-	ensemble_walk_lengths = hcat(ensemble_walk_lengths...) 
-	
-	#calculate measures for every step
-	steps = 1:N_max
-	entropy_timeseries = mean(ensemble_walk_lengths,dims=2) ./ steps
-	lyapunov_timeseries = var(ensemble_walk_lengths,dims=2,corrected=false) ./steps 
-	
-	return entropy_timeseries,lyapunov_timeseries
+function network_measures(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P),ϵ=1e-12,maxiter=100000,alg=hybrid_solve)
+   	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
+    lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x,ϵ=ϵ,maxiter=maxiter,alg=alg)
+	return entropy, lyapunov
 end
 
 """
@@ -115,9 +34,10 @@ end
 	stationary_distribution(P) -> x
 Calculates the stationary probability based on the probability matrix P. Each element of the resulting vector is the probability of finding the system in node i.
 """
-function stationary_distribution(P::AbstractMatrix)
-	x = nullspace(Matrix(P' - I))
-	x = x ./sum(x)
+function stationary_distribution(P::SparseMatrixCSC)
+	vals, vecs, info = eigsolve(P',1,:LR)
+	info.converged < 1 && @warn "KrylovKit.eigsolve did not converge!" 
+	x = real.(vecs[1]) ./sum(real.(vecs[1]))
 	return x
 end
 
@@ -136,11 +56,7 @@ end
 Calculates analytically the Sinai-Kolmogorov entropy given the P transition probability matrix of the STN. 
 
 """
-function sinai_kolmogorov_entropy(P::AbstractMatrix;x=nothing)
-		
-	if isnothing(x)
-		x = stationary_distribution(P)
-	end
+function sinai_kolmogorov_entropy(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P))		
 	
 	v = ones(length(x))
 
@@ -153,30 +69,124 @@ end
 
 """
 	lyapunov_measure(P) -> Λ
-Calculates analytically the Lyapunov measure given the the P transition probability matrix of the STN. 
+Calculates analytically the Lyapunov measure given the the P transition probability matrix. Uses `iterative_linsolve to find needed matrix inverses.`
 
+Optional Keyword arguments:
+* `x`: probability distribution of states. If nothing is provided, it is calculated from `P'*x = x` using `stationary_distribution` (`Krylovkit`'s `eigsolve`).
+* `alg`: linear solver (`hybrid_solve` by default) -> `iterative_linsolve`, `linsolve` (`KrylovKit`),`hybrid_solve` are the options
+* `ϵ`: tolerance for linear solvers
+* `maxiter`: maxiter for linear solvers
 """
-function lyapunov_measure(P::AbstractMatrix;x=nothing)
+function lyapunov_measure(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P),alg::Function=hybrid_solve,ϵ=1e-12,maxiter=100000)
 	
-	if isnothing(x)
-		x = stationary_distribution(P)
-	end
-	x = x'
+	xt = transpose(x)
 	v = ones(length(x))
 	
 	L = -sparse_log(P)
 	L2 = P.*L.^2
 	L = P.*L
-	vx = v*x
-	S = (I-vx)+(P-vx)*inv(I-P+vx)
-	covariance = (x*L*S*L*v)[1]
-	variance = (x*L2*v)[1] -(x*L*v)[1]^2
-	lyapunov =  variance + 2*covariance
+	
+	X = PseudoDenseMatrix(x) 
+	
+	if alg == iterative_linsolve || alg == hybrid_solve
+		z,convergence_info = alg(P,X,L*v;ϵ = ϵ,maxiter=maxiter)
+		
+		if convergence_info isa KrylovKit.ConvergenceInfo
+			convergence_info.converged != 1 && @warn "KrylovKit.linsolve did not converge!"
+		elseif convergence_info isa Bool
+			convergence_info || @warn "iterative_linsolve did not converge! Your system converges slowly/might not converge at all. Try setting `maxiter` kwarg to bigger or `ϵ` to a higher value!"
+		end
+		
+	elseif alg == KrylovKit.linsolve
+		z,info = KrylovKit.linsolve(I - P + X,L*v)
+		info.converged != 1 && @warn "KrylovKit.linsolve did not converge!" 
+	else
+		error("This algorithm is not implemented yet! See the function's docstring for available options.")
+	end
+	
+	covariance = 2*xt*L*(z - X*L*v)
+	
+	variance = (xt*L2*v) - (xt*L*v)^2
+	lyapunov =  variance + covariance
 	if imag(covariance) < 1.0e-3
 	   return lyapunov, variance, covariance, :Success
 	else
 	   @show covariance
 	   return real(lyapunov), real(variance), real(covariance), :ComplexCovariancveWarning
 	end
- end
+end
+
+"""
+	sparse_log(A::AbstractMatrix) -> log(A)
+Calculates the piecewise logarithm of a sparse matrix without explicitely converting it to dense matrix.
+"""
+function sparse_log(A::AbstractMatrix)
+	P = copy(A)
+	vals = nonzeros(P)
+	m, n = size(P)
+	for j = 1:n
+		for i in nzrange(P, j)
+			vals[i] = log(vals[i])
+		end
+	end
+	return P
+end
  
+ 
+#Schlogl notation: C1,C2
+
+function bit_number_measures(x::Vector{Float64})
+
+	l = -log.(x)
+	replace!(l, Inf=>0.0)
+	entropy = sum((x .* l)) #C1
+    variance =  sum(x .* l .* l) - entropy^2 #C2
+	
+	return real(entropy), real(variance), :Success
+end
+
+#---------------------------------------------------------------Renyi entropy spectrum------------------------------------------------------------------------
+
+function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64; tol::Float64=1e-8, maxiter::Int64=10^4,verbosity::Int64=0)
+
+	P_q = deepcopy(P)
+	nonzeros(P_q) .= nonzeros(P_q) .^ q
+	λs,_,info = eigsolve(P_q; verbosity=verbosity, issymmetric=false, ishermitian=false, tol=tol, maxiter=maxiter)
+	info.converged < 1 && @warn "Eigenvalue calculation did not converge! "
+
+	#select the eigenvalue with largest absolute value
+	λ_max, = findmax(abs.(λs))
+
+	# for PPC there are multiple eigenvalues of the same magnitude and some are complex
+	#abs(imag(l[i_max]))<0.01 ? H = log(λ_max)/(1-q) : H = -1
+
+	#λ_max might be complex, but the absolute value is 
+	#approximately the same as the real eigenvalue 
+	H = log(abs(λ_max))/(1-q)
+	return H
+	
+end
+
+
+function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64,n::Int64; x::Vector{Float64}=stationary_distribution(P))
+
+	x_q = x .^ q
+	P_q = deepcopy(P)
+	nonzeros(P_q) .= nonzeros(P_q) .^ q
+	v_q = ones(length(x_q))
+	return log((x_q' * P_q^n * v_q))/(n*(1-q))
+
+end
+
+function renyi_entropy_spectrum(P::SparseMatrixCSC{Float64, Int64}, qs::Vector{Float64}; x::Vector{Float64}=stationary_distribution(P), verbose=true)
+    Hs = zeros(length(qs))
+    for (i,q) in enumerate(qs)
+        verbose && @show q
+		if q == 1.0
+			Hs[i] = sinai_kolmogorov_entropy(P;x=x)[1]
+			continue 
+		end
+        Hs[i] = renyi_entropy(P, q)
+    end
+    return Hs
+end
