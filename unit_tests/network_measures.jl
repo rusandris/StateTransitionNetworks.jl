@@ -7,22 +7,23 @@ using Test
 
 	as = [1.2,1.2265,1.24,1.27]
 	
-	ensemble = 1000
+	ensemble = 10000
 	nr_steps = 1000
 
 	for (i,a) in enumerate(as)
+		@show a
 		ds = Systems.henon(a=a)
-		timeseries, = trajectory(ds,30000;Ttr=1000)
+		timeseries, = trajectory(ds,10^7;Ttr=10^4)
 		sts = timeseries_to_grid(timeseries,20)
 		P,Q,x = calculate_transition_matrix(sts)
 		
 		#numerical (random walk) method
 		num_nm = network_measures(P,ensemble,nr_steps)
+		@show num_nm
 		
-		@show a
 		
 		#analytic formula
-		analytic_nm = network_measures(P)
+		analytic_nm = network_measures(P;x=x)
 		@show analytic_nm
 		#lyapunov_measure(P;maxiter=1000)
 		

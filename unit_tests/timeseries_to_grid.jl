@@ -119,3 +119,31 @@ end
     sts2 = timeseries_to_grid(orbit,grid_size,grid_edges=grid_edges,outside_grid=:skip) #with skipping outsiders
     @test length(sts1) != length(sts2)
 end
+
+
+#-----------------------------------------------general 1D grid tests-----------------------------------------------
+#generating partition of the tent map
+
+@testset "generating partition of the tent map" begin
+
+    #tent map definition
+    function f(u, p, n)
+        r = p[1]
+        x = u[1]
+        if x<=r
+        return SVector(x/r)
+        else
+        return SVector((1-x)/(1-r))
+        end
+    end
+    
+    r = 0.6
+    ds = DeterministicIteratedMap(f, [0.4], [r])
+    orbit,t = trajectory(ds,10^4;Ttr=1000)
+
+    tent_generating_partition(x::Float64,r::Float64) = x <= r ? 1 : 2
+
+    sts = timeseries_to_grid(orbit,x -> tent_generating_partition(x,r))
+    @test length(unique(sts)) == 2
+
+end

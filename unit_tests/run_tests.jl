@@ -17,5 +17,4 @@ using Test
 	#@testset verbose=true "time series analysis" include("timeseries_analysis.jl")
 	#@testset verbose=true "operations" include("operations.jl")
 		
-end
-;
+end;
