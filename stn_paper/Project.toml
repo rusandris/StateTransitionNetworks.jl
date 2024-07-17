@@ -1,0 +1,10 @@
+[deps]
+ChaosTools = "608a59af-f2a3-5ad4-90b4-758bdf3122a7"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+DynamicalSystems = "61744808-ddfa-5f27-97ff-6e42cc95d634"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+StateTransitionNetworks = "3840ccf8-8f4d-4ca1-a48b-c3a8348f3866"
