@@ -1,19 +1,20 @@
 # StateTransitionNetworks.jl
 Toolkit for dynamics on state-transition networks based on the paper Sándor et al. (2022).
 
-
 ## Installation
-Download a local copy, go to the directory and use the package in REPL:
+Download and install automatically to your local/global `julia` environment with:
 ```julia
-pkg> activate .
-using StateTransitionNetworks
-```
-Or download and install automatically to your local/global `julia` environment with:
-```julia
-pkg> add https://github.com/rusandris/StateTransitionNetworks.jl.git
+] add https://github.com/rusandris/StateTransitionNetworks.jl.git
 using StateTransitionNetworks
 ```
 
+Or download a local copy, go to the directory and use the package in REPL:
+```julia
+] activate .
+using StateTransitionNetworks
+```
+
+<!---
 
 ## Basic usage
 ### Discrete example: Henon map
@@ -127,7 +128,7 @@ There is a higher level function that accepts a time series and returns the corr
 stn_analysis(timeseries::Matrix;grid,plane,idxs,ensemble=100,N_steps=1000,make_ergodic=false, verbose=false,return_stn=false,use_analytic=false,use_stored_distribution=false)
 ```
 
-
+-->
 
 
 # References
