@@ -11,4 +11,9 @@ include("plot_henon_main.jl")
 
 l2 = @layout [a{0.5w} b{0.5w}]
 pl = plot(pl_logistic,pl_henon,layout=l2,size=(1000,1500),top_margin=15Plots.mm);
-savefig(pl,"figs/logistic_henon_main.png")
+
+fig_dir_name = "figs"
+fig_dir = fig_dir_name * "/" 
+!(fig_dir_name in readdir()) && (mkdir(fig_dir))
+
+savefig(pl,fig_dir * "logistic_henon_main.png")

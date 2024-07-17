@@ -33,9 +33,11 @@ const u0::Vector{Float64} = [0.3]
 const ps_renyi::Vector{Float64} = [3.82842,3.835,3.85,4.0]
 const qs::Vector{Float64} = [0.0:0.01:2;]
 
-data_root_dir_name = "data/"
-data_dir_name = "logistic_data/"
-data_dir = data_root_dir_name * data_dir_name 
+data_root_dir_name = "data"
+data_dir_name = "logistic_data"
+data_dir = data_root_dir_name * "/" * data_dir_name * "/" 
+!(data_root_dir_name in readdir()) && (mkdir(data_root_dir_name))
+!(data_dir_name in readdir(data_root_dir_name)) && (mkdir(data_dir))
 
 out_file_entropy = data_dir*"logistic_entropies"  * "_T$T_string" * "_Ttr$Ttr_string" * "_grid_$grid_size" * "param_$(ps[1])" * "_$(ps[end])" * ".txt"
 out_file_lambda = data_dir*"logistic_lambda"  * "_T$T_string" * "_Ttr$Ttr_string" * "_grid_$grid_size" * "param_$(ps[1])" * "_$(ps[end])" * ".txt"
