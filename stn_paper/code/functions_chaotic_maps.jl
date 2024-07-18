@@ -355,6 +355,9 @@ function walk_length_statistics(ds, ps; param_index=1, sts_eltype=Int64 ,order=1
             Ss[i] = S
             Λs[i] = Λ
         end
+
+        @info "Walk length statistics done for parameter p=$p ..."
+        flush(stderr)
     end
     return walk_lengths,means,variances,Ss,Λs
 end

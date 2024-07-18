@@ -38,7 +38,7 @@ data_dir = data_root_dir_name * "/" * data_dir_name * "/"
 !(data_root_dir_name in readdir()) && (mkdir(data_root_dir_name))
 !(data_dir_name in readdir(data_root_dir_name)) && (mkdir(data_dir))
 
-
+#=
 out_file_entropy = data_dir*"henon_entropies"  * "_T$T_string" * "_Ttr$Ttr_string" * "_b_0.3" * "_grid_$grid_size" * "param_$(ps[1])" * "_$(ps[end])" * ".txt"
 out_file_lambda = data_dir*"henon_lambdas" *  "_T$T_string" * "_Ttr$Ttr_string" * "_b_0.3" * "_grid_$grid_size" * "param_$(ps[1])" * "_$(ps[end])" * ".txt"
 
@@ -91,4 +91,17 @@ flush(stderr)
 lyap_exps = calc_lyapunovs(ds,ps,5000,5000)
 writedlm(data_dir * "lyapexps" * "_T$T_string" * "_Ttr$Ttr_string" * "_b_$(ds.p[2])"  * "_grid_$grid_size" * "_nr_param_$(length(ps))" * "param_$(ps[1])" * "_$(ps[end])" * ".txt",hcat(ps,lyap_exps))
 
+=#
+#-----------------------------------------------direct random walk simulation stats-----------------------------------------
 
+
+const ps_henon_rw::Vector{Float64} = [1.2265,1.27,1.4]
+const order_rw::Int64 = 1
+
+henon_out1 = data_dir * "henon_walk_lengths_ens_$(ensemble)" * "_t$(N_steps)" * "_T$T_string" * "_Ttr$Ttr_string" * "_order_$order_rw" * "_grid$(grid_size)" * ".txt"
+henon_out2 = data_dir * "henon_wl_stats_ens_$(ensemble)" * "_t$(N_steps)" * "_T$T_string" * "_Ttr$Ttr_string" * "_order_$order_rw" * "_grid$(grid_size)" * ".txt"
+ds = Systems.henon()
+
+walk_lengths_henon,means_henon,variances_henon,Ss_henon,Λs_henon = walk_length_statistics(ds, ps_henon_rw; grid_size=grid_size, order=order_rw, T = T, Ttr = Ttr ,ensemble = ensemble, N_steps = N_steps)
+writedlm(henon_out1,walk_lengths_henon)
+writedlm(henon_out2,hcat(means_henon,variances_henon,Ss_henon,Λs_henon))

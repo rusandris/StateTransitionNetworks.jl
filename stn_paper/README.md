@@ -38,10 +38,16 @@ To generate the results run the following source codes:
 * `logistic_map_main.jl`
 * `henon_map_main.jl`
 
-Note: The scripts save the values continuously in `data/` and log status at every 100th parameter value in the stdout/logfiles. If you run the same script multiple times, they all save data in the same files (duplicates can occur, and this can cause errors in plotting)
+Note: To reproduce the exact figures,  one should use the parameters values in the comments (there are some values that are commented out after certain parameters). The ones that are currently set are chosen to produce results quickly and of course may lead to less accurate calculation. . 
+
+Note:  The scripts save the values continuously in `data/` and log status in the stdout/logfiles. If you run the same script multiple times, they all save data in the same files (duplicates can occur, and this can cause errors in plotting).
 
 #### PLOT
 
-To get the main figure, run `code/plotters/plot_maps_main.jl`. See the output in `figs/`
+To get the main figure, run `code/plotters/plot_maps_main.jl`. 
+
+To get the supplementary figure, run `code/plotters/plot_maps_sm.jl`.
+
+See the output in `figs/` (png).
 
 It is advised to do this in a separate Julia session, if you intend to run the plotter from the `REPL`.

@@ -91,4 +91,17 @@ flush(stderr)
 lyap_exps = calc_lyapunovs(ds,ps,5000,5000;u0=u0)
 writedlm(data_dir*"lyapexps" * "_T$T_string" * "_Ttr$Ttr_string" * "_grid_$grid_size" * "_nr_param_$(length(ps))" * "param_$(ps[1])" * "_$(ps[end])" * ".txt",hcat(ps,lyap_exps))
 
+#-----------------------------------------------direct random walk simulation stats-----------------------------------------
 
+
+const ps_log_rw::Vector{Float64} = [3.82842,3.85,4.0]
+const order_rw::Int64 = 1
+
+ds = Systems.logistic()
+
+logistic_out1 = data_dir * "logistic_walk_lengths_ens_$(ensemble)" * "_t$(N_steps)" * "_T$T_string" * "_Ttr$Ttr_string" * "_order_$order_rw" * "_grid$(grid_size)" * ".txt"
+logistic_out2 = data_dir * "logistic_wl_stats_ens_$(ensemble)" * "_t$(N_steps)" * "_T$T_string" * "_Ttr$Ttr_string" * "_order_$order_rw" * "_grid$(grid_size)" * ".txt"
+
+walk_lengths_log,means_log,variances_log,Ss_log,Λs_log = walk_length_statistics(ds, ps_log_rw; grid_size=grid_size,order=order_rw, T = T, Ttr = Ttr, u0=[0.3],ensemble = ensemble, N_steps = N_steps)
+writedlm(logistic_out1,walk_lengths_log)
+writedlm(logistic_out2,hcat(means_log,variances_log,Ss_log,Λs_log))
