@@ -1,12 +1,14 @@
 Our package `StateTransitionNetworks.jl` and other functions and scripts to generate figures are written in the Julia programming language.
 
+These examples are likely but not guaranteed to work with the latest version of the package. To make sure they work, use the `v0.4.0-pub` release.
+
 For Julia installation instructions see: https://julialang.org/downloads/
 
 Run everything from the `stn_paper/` dir as working directory to avoid path errors.
 
 #### INSTALL AND SETUP
 
-Once you have successfully downloaded the `stn_paper/` directory (or by clicking on the `Download ZIP` option on Github, or by cloning the repository `git clone https://github.com/rusandris/StateTransitionNetworks.jl.git `), navigate to `stn_paper/` directory and follow these steps:
+Once you have successfully downloaded the `stn_paper/` directory (or by clicking on the `Download ZIP` option on Github, or by cloning the repository `git clone https://github.com/rusandris/StateTransitionNetworks.jl.git --branch v0.4.0-pub`  ), navigate to `stn_paper/` directory and follow these steps:
 
 1. Activate the environment:
     * in the `stn_paper/` directory open a Julia `REPL`, activate the env with: `] activate .` (the `]`is needed to enter package mode (blue) of the `REPL` and only needed once)
@@ -15,7 +17,7 @@ Once you have successfully downloaded the `stn_paper/` directory (or by clicking
 
    * if you only have the `stn_paper/` dir with the scripts, or you use Windows: 
 
-     ` add https://github.com/rusandris/StateTransitionNetworks.jl.git`
+     ` add https://github.com/rusandris/StateTransitionNetworks.jl.git #v0.4.0-pub  `
 
    * if you downloaded the whole repository: ` add ../../StateTransitionNetworks.jl/`
 
