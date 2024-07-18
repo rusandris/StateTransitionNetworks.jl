@@ -29,7 +29,7 @@ Once you have successfully downloaded the `stn_paper/` directory (or by clicking
 
 To run any file from the `code/` directory, here are some options:
 
-* Run from `REPL`: `include(code/logistic_map_main.jl)`
+* Run from `REPL`: `include("code/logistic_map_main.jl")`
 
 * Run in background (Linux): `julia --project=./ code/logistic_map_main.jl < /dev/null > logfile.log 2>&1 &`
 
@@ -46,9 +46,9 @@ Note:  The scripts save the values continuously in `data/` and log status in the
 
 #### PLOT
 
-To get the main figure, run `code/plotters/plot_maps_main.jl`. 
+To get the main figure, run `code/plotters/plot_maps_main.jl`.  For example `include("code/plotters/plot_maps_main.jl")`
 
-To get the supplementary figure, run `code/plotters/plot_maps_sm.jl`.
+To get the supplementary figure, run `code/plotters/plot_maps_sm.jl`. For example `include("code/plotters/plot_maps_sm.jl")`
 
 See the output in `figs/` (png).
 
