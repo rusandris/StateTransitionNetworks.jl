@@ -13,8 +13,13 @@ flush(stdout)
 
 #---------------parameters----------------------
 
+#for zoomed-in parameter range
 Δp::Float64 = 1e-3 	#2*1e-4
 ps::Vector{Float64} = [1.2:Δp:1.4;]
+
+#for broader parameter range
+#Δp::Float64 = 1e-3 	#4*1e-4
+#ps::Vector{Float64} = [1.0:Δp:1.4;]
 
 const T::Int64 = 10^6 #10^8
 const T_string::String = @sprintf "%.E" T
@@ -38,7 +43,7 @@ data_dir = data_root_dir_name * "/" * data_dir_name * "/"
 !(data_root_dir_name in readdir()) && (mkdir(data_root_dir_name))
 !(data_dir_name in readdir(data_root_dir_name)) && (mkdir(data_dir))
 
-#=
+
 out_file_entropy = data_dir*"henon_entropies"  * "_T$T_string" * "_Ttr$Ttr_string" * "_b_0.3" * "_grid_$grid_size" * "param_$(ps[1])" * "_$(ps[end])" * ".txt"
 out_file_lambda = data_dir*"henon_lambdas" *  "_T$T_string" * "_Ttr$Ttr_string" * "_b_0.3" * "_grid_$grid_size" * "param_$(ps[1])" * "_$(ps[end])" * ".txt"
 
@@ -91,7 +96,7 @@ flush(stderr)
 lyap_exps = calc_lyapunovs(ds,ps,5000,5000)
 writedlm(data_dir * "lyapexps" * "_T$T_string" * "_Ttr$Ttr_string" * "_b_$(ds.p[2])"  * "_grid_$grid_size" * "_nr_param_$(length(ps))" * "param_$(ps[1])" * "_$(ps[end])" * ".txt",hcat(ps,lyap_exps))
 
-=#
+
 #-----------------------------------------------direct random walk simulation stats-----------------------------------------
 
 

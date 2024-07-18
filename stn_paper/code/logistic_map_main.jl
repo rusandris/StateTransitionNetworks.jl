@@ -13,8 +13,13 @@ flush(stdout)
 
 #--------------------parameters--------------------
 
+#for zoomed-in parameter range 
 Δp::Float64 = 1e-3 	#2*1e-4
 ps::Vector{Float64} = [3.8:Δp:4.0;]
+
+#for broader control parameter range
+#Δp::Float64 = 1e-3 	#2*1e-4
+#ps::Vector{Float64} = [3.5:Δp:4.0;]
 
 const T::Int64 = 10^6 #10^8
 const T_string::String = @sprintf "%.E" T
