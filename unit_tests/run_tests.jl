@@ -7,7 +7,7 @@ using Test
 	@testset verbose=true "linsolve methods" include("iterative_linsolve.jl")
 	@testset verbose=true "higher order states" include("higher_order_states.jl")
 	@testset verbose=true "renyi entropy" include("renyi_entropy.jl")
-	@testset verbose=true "Transitions interface" include("transitions.jl")
+	@testset verbose=true "SymbolStatistics structs" include("SymbolStatistics.jl")
 
 		
 	

@@ -1,26 +1,27 @@
-export IntegerTransitions,GeneralTransitions
+export SymbolStatistics,SymbolStatisticsRemap
 export add_transition!,add_transitions!
 export calculate_transition_matrix,update_dict!,normalize_rows!,calculate_symbol_probabilities
 
-abstract type AbstractTransitions end 
+abstract type AbstractSymbolStatistics end 
 
-#--------------------IntegerTransitions------------------
+#--------------------SymbolStatistics------------------
 
-mutable struct IntegerTransitions{I<: Integer} <: AbstractTransitions                    
+mutable struct SymbolStatistics{I<: Integer} <: AbstractSymbolStatistics                    
     symbol_space_size::I
     Q::SparseMatrixCOO{Float64, I}
     x::SparseVector{Float64,I}
-    nr_transitions::I
+    last_transition::Tuple{I,I}
+    nr_unique_symbols::I 
+    nr_transitions::I 
 end
 
-function IntegerTransitions(I::Type,symbol_space_size::Int64)
+function SymbolStatistics(I::Type,symbol_space_size::Int64)
     Q = SparseMatrixCOO{Float64, I}(I[], I[], Float64[],symbol_space_size,symbol_space_size)
     x = SparseVector(symbol_space_size,I[],Float64[])
-    nr_transitions::I = 0
-    return IntegerTransitions(symbol_space_size,Q,x,nr_transitions)
+    return SymbolStatistics(symbol_space_size,Q,x,(zero(I),zero(I)),0,0)
 end
 
-function add_transition!(trs::IntegerTransitions,tr::Tuple{I,I} ) where I<:Integer
+function add_transition!(trs::SymbolStatistics,tr::Tuple{I,I} ) where I<:Integer
 
     #src and dst symbols
     src = tr[1]
@@ -30,7 +31,7 @@ function add_transition!(trs::IntegerTransitions,tr::Tuple{I,I} ) where I<:Integ
     trs.Q[src,dst] = 1.0
 
     #count occurrence of symbols in x 
-    if trs.nr_transitions == 0
+    if src != trs.last_transition[2] 
         trs.x[src] += 1.0
         trs.x[dst] += 1.0
     else
@@ -40,11 +41,17 @@ function add_transition!(trs::IntegerTransitions,tr::Tuple{I,I} ) where I<:Integ
     #increment nr_transitions
     trs.nr_transitions += 1
 
+    #save last_transition
+    trs.last_transition = tr
+
+    #update nr_unique_symbols
+    trs.nr_unique_symbols = length(trs.x.nzind)
+
     return nothing
 
 end
 
-function calculate_transition_matrix(trs::IntegerTransitions)
+function calculate_transition_matrix(trs::SymbolStatistics)
     #get used symbols from occupied indices of the sparse COO
     #trs.Q.is is the row coord, trs.Q.js is the col coord of elements
     used_symbols = trs.x.nzind
@@ -59,7 +66,7 @@ function calculate_transition_matrix(trs::IntegerTransitions)
 end
 
 
-function add_transitions!(trs::AbstractTransitions, symbolic_timeseries)  
+function add_transitions!(trs::AbstractSymbolStatistics, symbolic_timeseries)  
 
     n = length(symbolic_timeseries)
 
@@ -69,31 +76,33 @@ function add_transitions!(trs::AbstractTransitions, symbolic_timeseries)
 
 end
 
-function calculate_symbol_probabilities(trs::T) where T <: AbstractTransitions
+function calculate_symbol_probabilities(trs::T) where T <: AbstractSymbolStatistics
     x_nz = nonzeros(trs.x) 
     return x_nz ./ sum(x_nz)  
 end
 
-#--------------------GeneralTransitions------------------
+#--------------------SymbolStatisticsRemap------------------
 
-mutable struct GeneralTransitions{S} <: AbstractTransitions                    
+mutable struct SymbolStatisticsRemap{T} <: AbstractSymbolStatistics                    
     symbol_space_size::Int64
     Q::SparseMatrixCOO{Float64, Int64}
     x::SparseVector{Float64,Int64}
-    symbol_dict::Dict{S,Int64}
-    nr_used_symbols::Int64 
+    symbol_dict::Dict{T,Int64}
+    last_transition::Tuple{T,T}
+    nr_unique_symbols::Int64 
     nr_transitions::Int64 
 end
 
 
-function GeneralTransitions(S::Type,symbol_space_size::Int64)
+function SymbolStatisticsRemap(T::Type,symbol_space_size::Int64)
     Q = SparseMatrixCOO{Float64, Int64}(Int64[], Int64[], Float64[],symbol_space_size,symbol_space_size)
     x = SparseVector(symbol_space_size,Int64[],Float64[])
-    symbol_dict = Dict{S,Int64}()
-    return GeneralTransitions{S}(symbol_space_size,Q,x,symbol_dict,0,0)
+    symbol_dict = Dict{T,Int64}()
+    return SymbolStatisticsRemap{T}(symbol_space_size,Q,x,symbol_dict,(zero(T),zero(T)),0,0)
 end
 
-function add_transition!(trs::GeneralTransitions,tr::Tuple{S,S} where S<:Any)
+function add_transition!(trs::SymbolStatisticsRemap,tr::Tuple{S,S} where S<:Any)
+
     #src and dst symbols
     src = tr[1]
     dst = tr[2]
@@ -105,40 +114,43 @@ function add_transition!(trs::GeneralTransitions,tr::Tuple{S,S} where S<:Any)
     #add transition to sparse matrix (setindex! pushes)
     trs.Q[trs.symbol_dict[src] ,trs.symbol_dict[dst] ] = 1.0
 
-    #increment nr_transitions
-    trs.nr_transitions += 1
-
     #count occurrence of symbols in x 
-    if trs.nr_transitions == 0
+    if src != trs.last_transition[2] 
         trs.x[trs.symbol_dict[src]] += 1.0   
         trs.x[trs.symbol_dict[dst]] += 1.0   
     else
         trs.x[trs.symbol_dict[dst]] += 1.0
     end
 
+    #increment nr_transitions
+    trs.nr_transitions += 1
+
+    #save last_transition
+    trs.last_transition = tr
+
     return nothing
 
 end
 
-function update_dict!(trs::GeneralTransitions,symbol::S where S<:Any)
+function update_dict!(trs::SymbolStatisticsRemap,symbol::S where S<:Any)
     #check if symbol is already used
     if !haskey(trs.symbol_dict,symbol)
         #check if symbol can be added
-        if trs.nr_used_symbols < trs.symbol_space_size
+        if trs.nr_unique_symbols < trs.symbol_space_size
             #push new symbol_dict entry
-            push!(trs.symbol_dict, symbol => trs.nr_used_symbols + 1)
-            trs.nr_used_symbols += 1
+            push!(trs.symbol_dict, symbol => trs.nr_unique_symbols + 1)
+            trs.nr_unique_symbols += 1
         else
-            error("Cannot add more symbols! trs.used_symbols ($(trs.nr_used_symbols)) < trs.symbol_space_size ($(trs.symbol_space_size)) ")
+            error("Cannot add more symbols! trs.used_symbols ($(trs.nr_unique_symbols)) < trs.symbol_space_size ($(trs.symbol_space_size)) ")
         end
     end
     return nothing
 end
 
 
-function calculate_transition_matrix(trs::GeneralTransitions)
+function calculate_transition_matrix(trs::SymbolStatisticsRemap)
     #transitions are put in order in trs.Q
-    nzrows = 1:trs.nr_used_symbols
+    nzrows = 1:trs.nr_unique_symbols
     #easy slice
     P = SparseMatrixCSC(trs.Q)
     P = P[nzrows,nzrows]
