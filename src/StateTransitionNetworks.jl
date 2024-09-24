@@ -16,7 +16,7 @@ export linsolve
 
 
 include("timeseries_to_grid.jl")
-include("transitions.jl")
+include("SymbolStatistics.jl")
 include("transition_matrix.jl")
 include("higher_order_symbolics.jl")
 
