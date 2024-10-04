@@ -26,9 +26,9 @@ using Test
     
     @testset "Test transition addition" begin
 
-        @testset "SymbolStatisticsRemap" begin
+        @testset "SymbolStatistics" begin
             #test adding single transitions
-            trs = SymbolStatisticsRemap(Int64,3)
+            trs = SymbolStatistics(Int64,3)
             add_transition!(trs, (11,22))
             @test trs.nr_unique_symbols == 2
             @test trs.nr_transitions == 1
@@ -41,14 +41,14 @@ using Test
 
             #test if adding single transitions and adding transitions
             #from a symbolic trajectory is the same
-            trs_in_one_go = SymbolStatisticsRemap(Int64,3)
+            trs_in_one_go = SymbolStatistics(Int64,3)
             add_transitions!(trs_in_one_go,[11,22,33])
             @test all([getfield(trs,field) == getfield(trs,field) for field in fieldnames(typeof(trs))]) 
         end
 
         #=
         @testset "more general (string) symbols" begin
-            trs = SymbolStatisticsRemap(String,10)
+            trs = SymbolStatistics(String,10)
             add_transitions!(trs, ["a","b","c","b","a","c"])
             @test trs.nr_unique_symbols == 3
             @test trs.nr_transitions == 5     
@@ -63,9 +63,9 @@ using Test
         =#
     end
 
-    @testset "SymbolStatistics" begin
+    @testset "SymbolStatisticsNoRemap" begin
         #test adding single transitions
-        trs = SymbolStatistics(Int64,3)
+        trs = SymbolStatisticsNoRemap(Int64,3)
         add_transition!(trs, (1,2))
         @test trs.nr_unique_symbols == 2
         @test trs.nr_transitions == 1
@@ -78,7 +78,7 @@ using Test
 
         #test if adding single transitions and adding transitions
         #from a symbolic trajectory is the same
-        trs_in_one_go = SymbolStatistics(Int64,3)
+        trs_in_one_go = SymbolStatisticsNoRemap(Int64,3)
         add_transitions!(trs_in_one_go,[1,2,3])
         @test all([getfield(trs,field) == getfield(trs,field) for field in fieldnames(typeof(trs))]) 
     end
