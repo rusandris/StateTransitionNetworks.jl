@@ -12,7 +12,7 @@ Optional Keyword arguments:
 * `ϵ`: tolerance for Λ calculation
 * `maxiter`: maxiter for Λ calculation
 """
-function network_measures(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P),ϵ=1e-12,maxiter=100000,alg=hybrid_solve)
+function network_measures(P::SparseMatrixCSC;x=stationary_distribution(P),ϵ=1e-12,maxiter=100000,alg=hybrid_solve)
    	entropy, ret_code_entr = sinai_kolmogorov_entropy(P;x=x)
     lyapunov, variance, covariance, ret_code_lyap = lyapunov_measure(P;x=x,ϵ=ϵ,maxiter=maxiter,alg=alg)
 	return entropy, lyapunov
