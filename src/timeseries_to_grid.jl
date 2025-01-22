@@ -201,7 +201,7 @@ function timeseries_to_grid!(symbolic_timeseries,timeseries::TimeSeries{T,2},gri
 	end
 
 	x_min,y_min,x_max,y_max = grid_edges
-	L,dim = size(timeseries) 
+	L, = size(timeseries) 
 
 	for p in 1:L
 		#handle points outside on the x-axis
@@ -220,7 +220,7 @@ function timeseries_to_grid(timeseries::TimeSeries{T,2},grid_size::Int,grid_edge
 	end
 
 	x_min,y_min,x_max,y_max = grid_edges
-	L,dim = size(timeseries)
+	L, = size(timeseries)
 	
 	if method == skip_outside_grid
 		symbolic_timeseries = Int[]
