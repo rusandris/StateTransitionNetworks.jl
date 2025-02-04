@@ -1,12 +1,18 @@
 #---------------------global plotting params---------------------
 global guidefontsize::Int = 25
 global legendfontsize::Int = 14
-global tickfontsize::Int = 18
+global tickfontsize::Int = 14
 global annotation_fontsize::Int = 24 
 global reduced_right_margin = 2Plots.mm
 global reduced_left_margin = 4Plots.mm
 global left_margin = 9Plots.mm
+global reduced_top_margin = -6Plots.mm
+global top_margin = 5Plots.mm
+global halfcolfig_size = (500,800) #not sure of it matters
+global colfig_size = (1000,1200)
 global marker_size_colored = 12 
+global ylims_od = (-0.2,1.45)
+global inset_box = bbox(0.62,0.05,0.3,0.4)
 global subfigure_annotation_pos = (-0.35,1.05)
 global subfigure_annotation_pos_henon = (-0.15,1.05)
 global inset_tickfontsize = 14

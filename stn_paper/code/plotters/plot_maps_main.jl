@@ -10,7 +10,7 @@ include("plot_logistic_main.jl")
 include("plot_henon_main.jl")
 
 l2 = @layout [a{0.5w} b{0.5w}]
-pl = plot(pl_logistic,pl_henon,layout=l2,size=(1000,1500),top_margin=15Plots.mm);
+pl = plot(pl_logistic,pl_henon,layout=l2,size=colfig_size) #,top_margin=15Plots.mm);
 
 fig_dir_name = "figs"
 fig_dir = fig_dir_name * "/" 

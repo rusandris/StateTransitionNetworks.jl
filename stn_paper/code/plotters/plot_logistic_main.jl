@@ -33,8 +33,9 @@ ylims=(-0.03,0.725),
 #yticks=[0.0,0.1,0.2,0.3],
 titlefontsize=20,
 left_margin=10Plots.mm,
+#top_margin=reduced_top_margin,
 #right_margin=5Plots.mm,
-top_margin=5Plots.mm,
+top_margin=top_margin,
 legend= (0.7,0.8),
 dpi=300,#size=(800,300)
 xlabel=L"q",
@@ -100,7 +101,6 @@ Ss = readdlm(logistic_results_dir * entropies_file)[:,2:end]
 
 #--------------plotting params------------
 alphas = [0.4:0.2:1.0;]
-inset_box = bbox(0.62,0.2,0.3,0.25)
 #inset_indices = 301:351
 inset_param_range = [3.8,3.88]
 inset_ticks_entropies = [inset_param_range,[0.0,0.5]]
@@ -118,10 +118,12 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-ylims=(0.0,1.45),
+ylims=ylims_od,
 #xlims=(3.8,4.01),
 yticks=[0.0,0.5,1.0],
+xticks=[3.8,3.85,3.9,3.95,4.0],
 titlefontsize=20,
+top_margin=reduced_top_margin,
 left_margin=left_margin,
 right_margin=reduced_right_margin ,
 legend=:none,
@@ -139,9 +141,11 @@ tickfontsize=tickfontsize,
 ylims=(-0.01,1.0),
 #xlims=(3.8,4.01),
 yticks=[0.0,0.5,1.0],
+xticks=[3.8,3.85,3.9,3.95,4.0],
 titlefontsize=20,
 left_margin=left_margin,
 right_margin=reduced_right_margin,
+top_margin=reduced_top_margin,
 legend=:none,
 ylabel= L"S,\lambda",
 xformatter=:none,
@@ -160,10 +164,11 @@ yticks=[0.0,0.5,1.0],
 titlefontsize=20,
 left_margin=left_margin,
 right_margin=reduced_right_margin,
+top_margin=reduced_top_margin,
 legend=:none,
 ylabel= L"\Lambda",
 xlabel = L"r",
-xticks=[3.8,3.9,4.0],
+xticks=[3.8,3.85,3.9,3.95,4.0],
 yguidefontrotation=0,
 marker_size=marker_size_colored,
 dpi=300)
@@ -176,7 +181,7 @@ pl_s_logistic = plot_measure(ps,Ss,special_ps;
     labels = s_labels,
     λs = λs,
     alphas=alphas,
-    inset_box=inset_box,
+    inset_box=bbox(0.62,0.42,0.3,0.4),
     inset_param_range=inset_param_range,
     marker_shapes=marker_shapes,
     marker_colors=marker_colors,
@@ -209,5 +214,5 @@ pl_lambda_logistic = plot_measure(ps,Λs,special_ps;
 annotate!(pl_lambda_logistic[1],subfigure_annotation_pos, text("(g)", :left, 24))
 
 l = @layout [a{0.25h}; b{0.25h}; b{0.25h};d{0.25h}]
-pl_logistic = plot(pl_spec,pl_od_logistic,pl_s_logistic,pl_lambda_logistic,layout = l,size=(600,1000))
+pl_logistic = plot(pl_spec,pl_od_logistic,pl_s_logistic,pl_lambda_logistic,layout = l,size=halfcolfig_size)
 #savefig(pl_logistic,"logistic_4fig_spectrums_measures_test_T1e8_max_order12.png")

@@ -29,7 +29,7 @@ tickfontsize=tickfontsize,
 ylims=(-0.03,0.72),
 titlefontsize=20,
 left_margin=reduced_left_margin,
-top_margin=5Plots.mm,
+top_margin=top_margin,
 legend= (0.7,0.9),
 dpi=300,#size=(800,300)
 xlabel=L"q",
@@ -93,7 +93,6 @@ Ss = readdlm(henon_results_dir * entropies_file)[:,2:end]
 
 #--------------plotting params------------
 alphas = [0.2:0.2:1.0;]
-inset_box = bbox(0.62,0.2,0.3,0.25)
 #inset_indices = 1:201
 inset_param_range = [1.2,1.25]
 inset_ticks_entropies = [inset_param_range,[0.0,0.5]]
@@ -108,10 +107,12 @@ plot_params_od = (
 guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
-ylims=(0,1.45),
-yticks=[0.0,1.0],
+ylims=ylims_od,
+yticks=[0.0,0.5,1.0],
+xticks=[1.2,1.25,1.3,1.35,1.4],
 titlefontsize=20,
 left_margin=reduced_left_margin,
+top_margin=reduced_top_margin,
 #right_margin=4Plots.mm,
 legend=:none,
 #ylabel= L"x_n",
@@ -124,10 +125,12 @@ plot_params_entropy = (
 guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
-ylims=(-0.01,1.2),
+ylims=(-0.01,1.0),
 yticks=[0.0,0.5,1.0],
+xticks=[1.2,1.25,1.3,1.35,1.4],
 titlefontsize=20,
-left_margin=reduced_left_margin ,
+left_margin=reduced_left_margin,
+top_margin=reduced_top_margin,
 #right_margin=4Plots.mm,
 legend=:none,
 #ylabel= L"S",
@@ -147,11 +150,12 @@ yticks=[0.0,0.5,1.0],
 titlefontsize=20,
 left_margin=reduced_left_margin,
 #right_margin=4Plots.mm,
+top_margin=reduced_top_margin,
 legend=:none,
 #ylabel= L"\Lambda",
 xlabel = L"a",
 vertical_lw=2,
-xticks=[1.2,1.3,1.4],
+xticks=[1.2,1.25,1.3,1.35,1.4],
 yformatter=:none,
 yguidefontrotation=0,
 dpi=300)
@@ -195,5 +199,5 @@ pl_lambda_henon = plot_measure(ps,Λs,special_ps;
 annotate!(pl_lambda_henon[1],subfigure_annotation_pos_henon, text("(h)", :left, 24))
 
 l = @layout [a{0.25h}; b{0.25h}; b{0.25h};d{0.25h}]
-pl_henon = plot(pl_spec,pl_od_henon,pl_s_henon,pl_lambda_henon,layout = l,size=(600,1000))
+pl_henon = plot(pl_spec,pl_od_henon,pl_s_henon,pl_lambda_henon,layout = l,size=halfcolfig_size)
 #savefig(pl_henon,"henon_4fig_spectrums_measures_T1e8_max_order8.png")
