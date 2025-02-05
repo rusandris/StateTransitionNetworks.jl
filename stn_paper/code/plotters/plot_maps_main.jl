@@ -16,4 +16,4 @@ fig_dir_name = "figs"
 fig_dir = fig_dir_name * "/" 
 !(fig_dir_name in readdir()) && (mkdir(fig_dir))
 
-savefig(pl,fig_dir * "logistic_henon_main.png")
+savefig(pl,fig_dir * "logistic_henon_main_inset_rw_changed.png")

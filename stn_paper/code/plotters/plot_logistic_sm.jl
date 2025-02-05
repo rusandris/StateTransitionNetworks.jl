@@ -3,7 +3,7 @@ using Plots,LaTeXStrings
 using Printf
 using DynamicalSystems
 #using ComplexityMeasures
-include("plotting_params_sm.jl")
+include("plotting_params_main.jl")
 include("plot_functions_chaotic_maps.jl")
 
 #---------------------------logistic------------------------------------
@@ -13,7 +13,7 @@ include("plot_functions_chaotic_maps.jl")
 #------------------------read in data-----------------------------
 
 
-data_dir = "data/logistic_data/"
+data_dir = "data/logistic_data_sm/"
 result_files = readdir(data_dir)
 
 param_file = result_files[findfirst(f -> occursin("param_values", f),result_files)]
@@ -89,7 +89,7 @@ plot!(pl_dist_log,[0.0],[0.02],st=:scatter,
 
 annotate!(pl_dist_log,subfigure_annotation_pos, text("(a)", :left, 24))
 #--------------------------measures fig---------------------
-logistic_results_dir = "data/logistic_data/"
+logistic_results_dir = "data/logistic_data_sm/"
 result_files = readdir(logistic_results_dir)
 
 ps_file = result_files[findfirst(f -> occursin("logistic_p_values", f),result_files)]
@@ -129,16 +129,18 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-ylims=(0.0,1.2),
+ylims=(-0.5,1.7),
 #xlims=(3.8,4.01),
-yticks=[0.0,0.5,1.0],
+yticks=[-0.5,0.0,0.5,1.0,1.5],
 titlefontsize=20,
 left_margin=left_margin,
-right_margin=reduced_right_margin ,
+right_margin=reduced_right_margin,
+top_margin=reduced_top_margin_sm,
 legend=:none,
 ylabel= L"x_n",
 yguidefontrotation=0,
 xformatter=:none,
+xticks=[3.5,3.625,3.75,3.875,4.0],
 marker_size=marker_size_colored,
 dpi=300)
 
@@ -147,14 +149,16 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-ylims=(-0.01,1.0),
+ylims=(-0.01,1.25),
 #xlims=(3.8,4.01),
 yticks=[0.0,0.5,1.0],
 titlefontsize=20,
 left_margin=left_margin,
 right_margin=reduced_right_margin,
+top_margin=reduced_top_margin_sm,
 legend=:none,
 ylabel= L"S,\lambda",
+xticks=[3.5,3.625,3.75,3.875,4.0],
 xformatter=:none,
 yguidefontrotation=0,
 marker_size=marker_size_colored,
@@ -171,10 +175,11 @@ yticks=[0.0,0.5,1.0],
 titlefontsize=20,
 left_margin=left_margin,
 right_margin=reduced_right_margin,
+top_margin=reduced_top_margin_sm,
 legend=:none,
 ylabel= L"\Lambda",
 xlabel = L"r",
-xticks=[3.5,3.75,4.0],
+xticks=[3.5,3.625,3.75,3.875,4.0],
 yguidefontrotation=0,
 marker_size=marker_size_colored,
 dpi=300)

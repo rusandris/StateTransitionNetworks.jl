@@ -3,13 +3,13 @@ using Plots,LaTeXStrings
 using Printf
 using DynamicalSystems
 #using ComplexityMeasures
-include("plotting_params_sm.jl")
+include("plotting_params_main.jl")
 include("plot_functions_chaotic_maps.jl")
 
 #--------------------------------------Henon--------------------------------------------
 
 #read henon param values from spectrumdir
-data_dir = "data/henon_data/"
+data_dir = "data/henon_data_sm/"
 results_files = readdir(data_dir)
 param_file = results_files[findfirst(f -> occursin("param_values", f),result_files)]
 ps_henon = vec(readdlm(data_dir * param_file))
@@ -22,7 +22,7 @@ marker_shapes_wl = marker_shapes[[1,3,4]] #local plotting param
 
 #----------------------------read in data-----------------------
 
-result_files = readdir(spectrums_dir)
+result_files = readdir(data_dir)
 
 walk_lengths_file = result_files[findfirst(f -> occursin("walk_lengths", f),result_files)]
 walk_lengths_henon = readdlm(data_dir * walk_lengths_file)
@@ -91,7 +91,7 @@ plot!(pl_dist_henon,[0.0],[0.02],st=:scatter,
     label=L"a=%$(ps_henon[2])")
 
 #--------------------------measures fig---------------------
-henon_results_dir = "data/henon_data/"
+henon_results_dir = "data/henon_data_sm/"
 result_files = readdir(henon_results_dir)
 
 ps_file = result_files[findfirst(f -> occursin("henon_p_values", f),result_files)]
@@ -132,10 +132,12 @@ plot_params_od = (
 guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
-ylims=(-1.4,1.7),
-yticks=[-1.0,0.0,1.0],
+ylims=(-0.5,1.7),
+yticks=[-0.5,0.0,0.5,1.0,1.5],
+xticks=[1.0,1.1,1.2,1.3,1.4],
 titlefontsize=20,
 left_margin=left_margin,
+top_margin=reduced_top_margin_sm,
 #right_margin=4Plots.mm,
 legend=:none,
 #ylabel= L"x_n",
@@ -149,10 +151,12 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-ylims=(-0.01,1.2),
+ylims=(-0.01,1.25),
 yticks=[0.0,0.5,1.0],
+xticks=[1.0,1.1,1.2,1.3,1.4],
 titlefontsize=20,
-left_margin=left_margin ,
+left_margin=left_margin,
+top_margin=reduced_top_margin_sm,
 #right_margin=4Plots.mm,
 legend=:none,
 #ylabel= L"S",
@@ -167,16 +171,17 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-ylims=(-0.01,1.2),
+ylims=(-0.01,1.25),
 yticks=[0.0,0.5,1.0],
 titlefontsize=20,
 left_margin=left_margin,
+top_margin=reduced_top_margin_sm,
 #right_margin=4Plots.mm,
 legend=:none,
 #ylabel= L"\Lambda",
 xlabel = L"a",
 vertical_lw=2,
-xticks=[1.0,1.2,1.4],
+xticks=[1.0,1.1,1.2,1.3,1.4],
 yformatter=:none,
 yguidefontrotation=0,
 dpi=300)

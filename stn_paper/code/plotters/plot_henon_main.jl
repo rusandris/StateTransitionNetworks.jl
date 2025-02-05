@@ -91,6 +91,12 @@ lambdas_file = result_files[findall(f -> occursin("lambdas", f),result_files)][1
 Ss = readdlm(henon_results_dir * entropies_file)[:,2:end]
 Λs = readdlm(henon_results_dir * lambdas_file)[:,2:end]
 
+
+#show higher precision random walk calculations on inset
+#load data that was saved separately
+Ss_rw = readdlm(henon_results_dir * "henon_rw_entropies_T1E+08_Ttr1E+06_b_0.3_grid_32.txt")
+Λs_rw = readdlm(henon_results_dir * "henon_rw_lambdas_T1E+08_Ttr1E+06_b_0.3_grid_32.txt")
+
 #--------------plotting params------------
 alphas = [0.2:0.2:1.0;]
 #inset_indices = 1:201
@@ -169,6 +175,7 @@ pl_s_henon = plot_measure(ps,Ss,special_ps;
     λs = λs,
     alphas=alphas,
     inset_box=inset_box,
+    inset_rw_vals=Ss_rw,
     inset_param_range=inset_param_range,
     marker_colors=marker_colors,
     orders=orders,
@@ -185,6 +192,7 @@ pl_lambda_henon = plot_measure(ps,Λs,special_ps;
     labels = Λ_labels,
     alphas=alphas,
     inset_box=inset_box,
+    inset_rw_vals=Λs_rw,
     inset_param_range=inset_param_range,
     marker_colors=marker_colors,
     orders=orders,
