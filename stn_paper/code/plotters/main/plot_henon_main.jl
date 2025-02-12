@@ -1,23 +1,25 @@
 using DelimitedFiles
 using Plots,LaTeXStrings
 using Printf
-include("plotting_params_main.jl")
-include("plot_functions_chaotic_maps.jl")
+
+cd(@__DIR__)
+include("../plotting_params.jl")
+include("../plot_functions_chaotic_maps.jl")
 #---------------------------------henon------------------------------------
 
 #henon spectrum results
-spectrums_dir = "data/henon_data/"
+henon_results_dir = "../../../data/main/henon_data/"
 
-all_spec_files = readdir(spectrums_dir)
+all_spec_files = readdir(henon_results_dir)
 spectrum_files = all_spec_files[findall(f -> occursin("renyi_spectrums", f),all_spec_files)]
 measure_files = all_spec_files[findall(f -> occursin("measures_q1", f),all_spec_files)]
 
-all_spectrums = readdlm.(spectrums_dir .* spectrum_files) 
-measures_q1 = readdlm.(spectrums_dir .* measure_files) 
+all_spectrums = readdlm.(henon_results_dir .* spectrum_files) 
+measures_q1 = readdlm.(henon_results_dir .* measure_files) 
 
 param_file = all_spec_files[findall(f -> occursin("param_values", f),all_spec_files)][1]
-special_ps = vec(readdlm(spectrums_dir * param_file))
-orders = vec(readdlm(spectrums_dir * "orders.txt",Int64))
+special_ps = vec(readdlm(henon_results_dir * param_file))
+orders = vec(readdlm(henon_results_dir * "orders.txt",Int64))
 
 
 alphas = [1.0,1.0,1.0,1.0]
@@ -66,7 +68,7 @@ plot_params_spec...)
 annotate!(pl_spec,subfigure_annotation_pos_henon, text("(b)", :left, 24))
 
 #--------------------------measures fig---------------------
-henon_results_dir = "data/henon_data/"
+
 result_files = readdir(henon_results_dir)
 
 ps_file = result_files[findfirst(f -> occursin("henon_p_values", f),result_files)]
@@ -167,7 +169,9 @@ yguidefontrotation=0,
 dpi=300)
 
 
-pl_od_henon = plot_orbit_diagram(od_data,ps,special_ps;marker_shapes=marker_shapes,marker_offset=0.08,marker_size=marker_size_colored,marker_colors=marker_colors,plot_params_od...)
+pl_od_henon = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_henon,ma_od = ma_od_henon,
+    marker_shapes=marker_shapes,marker_offset=0.08,marker_size=marker_size_colored,
+    marker_colors=marker_colors,plot_params_od...)
 annotate!(pl_od_henon,subfigure_annotation_pos_henon, text("(d)", :left, 24))
 
 pl_s_henon = plot_measure(ps,Ss,special_ps;

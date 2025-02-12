@@ -53,7 +53,7 @@ function plot_measure(ps,ms,special_ps;λs=[],labels,vertical_lw,
     return pl
 end
 
-function plot_orbit_diagram(od,ps,special_ps;marker_shapes,marker_size,marker_colors,marker_offset=0.1,kwargs...)
+function plot_orbit_diagram(od,ps,special_ps;ms_od,ma_od,marker_shapes,marker_size,marker_colors,marker_offset=0.1,kwargs...)
     #--------------------------plot orbit diagram------------------------
     od_plot = plot(;kwargs...)
     n = length(od[1])
@@ -63,8 +63,8 @@ function plot_orbit_diagram(od,ps,special_ps;marker_shapes,marker_size,marker_co
 
         plot!(od_plot,fill(p,n),od[i],
         st=:scatter,
-        ms = 0.6,
-        ma=0.5,
+        ms = ms_od,
+        ma = ma_od,
         mc =:gray10,
         markerstrokewidth=0.0,
         legend=false)       

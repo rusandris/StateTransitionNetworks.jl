@@ -3,8 +3,9 @@ using Plots,LaTeXStrings
 using Printf
 using DynamicalSystems
 #using ComplexityMeasures
-include("plotting_params_main.jl")
-include("plot_functions_chaotic_maps.jl")
+cd(@__DIR__)
+include("../../plotting_params.jl")
+include("../../plot_functions_chaotic_maps.jl")
 
 #---------------------------logistic------------------------------------
 
@@ -13,19 +14,19 @@ include("plot_functions_chaotic_maps.jl")
 #------------------------read in data-----------------------------
 
 
-data_dir = "data/logistic_data_sm/"
-result_files = readdir(data_dir)
+logistic_results_dir = "../../../../data/supplimentary/logistic_data_sm/"
+result_files = readdir(logistic_results_dir)
 
 param_file = result_files[findfirst(f -> occursin("param_values", f),result_files)]
 
-global ps_log::Vector{Float64} = vec(readdlm(data_dir * param_file))
+global ps_log::Vector{Float64} = vec(readdlm(logistic_results_dir * param_file))
 global ps_wl_log::Vector{Float64} = ps_log[[1,3,4]] #[3.82842,3.85,4.0]
 
 walk_lengths_file = result_files[findfirst(f -> occursin("walk_lengths", f),result_files)]
-walk_lengths_log = readdlm(data_dir * walk_lengths_file)
+walk_lengths_log = readdlm(logistic_results_dir * walk_lengths_file)
 
 walk_lengths_stats_file = result_files[findfirst(f -> occursin("wl_stats", f),result_files)]
-means_log,variances_log,Ss_log,Λs_log = eachcol(readdlm(data_dir * walk_lengths_stats_file))
+means_log,variances_log,Ss_log,Λs_log = eachcol(readdlm(logistic_results_dir * walk_lengths_stats_file))
 
 marker_shapes_wl = marker_shapes[[1,3,4]] #local plotting param
 
@@ -89,7 +90,6 @@ plot!(pl_dist_log,[0.0],[0.02],st=:scatter,
 
 annotate!(pl_dist_log,subfigure_annotation_pos, text("(a)", :left, 24))
 #--------------------------measures fig---------------------
-logistic_results_dir = "data/logistic_data_sm/"
 result_files = readdir(logistic_results_dir)
 
 ps_file = result_files[findfirst(f -> occursin("logistic_p_values", f),result_files)]
@@ -185,8 +185,10 @@ marker_size=marker_size_colored,
 dpi=300)
 
 
-pl_od_logistic = plot_orbit_diagram(od_data,ps,ps_log;marker_shapes=marker_shapes,marker_size=marker_size_colored,marker_colors=marker_colors,plot_params_od...)
-annotate!(pl_od_logistic,subfigure_annotation_pos, text("(b)", :left, 24))
+pl_od_logistic = plot_orbit_diagram(od_data,ps,ps_log;ms_od = ms_od_logistic,ma_od = ma_od_logistic,
+    marker_shapes=marker_shapes,marker_size=marker_size_colored,
+    marker_colors=marker_colors,plot_params_od...)
+annotate!(pl_od_logistic,subfigure_annotation_pos, text("(c)", :left, 24))
 
 pl_s_logistic = plot_measure(ps,Ss,ps_log;
     labels = s_labels,
@@ -204,7 +206,7 @@ pl_s_logistic = plot_measure(ps,Ss,ps_log;
     marker_size=marker_size_colored,
     plot_params_entropy...)
 
-annotate!(pl_s_logistic[1],subfigure_annotation_pos, text("(c)", :left, 24))
+annotate!(pl_s_logistic[1],subfigure_annotation_pos, text("(e)", :left, 24))
 
 pl_lambda_logistic = plot_measure(ps,Λs,ps_log;
     labels = Λ_labels,
@@ -222,7 +224,7 @@ pl_lambda_logistic = plot_measure(ps,Λs,ps_log;
     red_params=[3.82,3.83],
     plot_params_lambda...)
 
-annotate!(pl_lambda_logistic[1],subfigure_annotation_pos, text("(d)", :left, 24))
+annotate!(pl_lambda_logistic[1],subfigure_annotation_pos, text("(f)", :left, 24))
 
 l = @layout [a{0.25h}; b{0.25h};c{0.25h};d{0.25h}]
 pl_logistic = plot(pl_dist_log,pl_od_logistic,pl_s_logistic,pl_lambda_logistic,layout = l,size=(1000,1000))

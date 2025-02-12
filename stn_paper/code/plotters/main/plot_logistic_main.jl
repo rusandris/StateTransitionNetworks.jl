@@ -1,23 +1,24 @@
 using DelimitedFiles
 using Plots,LaTeXStrings
 using Printf
-include("plotting_params_main.jl")
-include("plot_functions_chaotic_maps.jl")
+cd(@__DIR__)
+include("../plotting_params.jl")
+include("../plot_functions_chaotic_maps.jl")
 #---------------------------------logistic------------------------------------
 
 #-----------------------------logistic spectrum results------------------------
-spectrums_dir = "data/logistic_data/"
+logistic_results_dir = "../../../data/main/logistic_data/"
 
-all_spec_files = readdir(spectrums_dir)
+all_spec_files = readdir(logistic_results_dir)
 spectrum_files = all_spec_files[findall(f -> occursin("renyi_spectrums", f),all_spec_files)]
 measure_files = all_spec_files[findall(f -> occursin("measures_q1", f),all_spec_files)]
 
-all_spectrums = readdlm.(spectrums_dir .* spectrum_files) 
-measures_q1 = readdlm.(spectrums_dir .* measure_files) 
+all_spectrums = readdlm.(logistic_results_dir .* spectrum_files) 
+measures_q1 = readdlm.(logistic_results_dir .* measure_files) 
 
 param_file = all_spec_files[findall(f -> occursin("param_values", f),all_spec_files)][1]
-special_ps = vec(readdlm(spectrums_dir * param_file))
-orders = vec(readdlm(spectrums_dir * "orders.txt",Int64))
+special_ps = vec(readdlm(logistic_results_dir * param_file))
+orders = vec(readdlm(logistic_results_dir * "orders.txt",Int64))
 
 #marker_colors = fill(:red,4)
 #alphas = [0.2,0.4,0.6,1.0]
@@ -75,7 +76,7 @@ annotate!(pl_spec,subfigure_annotation_pos, text("(a)", :left, 24))
 plot!(pl_spec,[qs[1],qs[end]],[log(2),log(2)],ls=:dot,lw=2,lc=:gray10,label=L"K_q")
 
 #--------------------------measures fig---------------------
-logistic_results_dir = "data/logistic_data/"
+
 result_files = readdir(logistic_results_dir)
 
 ps_file = result_files[findfirst(f -> occursin("logistic_p_values", f),result_files)]
@@ -176,7 +177,9 @@ marker_size=marker_size_colored,
 dpi=300)
 
 
-pl_od_logistic = plot_orbit_diagram(od_data,ps,special_ps;marker_shapes=marker_shapes,marker_offset=0.35,marker_size=marker_size_colored,marker_colors=marker_colors,plot_params_od...)
+pl_od_logistic = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_logistic,ma_od = ma_od_logistic,
+    marker_shapes=marker_shapes,marker_offset=0.35,
+    marker_size=marker_size_colored,marker_colors=marker_colors,plot_params_od...)
 annotate!(pl_od_logistic,subfigure_annotation_pos, text("(c)", :left, 24))
 
 pl_s_logistic = plot_measure(ps,Ss,special_ps;

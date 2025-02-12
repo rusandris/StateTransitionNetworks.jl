@@ -3,16 +3,17 @@ using Plots,LaTeXStrings
 using Printf
 using DynamicalSystems
 #using ComplexityMeasures
-include("plotting_params_main.jl")
-include("plot_functions_chaotic_maps.jl")
+cd(@__DIR__)
+include("../../plotting_params.jl")
+include("../../plot_functions_chaotic_maps.jl")
 
 #--------------------------------------Henon--------------------------------------------
 
 #read henon param values from spectrumdir
-data_dir = "data/henon_data_sm/"
-results_files = readdir(data_dir)
+henon_results_dir = "../../../../data/supplimentary/henon_data_sm/"
+results_files = readdir(henon_results_dir)
 param_file = results_files[findfirst(f -> occursin("param_values", f),result_files)]
-ps_henon = vec(readdlm(data_dir * param_file))
+ps_henon = vec(readdlm(henon_results_dir * param_file))
 
 global ps_wl_henon::Vector{Float64} = ps_henon[[1,3,4]] #[1.2265,1.27,1.4]
 marker_shapes_wl = marker_shapes[[1,3,4]] #local plotting param
@@ -22,13 +23,13 @@ marker_shapes_wl = marker_shapes[[1,3,4]] #local plotting param
 
 #----------------------------read in data-----------------------
 
-result_files = readdir(data_dir)
+result_files = readdir(henon_results_dir)
 
 walk_lengths_file = result_files[findfirst(f -> occursin("walk_lengths", f),result_files)]
-walk_lengths_henon = readdlm(data_dir * walk_lengths_file)
+walk_lengths_henon = readdlm(henon_results_dir * walk_lengths_file)
 
 walk_lengths_stats_file = result_files[findfirst(f -> occursin("wl_stats", f),result_files)]
-means_henon,variances_henon,Ss_henon,Λs_henon = eachcol(readdlm(data_dir * walk_lengths_stats_file))
+means_henon,variances_henon,Ss_henon,Λs_henon = eachcol(readdlm(henon_results_dir * walk_lengths_stats_file))
 
 pl_dist_henon = plot(xlabel=L"\mathcal{L}(t)",
 #ylabel=L"p(\mathcal{L}(t))",
@@ -90,8 +91,9 @@ plot!(pl_dist_henon,[0.0],[0.02],st=:scatter,
     markerstrokewidth=0.5,
     label=L"a=%$(ps_henon[2])")
 
+annotate!(pl_dist_log,subfigure_annotation_pos, text("(b)", :left, 24))
+
 #--------------------------measures fig---------------------
-henon_results_dir = "data/henon_data_sm/"
 result_files = readdir(henon_results_dir)
 
 ps_file = result_files[findfirst(f -> occursin("henon_p_values", f),result_files)]
@@ -187,8 +189,11 @@ yguidefontrotation=0,
 dpi=300)
 
 
-pl_od_henon = plot_orbit_diagram(od_data,ps,ps_henon;marker_shapes=marker_shapes,marker_offset=0.17,marker_size=marker_size_colored,marker_colors=marker_colors,plot_params_od...)
-#annotate!(pl_od_henon,subfigure_annotation_pos_henon, text("(a)", :left, 24))
+pl_od_henon = plot_orbit_diagram(od_data,ps,ps_henon;ms_od = ms_od_henon,ma_od = ma_od_henon,
+    marker_shapes=marker_shapes,marker_offset=0.17,marker_size=marker_size_colored,
+    marker_colors=marker_colors,plot_params_od...)
+
+annotate!(pl_od_henon,subfigure_annotation_pos, text("(d)", :left, 24))
 
 pl_s_henon = plot_measure(ps,Ss,ps_henon;
     labels = s_labels,
@@ -205,7 +210,7 @@ pl_s_henon = plot_measure(ps,Ss,ps_henon;
     inset_tickfontsize=inset_tickfontsize,
     plot_params_entropy...)
 
-#annotate!(pl_s_henon[1],subfigure_annotation_pos_henon, text("(b)", :left, 24))
+annotate!(pl_s_henon[1],subfigure_annotation_pos_henon, text("(f)", :left, 24))
 
 pl_lambda_henon = plot_measure(ps,Λs,ps_henon;
     labels = Λ_labels,
@@ -222,7 +227,7 @@ pl_lambda_henon = plot_measure(ps,Λs,ps_henon;
     red_params=[1.22,1.227],
     plot_params_lambda...)
 
-#annotate!(pl_lambda_henon[1],subfigure_annotation_pos_henon, text("(c)", :left, 24))
+annotate!(pl_lambda_henon[1],subfigure_annotation_pos_henon, text("(h)", :left, 24))
 
 l = @layout [a{0.25h}; b{0.25h};c{0.25h};d{0.25h}]
 pl_henon = plot(pl_dist_henon,pl_od_henon,pl_s_henon,pl_lambda_henon,layout = l,size=(1000,1000))
