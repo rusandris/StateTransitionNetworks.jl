@@ -8,8 +8,9 @@ using StatsBase
 using DataFrames,CSV
 cd(@__DIR__)
 include("pipeline_functions.jl")
-data_dir = ""
-output_dir = "stn_paper_results/"
+data_dir = "../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
+#TODO: mkdir if doesn't exist 
+output_dir = "../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 
 
 #-----------------------------params------------------------
@@ -35,7 +36,7 @@ rrs_intervals = []
 time_spans = []
 rrs_datas = []
 for i in 1:length(samples)
-    rrs_data = readdlm("Long_Term_AF_Database/preAF_fib/rr_$(samples[i]).txt") #bimodal
+    rrs_data = readdlm(data_dir*"rr_$(samples[i]).txt") #bimodal
     rrs = Float64.(rrs_data[2:end,2])
     time_span = [1:length(rrs);] 
     push!(rrs_datas,rrs_data)

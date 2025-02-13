@@ -1,7 +1,8 @@
 using DelimitedFiles
 using CSV,DataFrames
 using Plots,LaTeXStrings
-include("../../StateTransitionNetworks.jl/stn_paper/code/plotters/plotting_params_main.jl")
+cd(@__DIR__)
+include("../../plotting_params.jl")
 
 
 #find annotations that mark change of signal type
@@ -31,13 +32,13 @@ function find_annotations(annotation,sig_change_data,times)
 end  
 
 #--------------------read dir----------------------
-data_dir = "stn_paper_results/"
+data_dir = "../../../../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 result_files = readdir(data_dir)
 samples = readdlm(data_dir*"sample_ids.txt",String)
 method_params = readdlm(data_dir*"method_params.txt")
 grid_size,w,window_size,grid_min,grid_max = method_params 
 grid_edges = (grid_min,grid_max)
-rrs_dir = "Long_Term_AF_Database/preAF_fib/"
+rrs_dir = "../../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 #--------------------plot data----------------------
 
 plot_params = (
@@ -126,7 +127,7 @@ for i in 1:length(plots_grid)
     @show samples[i]
     title!(plots_grid[i][1],"$(samples[i])")
     title!(plots_OP[i][1],"$(samples[i])")
-    sig_change_data = readdlm("Long_Term_AF_Database/preAF_fib/ann_sigch_$(samples[i]).txt",skipstart=1)
+    sig_change_data = readdlm(rrs_dir*"ann_sigch_$(samples[i]).txt",skipstart=1)
     rrs_data = readdlm(rrs_dir*"rr_$(samples[i]).txt")
     times = rrs_data[:,1]
 
@@ -152,11 +153,17 @@ for i in 1:length(plots_grid)
 
 end
 
-pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl,"figs/LTAFDatabase/summary/fib_selection_paper_sm" * "_grid_$(Int(grid_size))" * "_window_$(Int(window_size))"*".png")
+fig_dir_name = "figs"
+fig_dir = "../../../../" * fig_dir_name * "/" 
+!(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
 
-pl = plot(plots_OP...,layout = (1,length(plots_OP)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl,"figs/LTAFDatabase/summary/fib_selection_paper_sm" * "_OP_$(Int(w))" * "_window_$(Int(window_size))"*".png")
+pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1]*1.5,colfig_size[2]))
+savefig(pl,fig_dir*"fib_selection_paper_sm" * "_grid_$(Int(grid_size))" * "_window_$(Int(window_size))"*".png")
+
+pl_OP = plot(plots_OP...,layout = (1,length(plots_OP)),size=(colfig_size[1]*1.5,colfig_size[2]))
+savefig(pl,fig_dir*"fib_selection_paper_sm" * "_OP_$(Int(w))" * "_window_$(Int(window_size))"*".png")
+
+
 
 #=
 #zoom around onset
