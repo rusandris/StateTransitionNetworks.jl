@@ -19,6 +19,7 @@ global subfigure_annotation_pos = (-0.35,1.0)
 global subfigure_annotation_pos_henon = (-0.13,1.0)
 global subfigure_annotation_pos_sm = (-0.15,1.0)
 global subfigure_annotation_pos_sm_henon = (-0.1,1.0)
+global subfigure_annotation_pos_alter = (-0.3,1.0)
 global inset_tickfontsize = 14
 global legend_position = (0.6,0.7)
 global marker_shapes = [:rect,:star5,:circle,:diamond]

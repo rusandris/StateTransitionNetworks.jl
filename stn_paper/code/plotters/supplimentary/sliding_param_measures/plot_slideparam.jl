@@ -69,25 +69,12 @@ plot!(pl_ts[2],xlims=(rs[1],rs[end]+0.001),xlabel=L"r(t)",xticks=[3.8,3.81,3.82,
 plot!(pl_ts[1],times,timeseries,st=scatter,ms=0.8,ylims=(0.0,1.2),yticks=[0.0:0.3:1.2;],widen=true,ylabel=L"x(t)",mc=:gray10,ma=0.5,markerstrokewidth=0.0,legend=false);
 vline!(pl_ts[1],[n_min+n_crit],ls=:dash,lw=2,lc=:red);
 
-#=
-#---------------plot inset-------------------
-inset_box = bbox(0.35,0.25,0.2,0.2)
-inset_xticks = [times[1],(times[1]+times[end])/2,times[end]]
-inset_yticks = [rs[1]-0.01:0.02:rs[end]+0.01;]
-
-inset_xlims = [times[1],times[end]]
-inset_ylims = [rs[1]-0.01,rs[end]+0.01]
-plot!(pl_ts, inset=inset_box, subplot=2, framestyle=:box,xticks=inset_xticks,yticks=inset_yticks,tickfontsize=inset_tickfontsize)
-plot!(pl_ts[2],times,rs,ylabel=L"r(t)",xlabel=L"t",ylims=inset_ylims,xlims=inset_xlims,lw=2,la=1.0,lc=:gray10,legend=false)
-=#
 
 pl_S = plot(;plot_params...);
-pl_L = plot(;plot_params...);
-pl_var = plot(;plot_params...,ylims=(0.04,0.12),yticks=[0.04:0.02:0.12;]);
-pl_ac = plot(;xlims=[times[1],times[end]],xticks=[times[1]:30000:times[end];],xlabel=L"t",plot_params...,xformatter=:auto);
-#pl_ac_sum = plot();
-#pl_C1 = plot();
-#pl_C2 = plot();
+pl_L = plot(;plot_params...,ylims=(0.0,2.5),yticks=[0.0:1.0:2.5;]);
+pl_var = plot(;plot_params...,ylims=(0.0,0.12),yticks=[0.0:0.04:0.12;]);
+pl_ac = plot(;ylims=(-0.65,-0.45),yticks=[-0.65:0.05:-0.45;],xlims=[times[1],times[end]],xticks=[times[1]:30000:times[end];],xlabel=L"t",plot_params...,xformatter=:auto);
+
 
 for i in 1:nr_ics
     #lambda
@@ -107,10 +94,10 @@ for i in 1:nr_ics
     hline!(pl_ac,[acs[n_trans - n_min - window_size,nr_ics]],ls=:dash,lc=:gray50)
 end
 
-annotate!(pl_ts,subfigure_annotation_pos_henon, text("(a)", :left, 24))
-annotate!(pl_L,subfigure_annotation_pos_henon, text("(b)", :left, 24))
-annotate!(pl_var,subfigure_annotation_pos_henon, text("(c)", :left, 24))
-annotate!(pl_ac,subfigure_annotation_pos_henon, text("(d)", :left, 24))
+annotate!(pl_ts,subfigure_annotation_pos_sm, text("(a)", :left, 24))
+annotate!(pl_L,subfigure_annotation_pos_sm, text("(b)", :left, 24))
+annotate!(pl_var,subfigure_annotation_pos_sm, text("(c)", :left, 24))
+annotate!(pl_ac,subfigure_annotation_pos_sm, text("(d)", :left, 24))
 
 
 pl_log = plot(pl_ts,pl_L,pl_var,pl_ac,layout=(4,1),size=colfig_size);

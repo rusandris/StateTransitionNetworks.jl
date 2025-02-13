@@ -91,7 +91,7 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 titlefontsize=20,
-left_margin=left_margin+ 2Plots.mm,
+left_margin=left_margin,
 right_margin=reduced_right_margin,
 legend=:none,
 xformatter=:none,
@@ -113,7 +113,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.65,0.05,inset_box_size...)
+inset_box = bbox(0.37,0.0,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [0.4,0.6]
 
@@ -127,19 +127,20 @@ lens!(pl_S,inset_xlims, inset_ylims, inset = (1,inset_box),grid=true,
 plot!(pl_S[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #---------------------------Λ plot------------------------------
+ylims = [0.0,1.5]
+yticks = [0.0,0.75,1.5]
 pl_Λ = plot(;ylabel= L"\Lambda",yticks=yticks,ylims=ylims,plot_params...)
-
 
 #plot measure curves
 plot!(pl_Λ,ps,Λs,lw=2,la=1.0,lc=linecolor,label = Λ_label)
 
-#plot vertical lines on S plot
+#plot vertical lines 
 for (i,p) in enumerate(special_ps)
     plot!(pl_Λ,[p,p],[ylims[1],ylims[end]],ls=:dash,lw=vertical_lw,lc=marker_colors[i],label=false)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.65,0.05,inset_box_size...)
+inset_box = bbox(0.65,0.0,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [0.02,0.22]
 
@@ -153,8 +154,8 @@ lens!(pl_Λ,inset_xlims, inset_ylims, inset = (1,inset_box),grid=true,
 plot!(pl_Λ[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #-------------------------var plot---------------------------
-ylims=[0,0.2]
-yticks=[0.0,0.1,0.2]
+ylims=[0,0.3]
+yticks=[0.0,0.15,0.3]
 var = EWS_standard_log[:,1]
 pl_var = plot(;ylabel=L"\sigma^2",yticks=yticks,ylims=ylims,plot_params...)
 
@@ -168,7 +169,7 @@ end
 
 #---------------plot inset-------------------
 var_inset = EWS_standard_log[:,2]
-inset_box = bbox(0.65,0.5,inset_box_size...)
+inset_box = bbox(0.65,0.0,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [0.08,0.12]
 
@@ -183,8 +184,8 @@ plot!(pl_var[2],xticks=inset_xticks,yticks=inset_yticks)
 
 
 #-------------------------ac plot---------------------------
-ylims=[-1.0,0.1]
-yticks=[-1.0,-0.5,0.1]
+ylims=[-1.5,0.1]
+yticks=[-1.5,-0.75,0.0]
 ac = EWS_standard_log[:,2]
 pl_ac = plot(;ylabel=L"ACF(1)",ylims=ylims,yticks=yticks,plot_params...,xformatter=:auto)
 
@@ -198,7 +199,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.65,0.5,inset_box_size...)
+inset_box = bbox(0.7,0.45,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [-0.5,-0.3]
 
@@ -213,5 +214,12 @@ plot!(pl_ac[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #l = @layout [a{0.25h}; b{0.25h}; b{0.25h};d{0.25h}]
 l = (5,1)
+
+annotate!(pl_od_logistic,subfigure_annotation_pos, text("(a)", :left, 24))
+annotate!(pl_S[1],subfigure_annotation_pos, text("(c)", :left, 24))
+annotate!(pl_Λ[1],subfigure_annotation_pos, text("(e)", :left, 24))
+annotate!(pl_var[1],subfigure_annotation_pos, text("(g)", :left, 24))
+annotate!(pl_ac[1],subfigure_annotation_pos, text("(i)", :left, 24))
+
 pl_logistic = plot(pl_od_logistic,pl_S,pl_Λ,pl_var,pl_ac,layout = l,size=(600,1000))
 #savefig(pl_henon,"EWS_comparison_logistic.png")

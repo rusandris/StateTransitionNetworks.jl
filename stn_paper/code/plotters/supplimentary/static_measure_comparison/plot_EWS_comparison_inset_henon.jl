@@ -43,7 +43,7 @@ yticks=[0.7,1.0,1.3],
 xticks=[1.2,1.3,1.4],
 titlefontsize=20,
 left_margin=left_margin,
-bottommargin=10Plots.mm,
+right_margin=reduced_right_margin,
 legend=:none,
 xformatter=:none,
 ylims=(0.7,1.4),
@@ -111,7 +111,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.65,0.1,inset_box_size...)
+inset_box = bbox(0.65,0.0,inset_box_size...)
 inset_xticks = [1.305,1.32]
 inset_yticks = [0.2,0.4]
 
@@ -126,6 +126,8 @@ plot!(pl_S[2],xticks=inset_xticks,yticks=inset_yticks)
 
 
 #---------------------------Λ plot------------------------------
+ylims = [0.0,1.5]
+yticks = [0.0,0.75,1.5]
 pl_Λ = plot(;yticks=yticks,ylims=ylims,plot_params...)
 #ylabel= L"\Lambda"
 
@@ -138,7 +140,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.65,0.1,inset_box_size...)
+inset_box = bbox(0.72,0.0,inset_box_size...)
 inset_xticks = [1.305,1.32]
 inset_yticks = [0.1,1.2]
 
@@ -151,8 +153,8 @@ lens!(pl_Λ,inset_xlims, inset_ylims, inset = (1,inset_box),grid=true,
 plot!(pl_Λ[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #-------------------------var plot---------------------------
-ylims=[0.43,0.6]
-yticks=[0.43,0.5,0.6]
+ylims=[0.4,0.8]
+yticks=[0.4,0.6,0.8]
 var = EWS_standard_henon[:,1]
 pl_var = plot(;yticks=yticks,ylims=ylims,plot_params...)
 #ylabel=L"\sigma^2"
@@ -166,7 +168,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.65,0.1,inset_box_size...)
+inset_box = bbox(0.65,0.0,inset_box_size...)
 inset_xticks = [1.305,1.32]
 inset_yticks = [0.45,0.55]
 
@@ -208,5 +210,13 @@ plot!(pl_ac[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #l = @layout [a{0.25h}; b{0.25h}; b{0.25h};d{0.25h}]
 l = (5,1)
+
+
+annotate!(pl_od_henon,subfigure_annotation_pos_alter, text("(b)", :left, 24))
+annotate!(pl_S[1],subfigure_annotation_pos_alter, text("(d)", :left, 24))
+annotate!(pl_Λ[1],subfigure_annotation_pos_alter, text("(f)", :left, 24))
+annotate!(pl_var[1],subfigure_annotation_pos_alter, text("(h)", :left, 24))
+annotate!(pl_ac[1],subfigure_annotation_pos_alter, text("(j)", :left, 24))
+
 pl_henon = plot(pl_od_henon,pl_S,pl_Λ,pl_var,pl_ac,layout = l,size=(600,1000))
 #savefig(pl_henon,"EWS_comparison_henon.png")
