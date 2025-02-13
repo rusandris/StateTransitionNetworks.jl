@@ -9,14 +9,14 @@ include("../plot_functions_chaotic_maps.jl")
 #-----------------------------logistic spectrum results------------------------
 logistic_results_dir = "../../../data/main/logistic_data/"
 
-all_spec_files = readdir(logistic_results_dir)
-spectrum_files = all_spec_files[findall(f -> occursin("renyi_spectrums", f),all_spec_files)]
-measure_files = all_spec_files[findall(f -> occursin("measures_q1", f),all_spec_files)]
+result_files = readdir(logistic_results_dir)
+spectrum_files = result_files[findall(f -> occursin("renyi_spectrums", f),result_files)]
+measure_files = result_files[findall(f -> occursin("measures_q1", f),result_files)]
 
 all_spectrums = readdlm.(logistic_results_dir .* spectrum_files) 
 measures_q1 = readdlm.(logistic_results_dir .* measure_files) 
 
-param_file = all_spec_files[findall(f -> occursin("param_values", f),all_spec_files)][1]
+param_file = result_files[findall(f -> occursin("param_values", f),result_files)][1]
 special_ps = vec(readdlm(logistic_results_dir * param_file))
 orders = vec(readdlm(logistic_results_dir * "orders.txt",Int64))
 

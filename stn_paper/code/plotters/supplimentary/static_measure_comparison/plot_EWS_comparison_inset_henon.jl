@@ -1,11 +1,11 @@
 using DelimitedFiles
 using Plots,LaTeXStrings
-#cd("Documents/stn_research/STNResearch/Chaos/revision")
-include("../../../StateTransitionNetworks.jl/stn_paper/code/plotters/plotting_params_main.jl")
-include("../../../StateTransitionNetworks.jl/stn_paper/code/plotters/plot_functions_chaotic_maps.jl")
+cd(@__DIR__)
+include("../../plotting_params.jl")
+include("../../plot_functions_chaotic_maps.jl")
 #---------------------------------load already computed results-------------------------
 
-henon_results_dir = "../prl_figure_data/henon1e8/"
+henon_results_dir = "../../../../data/main/henon_data/"
 result_files = readdir(henon_results_dir)
 
 ps_file = result_files[findfirst(f -> occursin("henon_p_values", f),result_files)]
@@ -17,49 +17,41 @@ orders = vec(readdlm(henon_results_dir * orders_file))
 entropies_file = result_files[findall(f -> occursin("entrop", f),result_files)][1]
 lambdas_file = result_files[findall(f -> occursin("lambda", f),result_files)][1]
 
-spectrums_dir = "../prl_figure_data/spectrums/henon1e8/"
-special_ps = vec(readdlm(spectrums_dir * "henon_param_values.txt"))
+param_file = result_files[findall(f -> occursin("param_values", f),result_files)][1]
+special_ps = vec(readdlm(henon_results_dir * param_file))
+
+#load var, ac
+var_ac_dir = "../../../../data/supplimentary/static_measures_var_ac/"
+var_ac_files = readdir(var_ac_dir)
+ac_var_henon_file = var_ac_files[findall(f -> occursin("henon", f),var_ac_files)][1]
+EWS_standard_henon = readdlm(var_ac_dir*ac_var_henon_file)
 
 
 
 #---------------------------------od plot-----------------------------
-#=
+
 od_file = result_files[findfirst(f -> occursin("od", f),result_files)]
 od_data = readdlm(henon_results_dir * od_file)
 od_data = [od_data[i,:] for i in 1:size(od_data,1)]
-=#
 
-recalc_dir = "SL_recalc_inset/"
-recalc_files = readdir(recalc_dir)
-od_file = recalc_files[findfirst(f -> occursin("henon", f) && occursin("od", f) &&  occursin("nr_param_4001", f),recalc_files)]
-od_data = readdlm(recalc_dir * od_file)
-od_data = [od_data[i,:] for i in 1:size(od_data,1)]
-ps_od = readdlm(recalc_dir*"params_od_henon.txt")
 
 plot_params_od = (
 guidefontsize=guidefontsize+5,
 legendfontsize=legendfontsize+5,
 tickfontsize=tickfontsize+2,
-#framestyle=:box,
-#ylims=(-1.4,1.6),
-#yticks=[-1.0,0.0,1.0],
 yticks=[0.7,1.0,1.3],
 xticks=[1.2,1.3,1.4],
 titlefontsize=20,
 left_margin=left_margin,
 bottommargin=10Plots.mm,
-#right_margin=4Plots.mm,
 legend=:none,
-ylabel= L"x_n",
-#xlabel= L"a",
 xformatter=:none,
-#yformatter=:none,
 ylims=(0.7,1.4),
 size=(1000,300),
 yguidefontrotation=0,
 dpi=300)
 
-pl_od_henon = plot_orbit_diagram(od_data,ps_od,special_ps;ms_od = 0.5,ma_od=0.9,
+pl_od_henon = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_henon,ma_od=ma_od_henon,
     marker_shapes=marker_shapes,marker_offset=0.06,marker_size=marker_size_colored,
     marker_colors=marker_colors,plot_params_od...)
 
@@ -119,8 +111,6 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-ps_inset = readdlm("SL_recalc_inset/henon_p_values_nr_param_301.txt")
-S_inset = readdlm("SL_recalc_inset/henon_entropies_T1E+08_Ttr1E+06_b_0.3_grid_32param_1.305_1.32.txt")[:,2]
 inset_box = bbox(0.65,0.1,inset_box_size...)
 inset_xticks = [1.305,1.32]
 inset_yticks = [0.2,0.4]
@@ -148,7 +138,6 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-Λ_inset = readdlm("SL_recalc_inset/henon_lambdas_T1E+08_Ttr1E+06_b_0.3_grid_32param_1.305_1.32.txt")[:,2]
 inset_box = bbox(0.65,0.1,inset_box_size...)
 inset_xticks = [1.305,1.32]
 inset_yticks = [0.1,1.2]
@@ -161,7 +150,6 @@ lens!(pl_Λ,inset_xlims, inset_ylims, inset = (1,inset_box),grid=true,
     framestyle=:box,lc=linecolor)
 plot!(pl_Λ[2],xticks=inset_xticks,yticks=inset_yticks)
 
-EWS_standard_henon = readdlm("var_acf_henon_T1e8_TTr_1e6_rs_3.8_4.txt")
 #-------------------------var plot---------------------------
 ylims=[0.43,0.6]
 yticks=[0.43,0.5,0.6]
@@ -178,8 +166,6 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-EWS_standard_henon_inset = readdlm("var_acf_henon_zoom_T1e8_TTr_1e6_as_1.305_1.32_4.txt")
-var_inset = EWS_standard_henon_inset[:,2]
 inset_box = bbox(0.65,0.1,inset_box_size...)
 inset_xticks = [1.305,1.32]
 inset_yticks = [0.45,0.55]
@@ -207,7 +193,6 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-ac_inset = EWS_standard_henon_inset[:,4]
 inset_box = bbox(0.65,0.1,inset_box_size...)
 inset_xticks = [1.305,1.32]
 inset_yticks = [-0.5,-0.35]

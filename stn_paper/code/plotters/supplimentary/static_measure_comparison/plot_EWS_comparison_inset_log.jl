@@ -1,11 +1,11 @@
 using DelimitedFiles
 using Plots,LaTeXStrings
-#cd("Documents/stn_research/STNResearch/Chaos/revision")
-include("../../../StateTransitionNetworks.jl/stn_paper/code/plotters/plotting_params_main.jl")
-include("../../../StateTransitionNetworks.jl/stn_paper/code/plotters/plot_functions_chaotic_maps.jl")
+cd(@__DIR__)
+include("../../plotting_params.jl")
+include("../../plot_functions_chaotic_maps.jl")
 #---------------------------------load already computed results-------------------------
 
-logistic_results_dir = "../prl_figure_data/logistic_1e8_reinit/"
+logistic_results_dir = "../../../../data/main/logistic_data/"
 result_files = readdir(logistic_results_dir)
 
 ps_file = result_files[findfirst(f -> occursin("logistic_p_values", f),result_files)]
@@ -17,23 +17,21 @@ orders = vec(readdlm(logistic_results_dir * orders_file))
 entropies_file = result_files[findall(f -> occursin("entrop", f),result_files)][1]
 lambdas_file = result_files[findall(f -> occursin("lambda", f),result_files)][1]
 
-spectrums_dir = "../prl_figure_data/spectrums/logistic1e8/"
-special_ps = vec(readdlm(spectrums_dir * "param_values.txt"))
+param_file = result_files[findall(f -> occursin("param_values", f),result_files)][1]
+special_ps = vec(readdlm(logistic_results_dir * param_file))
+
+#load var, ac
+var_ac_dir = "../../../../data/supplimentary/static_measures_var_ac/"
+var_ac_files = readdir(var_ac_dir)
+ac_var_logistic_file = var_ac_files[findall(f -> occursin("log", f),var_ac_files)][1]
+EWS_standard_log = readdlm(var_ac_dir*ac_var_logistic_file)
 
 
 #---------------------------------od plot-----------------------------
-#=
+
 od_file = result_files[findfirst(f -> occursin("od", f),result_files)]
 od_data = readdlm(logistic_results_dir * od_file)
 od_data = [od_data[i,:] for i in 1:size(od_data,1)]
-=#
-recalc_dir = "SL_recalc_inset/"
-recalc_files = readdir(recalc_dir)
-od_file = recalc_files[findfirst(f -> occursin("logistic", f) && occursin("od", f) &&  occursin("nr_param_4001", f),recalc_files)]
-od_data = readdlm(recalc_dir * od_file)
-od_data = [od_data[i,:] for i in 1:size(od_data,1)]
-ps_od = readdlm(recalc_dir*"params_od_logistic.txt")
-
 
 linecolor=:gray10
 
@@ -55,7 +53,7 @@ xformatter=:none,
 marker_size=marker_size_colored,
 dpi=300)
 
-pl_od_logistic = plot_orbit_diagram(od_data,ps_od,special_ps;ms_od = 0.3,ma_od=0.8,
+pl_od_logistic = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_logistic,ma_od = ma_od_logistic,
     marker_shapes=marker_shapes,marker_offset=0.35,marker_size=marker_size_colored,
     marker_colors=marker_colors,plot_params_od...)
 
@@ -115,8 +113,6 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-ps_inset = readdlm("SL_recalc_inset/logistic_p_values_nr_param_161.txt")
-S_inset = readdlm("SL_recalc_inset/logistic_entropies_T1E+08_Ttr1E+06_grid_32param_3.92_3.928.txt")[:,2]
 inset_box = bbox(0.65,0.05,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [0.4,0.6]
@@ -143,7 +139,6 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-Λ_inset = readdlm("SL_recalc_inset/logistic_lambda_T1E+08_Ttr1E+06_grid_32param_3.92_3.928.txt")[:,2]
 inset_box = bbox(0.65,0.05,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [0.02,0.22]
@@ -157,7 +152,6 @@ lens!(pl_Λ,inset_xlims, inset_ylims, inset = (1,inset_box),grid=true,
     framestyle=:box,lc=linecolor)
 plot!(pl_Λ[2],xticks=inset_xticks,yticks=inset_yticks)
 
-EWS_standard_log = readdlm("var_acf_log_T1e8_TTr_1e6_rs_3.8_4.txt")
 #-------------------------var plot---------------------------
 ylims=[0,0.2]
 yticks=[0.0,0.1,0.2]
@@ -173,8 +167,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-EWS_standard_log_inset = readdlm("var_acf_log_zoom_T1e8_TTr_1e6_rs_3.92_3.928.txt")
-var_inset = EWS_standard_log_inset[:,2]
+var_inset = EWS_standard_log[:,2]
 inset_box = bbox(0.65,0.5,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [0.08,0.12]
@@ -205,7 +198,6 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-ac_inset = EWS_standard_log_inset[:,3]
 inset_box = bbox(0.65,0.5,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [-0.5,-0.3]

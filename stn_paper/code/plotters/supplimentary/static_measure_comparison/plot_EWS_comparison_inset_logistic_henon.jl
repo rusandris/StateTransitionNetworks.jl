@@ -1,8 +1,8 @@
 using DelimitedFiles
 using Plots,LaTeXStrings
-#cd("Documents/stn_research/STNResearch/Chaos/revision")
-include("../prl_figure_scripts/plotting_params_main.jl")
-include("../prl_figure_scripts/plot_functions_chaotic_maps.jl")
+cd(@__DIR__)
+include("../../plotting_params.jl")
+include("../../plot_functions_chaotic_maps.jl")
 
 #plot logistic
 include("plot_EWS_comparison_inset_log.jl")
@@ -10,7 +10,11 @@ include("plot_EWS_comparison_inset_log.jl")
 #plot henon
 include("plot_EWS_comparison_inset_henon.jl")
 
+fig_dir_name = "figs"
+fig_dir = "../../../../" * fig_dir_name * "/" 
+!(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
+
 #combine figs 
 l = (1,2)
-pl = plot(pl_logistic,pl_henon,layout = l,size=(1500,1200)) #size=(1800,1500)
-savefig(pl,"EWS_comparison_logistic_henon_inset_denser_od.png")
+pl = plot(pl_logistic,pl_henon,layout = l,size=colfig_size) #size=(1800,1500)
+savefig(pl,fig_dir*"EWS_comparison_logistic_henon_insets.png")
