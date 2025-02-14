@@ -3,6 +3,7 @@ global guidefontsize::Int = 25
 global legendfontsize::Int = 14
 global tickfontsize::Int = 14
 global annotation_fontsize::Int = 24 
+global linecolor=:gray10
 global reduced_right_margin = 2Plots.mm
 global reduced_left_margin = 4Plots.mm
 global left_margin = 9Plots.mm

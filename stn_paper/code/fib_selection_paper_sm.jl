@@ -36,7 +36,7 @@ rrs_intervals = []
 time_spans = []
 rrs_datas = []
 for i in 1:length(samples)
-    rrs_data = readdlm(data_dir*"rr_$(samples[i]).txt") #bimodal
+    rrs_data = readdlm(data_dir*"rr_$(samples[i]).txt")
     rrs = Float64.(rrs_data[2:end,2])
     time_span = [1:length(rrs);] 
     push!(rrs_datas,rrs_data)
