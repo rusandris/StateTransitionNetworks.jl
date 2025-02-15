@@ -36,7 +36,8 @@ data_dir = "../../../../data/supplimentary/fibrillation_ECG/fibrillation_results
 result_files = readdir(data_dir)
 samples = readdlm(data_dir*"sample_ids.txt",String)
 method_params = readdlm(data_dir*"method_params.txt")
-grid_size,w,window_size,grid_min,grid_max = method_params 
+grid_size,w,window_size,grid_min,grid_max = method_params
+grid_size,w,window_size = Int.([grid_size,w,window_size])
 grid_edges = (grid_min,grid_max)
 rrs_dir = "../../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 #--------------------plot data----------------------
@@ -62,7 +63,7 @@ post_onset_offset = 200 #xaxis limits: nr of idxs before onset
 ann_onset = "(AFIB"
 ann_term = "(N"
 
-xticks = [[2000,2300,2600],[5300,5600,5900],[1600,1900,2200],[2000,2300,2600]]
+xticks = [[1600:300:2500;],[4900:300:6000;],[1200:300:2300;],[1600:300:2800;]]
 
 plots_grid = []
 plots_OP = []
@@ -71,7 +72,7 @@ for (i,sample) in enumerate(samples)
     pl_S = plot(;legend=false,ylims=(-0.1,2.5),yticks=[0.0,1.0,2.0],plot_params...)
     pl_L = plot(;legend=false,ylims=(-0.1,3.0),yticks=[0:1:3;],plot_params...,) 
     pl_var = plot(;legend=false,ylims=(-0.02,0.08),yticks=[0.0:0.03:0.06;],plot_params...)
-    pl_ac = plot(;legend=false,ylims=(-0.8,1.2),yticks=[-0.5,0.0,0.5,1.0],plot_params...,xformatter=:auto,xticks=xticks[i])
+    pl_ac = plot(;legend=false,ylims=(-0.8,1.2),yticks=[-0.5,0.0,0.5,1.0],plot_params...,xformatter=:auto)
     xlabel!(pl_ac,"index")
     if i == 1
         plot!(pl_rr,ylabel=L"RR",yformatter=:auto)
@@ -99,7 +100,6 @@ for (i,sample) in enumerate(samples)
     @show measures_file_grid
     M_grid = readdlm(data_dir*measures_file_grid)
     window_ends = M_grid[:,1]
-    @show window_ends[1]
     #OP
     measures_file_OP = result_files[findall(f -> occursin("measures_OP_$sample", f),result_files)][1]
     @show measures_file_OP
@@ -114,25 +114,33 @@ for (i,sample) in enumerate(samples)
 
     rr_idxs_onset,ann_times_onset = find_annotations(ann_onset,sig_change_data,times)
     rr_idxs_termination,ann_times_termination = find_annotations(ann_term,sig_change_data,times)
-    @show rr_idxs_onset 
-    @show rr_idxs_termination
 
     #set plotting interval
-    interval_end = min(length(window_ends), rr_idxs_onset[1]+post_onset_offset)
-    interval_start = rr_idxs_onset[1]-pre_onset_offset
-    @show interval_end
+    #rr time series indexes start from 1
+    #measures indexes start from window_size
+    #rr_idxs_onset is the index in the time series vector
+    interval_end = min(length(window_ends), rr_idxs_onset[1]-window_size+post_onset_offset)
+    interval_start = rr_idxs_onset[1]-pre_onset_offset - window_size
     measures_interval = interval_start:interval_end
+
+    @show rr_idxs_onset[1]
+    @show measures_interval
+    @show window_ends[measures_interval[1]]
+    @show window_ends[measures_interval[end]]
+    @show window_ends[measures_interval][1]
+    @show window_ends[measures_interval][end]
 
     #plot grid
     plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,2],lc=linecolor);
     plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lc=linecolor);
     plot!(pl_var,window_ends[measures_interval],M_grid[measures_interval,4],lc=linecolor);
-    plot!(pl_ac,window_ends,M_grid[measures_interval,5],lc=linecolor); 
+    plot!(pl_ac,window_ends[measures_interval],M_grid[measures_interval,5],lc=linecolor); 
 
 
     pls = [pl_rr,pl_S,pl_L,pl_var,pl_ac]
     #set xaxis limits
-    xlims = (measures_interval[1]-window_size,measures_interval[2])
+    xlims = (window_ends[measures_interval[1]]-window_size,window_ends[measures_interval[end]])
+
     #onset line (red) and termination line (green) on subplots
     for pl in pls
         vline!(pl,rr_idxs_onset,ls=:dash,lc=:red,lw=1,label="")
@@ -140,7 +148,7 @@ for (i,sample) in enumerate(samples)
 
         #adjust x limits
         #additional offset with window_size on time series plot
-        plot!(pl,xlims=xlims)
+        plot!(pl,xlims=xlims,xticks=xticks[i])
     end
 
     pl = plot(pls...,layout=(5,1),dpi=300)
@@ -160,7 +168,7 @@ for (i,sample) in enumerate(samples)
 
         #adjust x limits
         #additional offset with window_size on time series plot
-        plot!(pl,xlims=xlims)
+        plot!(pl,xlims=xlims,xticks=xticks[i])
     end
 
     pl = plot(pls_OP...,layout=(5,1),dpi=300)

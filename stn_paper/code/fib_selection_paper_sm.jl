@@ -16,7 +16,7 @@ output_dir = "../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 #-----------------------------params------------------------
 w = 4 #for op
 τ = 1 #for op
-grid_size = 20 # for binning
+grid_size = 22 # for binning
 #grid_sizes = [20]
 grid_edges = [0.2,1.2] # for binning
 #grid_edges = Float64[] #let the algo choose the grid minmax
