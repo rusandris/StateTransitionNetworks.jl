@@ -66,14 +66,14 @@ pl_ts = plot(;plot_params...,top_margin=4Plots.mm);
 twiny(pl_ts) #shared y axis, multiple x axis
 plot!(pl_ts[2],xlims=(rs[1],rs[end]+0.001),xlabel=L"r(t)",xticks=[3.8,3.81,3.82,3.83,3.84],widen=true,guidefontsize=guidefontsize,tickfontsize=tickfontsize)
 
-plot!(pl_ts[1],times,timeseries,st=scatter,ms=0.8,ylims=(0.0,1.2),yticks=[0.0:0.3:1.2;],widen=true,ylabel=L"x(t)",mc=:gray10,ma=0.5,markerstrokewidth=0.0,legend=false);
+plot!(pl_ts[1],times,timeseries,st=scatter,ms=0.8,ylims=(0.0,1.2),yticks=[0.0:0.5:1.0;],widen=true,ylabel=L"x(t)",mc=:gray10,ma=0.5,markerstrokewidth=0.0,legend=false);
 vline!(pl_ts[1],[n_min+n_crit],ls=:dash,lw=2,lc=:red);
 
 
 pl_S = plot(;plot_params...);
 pl_L = plot(;plot_params...,ylims=(0.0,2.5),yticks=[0.0:1.0:2.5;]);
-pl_var = plot(;plot_params...,ylims=(0.0,0.12),yticks=[0.0:0.04:0.12;]);
-pl_ac = plot(;ylims=(-0.65,-0.45),yticks=[-0.65:0.05:-0.45;],xlims=[times[1],times[end]],xticks=[times[1]:30000:times[end];],xlabel=L"t",plot_params...,xformatter=:auto);
+pl_var = plot(;plot_params...,ylims=(0.0,0.12),yticks=[0.0:0.05:0.1;]);
+pl_ac = plot(;ylims=(-0.7,-0.45),yticks=[-0.7:0.1:-0.5;],xlims=[times[1],times[end]],xticks=[times[1]:30000:times[end];],xlabel=L"t",plot_params...,xformatter=:auto);
 
 
 for i in 1:nr_ics
@@ -94,10 +94,10 @@ for i in 1:nr_ics
     hline!(pl_ac,[acs[n_trans - n_min - window_size,nr_ics]],ls=:dash,lc=:gray50)
 end
 
-annotate!(pl_ts,subfigure_annotation_pos_sm, text("(a)", :left, 24))
-annotate!(pl_L,subfigure_annotation_pos_sm, text("(b)", :left, 24))
-annotate!(pl_var,subfigure_annotation_pos_sm, text("(c)", :left, 24))
-annotate!(pl_ac,subfigure_annotation_pos_sm, text("(d)", :left, 24))
+annotate!(pl_ts,subfigure_annotation_pos_one_col, text("(a)", :left, annotation_fontsize))
+annotate!(pl_L,subfigure_annotation_pos_one_col, text("(b)", :left, annotation_fontsize))
+annotate!(pl_var,subfigure_annotation_pos_one_col, text("(c)", :left, annotation_fontsize))
+annotate!(pl_ac,subfigure_annotation_pos_one_col, text("(d)", :left, annotation_fontsize))
 
 
 pl_log = plot(pl_ts,pl_L,pl_var,pl_ac,layout=(4,1),size=colfig_size);

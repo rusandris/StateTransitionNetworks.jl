@@ -40,12 +40,13 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-ylims=(0.0,1.45),
+ylims=(0.0,1.2),
 #xlims=(3.8,4.01),
 yticks=[0.0,0.5,1.0],
 titlefontsize=20,
 left_margin=left_margin,
-right_margin=reduced_right_margin ,
+right_margin=reduced_right_margin,
+top_margin=top_margin,
 legend=:none,
 ylabel= L"x_n",
 yguidefontrotation=0,
@@ -54,7 +55,7 @@ marker_size=marker_size_colored,
 dpi=300)
 
 pl_od_logistic = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_logistic,ma_od = ma_od_logistic,
-    marker_shapes=marker_shapes,marker_offset=0.35,marker_size=marker_size_colored,
+    marker_shapes=marker_shapes,marker_offset=0.12,marker_size=marker_size_colored,
     marker_colors=marker_colors,plot_params_od...)
 
 #---------------plot inset-------------------
@@ -100,12 +101,12 @@ marker_size=marker_size_colored,
 dpi=300)
 
 #---------------------------S plot------------------------------
-ylims = [0.0,1.0]
-yticks = [0.0,0.5,1.0]
-pl_S = plot(;ylabel= L"S",yticks=yticks,ylims=ylims,plot_params...)
+ylims = [0.0,1.5]
+yticks = [0.0,0.75,1.5]
+pl_S = plot(;ylabel = s_label,yticks=yticks,ylims=ylims,plot_params...)
 
 #plot measure curves
-plot!(pl_S,ps,Ss,lw=2,la=1.0,lc=linecolor,label = s_label)
+plot!(pl_S,ps,Ss,lw=2,la=1.0,lc=linecolor)
 
 #plot vertical lines on S plot
 for (i,p) in enumerate(special_ps)
@@ -113,7 +114,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.37,0.0,inset_box_size...)
+inset_box = bbox(0.65,0.0,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [0.4,0.6]
 
@@ -129,10 +130,10 @@ plot!(pl_S[2],xticks=inset_xticks,yticks=inset_yticks)
 #---------------------------Λ plot------------------------------
 ylims = [0.0,1.5]
 yticks = [0.0,0.75,1.5]
-pl_Λ = plot(;ylabel= L"\Lambda",yticks=yticks,ylims=ylims,plot_params...)
+pl_Λ = plot(;ylabel = Λ_label,yticks=yticks,ylims=ylims,plot_params...)
 
 #plot measure curves
-plot!(pl_Λ,ps,Λs,lw=2,la=1.0,lc=linecolor,label = Λ_label)
+plot!(pl_Λ,ps,Λs,lw=2,la=1.0,lc=linecolor)
 
 #plot vertical lines 
 for (i,p) in enumerate(special_ps)
@@ -140,7 +141,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.65,0.0,inset_box_size...)
+inset_box = bbox(0.7,0.0,inset_box_size...)
 inset_xticks = [3.92,3.928]
 inset_yticks = [0.02,0.22]
 
@@ -187,7 +188,7 @@ plot!(pl_var[2],xticks=inset_xticks,yticks=inset_yticks)
 ylims=[-1.5,0.1]
 yticks=[-1.5,-0.75,0.0]
 ac = EWS_standard_log[:,2]
-pl_ac = plot(;ylabel=L"ACF(1)",ylims=ylims,yticks=yticks,plot_params...,xformatter=:auto)
+pl_ac = plot(;ylabel=L"ACF(1)",xlabel=L"r",ylims=ylims,yticks=yticks,plot_params...,xformatter=:auto)
 
 
 #plot measure curves
@@ -215,11 +216,11 @@ plot!(pl_ac[2],xticks=inset_xticks,yticks=inset_yticks)
 #l = @layout [a{0.25h}; b{0.25h}; b{0.25h};d{0.25h}]
 l = (5,1)
 
-annotate!(pl_od_logistic,subfigure_annotation_pos, text("(a)", :left, 24))
-annotate!(pl_S[1],subfigure_annotation_pos, text("(c)", :left, 24))
-annotate!(pl_Λ[1],subfigure_annotation_pos, text("(e)", :left, 24))
-annotate!(pl_var[1],subfigure_annotation_pos, text("(g)", :left, 24))
-annotate!(pl_ac[1],subfigure_annotation_pos, text("(i)", :left, 24))
+annotate!(pl_od_logistic,subfigure_annotation_pos_two_col, text("(a)", :left, annotation_fontsize))
+annotate!(pl_S[1],subfigure_annotation_pos_two_col, text("(c)", :left, annotation_fontsize))
+annotate!(pl_Λ[1],subfigure_annotation_pos_two_col, text("(e)", :left, annotation_fontsize))
+annotate!(pl_var[1],subfigure_annotation_pos_two_col, text("(g)", :left, annotation_fontsize))
+annotate!(pl_ac[1],subfigure_annotation_pos_two_col, text("(i)", :left, annotation_fontsize))
 
-pl_logistic = plot(pl_od_logistic,pl_S,pl_Λ,pl_var,pl_ac,layout = l,size=(600,1000))
+pl_logistic = plot(pl_od_logistic,pl_S,pl_Λ,pl_var,pl_ac,layout = l)
 #savefig(pl_henon,"EWS_comparison_logistic.png")

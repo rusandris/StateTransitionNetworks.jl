@@ -44,6 +44,7 @@ xticks=[1.2,1.3,1.4],
 titlefontsize=20,
 left_margin=left_margin,
 right_margin=reduced_right_margin,
+top_margin=top_margin,
 legend=:none,
 xformatter=:none,
 ylims=(0.7,1.4),
@@ -52,7 +53,7 @@ yguidefontrotation=0,
 dpi=300)
 
 pl_od_henon = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_henon,ma_od=ma_od_henon,
-    marker_shapes=marker_shapes,marker_offset=0.06,marker_size=marker_size_colored,
+    marker_shapes=marker_shapes,marker_offset=0.05,marker_size=marker_size_colored,
     marker_colors=marker_colors,plot_params_od...)
 
 #---------------plot inset-------------------
@@ -183,7 +184,7 @@ plot!(pl_var[2],xticks=inset_xticks,yticks=inset_yticks)
 ylims=[-0.7,0.5]
 yticks=[-0.7,-0.1,0.5]
 ac = EWS_standard_henon[:,3]
-pl_ac = plot(;ylims=ylims,yticks=yticks,plot_params...,xformatter=:auto)
+pl_ac = plot(;xlabel=L"a",ylims=ylims,yticks=yticks,plot_params...,xformatter=:auto)
 #ylabel=L"ACF(1)"
 
 #plot measure curves
@@ -195,7 +196,7 @@ for (i,p) in enumerate(special_ps)
 end
 
 #---------------plot inset-------------------
-inset_box = bbox(0.65,0.1,inset_box_size...)
+inset_box = bbox(0.65,0.0,inset_box_size...)
 inset_xticks = [1.305,1.32]
 inset_yticks = [-0.5,-0.35]
 
@@ -212,11 +213,11 @@ plot!(pl_ac[2],xticks=inset_xticks,yticks=inset_yticks)
 l = (5,1)
 
 
-annotate!(pl_od_henon,subfigure_annotation_pos_alter, text("(b)", :left, 24))
-annotate!(pl_S[1],subfigure_annotation_pos_alter, text("(d)", :left, 24))
-annotate!(pl_Λ[1],subfigure_annotation_pos_alter, text("(f)", :left, 24))
-annotate!(pl_var[1],subfigure_annotation_pos_alter, text("(h)", :left, 24))
-annotate!(pl_ac[1],subfigure_annotation_pos_alter, text("(j)", :left, 24))
+annotate!(pl_od_henon,subfigure_annotation_pos_alter, text("(b)", :left, annotation_fontsize))
+annotate!(pl_S[1],subfigure_annotation_pos_alter, text("(d)", :left, annotation_fontsize))
+annotate!(pl_Λ[1],subfigure_annotation_pos_alter, text("(f)", :left, annotation_fontsize))
+annotate!(pl_var[1],subfigure_annotation_pos_alter, text("(h)", :left, annotation_fontsize))
+annotate!(pl_ac[1],subfigure_annotation_pos_alter, text("(j)", :left, annotation_fontsize))
 
-pl_henon = plot(pl_od_henon,pl_S,pl_Λ,pl_var,pl_ac,layout = l,size=(600,1000))
+pl_henon = plot(pl_od_henon,pl_S,pl_Λ,pl_var,pl_ac,layout = l)
 #savefig(pl_henon,"EWS_comparison_henon.png")

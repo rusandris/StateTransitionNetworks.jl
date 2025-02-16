@@ -88,7 +88,7 @@ plot!(pl_dist_log,[0.0],[0.02],st=:scatter,
     markerstrokewidth=0.5,
     label=L"r=%$(ps_log[2])")
 
-annotate!(pl_dist_log,subfigure_annotation_pos_sm, text("(a)", :left, 24))
+
 #--------------------------measures fig---------------------
 result_files = readdir(logistic_results_dir)
 
@@ -115,7 +115,7 @@ Ss = readdlm(logistic_results_dir * entropies_file)[:,2:end]
 Λs = readdlm(logistic_results_dir * lambdas_file)[:,2:end]
 
 #--------------local plotting params------------
-global inset_box = bbox(0.25,0.2,0.3,0.25)
+inset_box = bbox(0.3,0.0,0.3,0.25)
 inset_param_range = [3.8,3.88]
 inset_ticks_entropies = [inset_param_range,[0.0,0.5]]
 inset_ticks_lambdas = [inset_param_range,[0.0,0.5]]
@@ -188,7 +188,7 @@ dpi=300)
 pl_od_logistic = plot_orbit_diagram(od_data,ps,ps_log;ms_od = ms_od_logistic,ma_od = ma_od_logistic,
     marker_shapes=marker_shapes,marker_size=marker_size_colored,
     marker_colors=marker_colors,plot_params_od...)
-annotate!(pl_od_logistic,subfigure_annotation_pos_sm, text("(c)", :left, 24))
+
 
 pl_s_logistic = plot_measure(ps,Ss,ps_log;
     labels = s_labels,
@@ -206,7 +206,7 @@ pl_s_logistic = plot_measure(ps,Ss,ps_log;
     marker_size=marker_size_colored,
     plot_params_entropy...)
 
-annotate!(pl_s_logistic[1],subfigure_annotation_pos_sm, text("(e)", :left, 24))
+
 
 pl_lambda_logistic = plot_measure(ps,Λs,ps_log;
     labels = Λ_labels,
@@ -224,8 +224,12 @@ pl_lambda_logistic = plot_measure(ps,Λs,ps_log;
     red_params=[3.82,3.83],
     plot_params_lambda...)
 
-annotate!(pl_lambda_logistic[1],subfigure_annotation_pos_sm, text("(f)", :left, 24))
+
+annotate!(pl_dist_log,subfigure_annotation_pos_one_col, text("(a)", :left, annotation_fontsize))
+annotate!(pl_od_logistic,subfigure_annotation_pos_one_col, text("(c)", :left, annotation_fontsize))
+annotate!(pl_lambda_logistic[1],subfigure_annotation_pos_one_col, text("(f)", :left, annotation_fontsize))
+annotate!(pl_s_logistic[1],subfigure_annotation_pos_one_col, text("(e)", :left, annotation_fontsize))
 
 l = @layout [a{0.25h}; b{0.25h};c{0.25h};d{0.25h}]
-pl_logistic = plot(pl_dist_log,pl_od_logistic,pl_s_logistic,pl_lambda_logistic,layout = l,size=(1000,1000))
+pl_logistic = plot(pl_dist_log,pl_od_logistic,pl_s_logistic,pl_lambda_logistic,layout = l)
 #savefig(pl_logistic,"logistic_4fig_wl_measures_test_T1e8_max_order12.png")

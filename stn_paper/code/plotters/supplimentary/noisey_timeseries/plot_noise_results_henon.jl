@@ -65,7 +65,7 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 titlefontsize=20,
-left_margin=reduced_left_margin,
+left_margin=left_margin,
 top_margin=reduced_top_margin,
 right_margin=reduced_right_margin,
 legend=true,
@@ -77,6 +77,8 @@ dpi=300)
 linealphas = [0.6,1.0]
 linealphas_OP = [0.3,0.6,1.0]
 rs = readdlm(measure_dirs_grid[1]*filenames_entropies_grid[1][1])[:,1]
+S_labels = ["(a)","(c)","(e)"]
+L_labels = ["(b)","(d)","(f)"]
 
 plots_henon = []
 plots_henon_OP = []
@@ -84,6 +86,9 @@ for (i,noise_level) in enumerate(noise_levels)
     #grid
     pl_S = plot(;ylims=(0.0,2.0),title = L"\sigma = %$noise_level", ylabel=L"S",xlabel=L"a",plot_params...)
     pl_L = plot(;ylims=(0.0,1.5),title = L"\sigma = %$noise_level", ylabel=L"\Lambda",xlabel=L"a",plot_params...)
+
+    annotate!(pl_S,subfigure_annotation_pos_two_col, text(S_labels[i], :left, annotation_fontsize))
+    annotate!(pl_L,subfigure_annotation_pos_two_col, text(L_labels[i], :left, annotation_fontsize))
 
     #OP
     pl_S_OP = deepcopy(pl_S)

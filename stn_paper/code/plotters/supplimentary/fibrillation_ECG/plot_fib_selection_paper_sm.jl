@@ -74,12 +74,21 @@ for (i,sample) in enumerate(samples)
     pl_var = plot(;legend=false,ylims=(-0.02,0.08),yticks=[0.0:0.03:0.06;],plot_params...)
     pl_ac = plot(;legend=false,ylims=(-0.8,1.2),yticks=[-0.5,0.0,0.5,1.0],plot_params...,xformatter=:auto)
     xlabel!(pl_ac,"index")
+
     if i == 1
         plot!(pl_rr,ylabel=L"RR",yformatter=:auto)
         plot!(pl_S,ylabel=L"S",yformatter=:auto)
         plot!(pl_L,ylabel=L"Λ",yformatter=:auto)
         plot!(pl_var,ylabel=L"\sigma^2",yformatter=:auto)
         plot!(pl_ac,ylabel=L"ACF(1)",yformatter=:auto)
+
+
+        #annotations
+        annotate!(pl_rr,subfigure_annotation_pos_two_col, text("(a)", :left, annotation_fontsize))
+        annotate!(pl_S,subfigure_annotation_pos_two_col, text("(b)", :left, annotation_fontsize))
+        annotate!(pl_L,subfigure_annotation_pos_two_col, text("(c)", :left, annotation_fontsize))
+        annotate!(pl_var,subfigure_annotation_pos_two_col, text("(d)", :left, annotation_fontsize))
+        annotate!(pl_ac,subfigure_annotation_pos_two_col, text("(e)", :left, annotation_fontsize))
     end
 
     #copy prepared plots for OP

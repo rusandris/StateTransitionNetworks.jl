@@ -33,7 +33,7 @@ titlefontsize=20,
 left_margin=reduced_left_margin,
 top_margin=top_margin,
 legend= (0.7,0.9),
-dpi=300,#size=(800,300)
+dpi=300,
 xlabel=L"q",
 yticks=[0.0,0.35,0.7],
 yformatter=:none
@@ -65,7 +65,7 @@ annotation_factor = 1.1,
 marker_size=marker_size_colored,
 plot_params_spec...)
 
-annotate!(pl_spec,subfigure_annotation_pos_henon, text("(b)", :left, 24))
+
 
 #--------------------------measures fig---------------------
 
@@ -172,7 +172,7 @@ dpi=300)
 pl_od_henon = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_henon,ma_od = ma_od_henon,
     marker_shapes=marker_shapes,marker_offset=0.08,marker_size=marker_size_colored,
     marker_colors=marker_colors,plot_params_od...)
-annotate!(pl_od_henon,subfigure_annotation_pos_henon, text("(d)", :left, 24))
+
 
 pl_s_henon = plot_measure(ps,Ss,special_ps;
     labels = s_labels,
@@ -190,7 +190,6 @@ pl_s_henon = plot_measure(ps,Ss,special_ps;
     inset_tickfontsize=inset_tickfontsize,
     plot_params_entropy...)
 
-annotate!(pl_s_henon[1],subfigure_annotation_pos_henon, text("(f)", :left, 24))
 
 pl_lambda_henon = plot_measure(ps,Λs,special_ps;
     labels = Λ_labels,
@@ -208,8 +207,12 @@ pl_lambda_henon = plot_measure(ps,Λs,special_ps;
     red_params=[1.22,1.227],
     plot_params_lambda...)
 
-annotate!(pl_lambda_henon[1],subfigure_annotation_pos_henon, text("(h)", :left, 24))
+annotate!(pl_spec,subfigure_annotation_pos_two_col_inner, text("(b)", :left, annotation_fontsize))
+annotate!(pl_od_henon,subfigure_annotation_pos_two_col_inner, text("(d)", :left, annotation_fontsize))
+annotate!(pl_s_henon[1],subfigure_annotation_pos_two_col_inner, text("(f)", :left, annotation_fontsize))
+annotate!(pl_lambda_henon[1],subfigure_annotation_pos_two_col_inner, text("(h)", :left, annotation_fontsize))
+
 
 l = @layout [a{0.25h}; b{0.25h}; b{0.25h};d{0.25h}]
-pl_henon = plot(pl_spec,pl_od_henon,pl_s_henon,pl_lambda_henon,layout = l,size=halfcolfig_size)
+pl_henon = plot(pl_spec,pl_od_henon,pl_s_henon,pl_lambda_henon,layout = l)
 #savefig(pl_henon,"henon_4fig_spectrums_measures_T1e8_max_order8.png")
