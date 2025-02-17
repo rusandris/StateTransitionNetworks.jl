@@ -13,13 +13,9 @@ flush(stdout)
 
 #--------------------parameters--------------------
 
-#for zoomed-in parameter range 
-Δp::Float64 = 1e-3 	#2*1e-4
-ps::Vector{Float64} = [3.8:Δp:4.0;]
-
 #for broader control parameter range
-#Δp::Float64 = 1e-3 	#2*1e-4
-#ps::Vector{Float64} = [3.5:Δp:4.0;]
+Δp::Float64 = 1e-3 	#2*1e-4
+ps::Vector{Float64} = [3.5:Δp:4.0;]
 
 const T::Int64 = 10^6 #10^8
 const T_string::String = @sprintf "%.E" T
@@ -39,7 +35,7 @@ const ps_renyi::Vector{Float64} = [3.82842,3.835,3.85,4.0]
 const qs::Vector{Float64} = [0.0:0.01:2;]
 
 
-data_dir = "data_test/main/logistic_data/" 
+data_dir = "data_test/supplimentary/logistic_data/" 
 mkpath(data_dir)
 
 out_file_entropy = data_dir*"logistic_entropies"  * "_T$T_string" * "_Ttr$Ttr_string" * "_grid_$grid_size" * "param_$(ps[1])" * "_$(ps[end])" * ".txt"

@@ -78,9 +78,8 @@ for i in 1:nr_ics
 end    
 
 #-------------------------------save data-------------------------------------
-#TODO: mkdir data_dir if it doesn't exist
-data_dir = "../data/supplimentary/sliding_param_measures/"
-
+data_dir = "../data_test/supplimentary/sliding_param_measures/"
+mkpath(data_dir)
 
 #leave off transient
 ts_data = hcat(times,params_container,ts_container)

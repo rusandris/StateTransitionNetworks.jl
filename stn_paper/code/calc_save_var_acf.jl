@@ -8,12 +8,14 @@ include("functions_chaotic_maps.jl")
 
 #calc and save var and acf for Henon and logistic maps
 
-const T::Int64 = 10^8
+const T::Int64 = 10^8 #10^6
 const T_string::String = @sprintf "%.E" T
-const Ttr::Int64 = 10^6 
+const Ttr::Int64 = 10^6 #10^3
 const Ttr_string::String = @sprintf "%.E" Ttr
-#TODO: mkdir data_dir if it doesn't exist
-data_dir = "../data/supplimentary/static_measures_var_ac/"
+
+data_dir = "../data_test/supplimentary/static_measures_var_ac/"
+mkpath(data_dir)
+
 #TODO:speed this up!
 #------------------------------Henon stuff--------------------------------
 

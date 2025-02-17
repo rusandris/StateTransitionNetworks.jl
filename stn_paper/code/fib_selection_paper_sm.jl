@@ -9,9 +9,9 @@ using DataFrames,CSV
 cd(@__DIR__)
 include("pipeline_functions.jl")
 data_dir = "../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
-#TODO: mkdir if doesn't exist 
-output_dir = "../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 
+output_dir = "../data_test/supplimentary/fibrillation_ECG/fibrillation_results/"
+mkpath(output_dir)
 
 #-----------------------------params------------------------
 w = 4 #for op
