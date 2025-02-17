@@ -44,7 +44,7 @@ ylims=(0.0,1.2),
 #xlims=(3.8,4.01),
 yticks=[0.0,0.5,1.0],
 titlefontsize=20,
-left_margin=left_margin,
+left_margin=reduced_left_margin,
 right_margin=reduced_right_margin,
 top_margin=top_margin,
 legend=:none,
@@ -216,11 +216,11 @@ plot!(pl_ac[2],xticks=inset_xticks,yticks=inset_yticks)
 #l = @layout [a{0.25h}; b{0.25h}; b{0.25h};d{0.25h}]
 l = (5,1)
 
-annotate!(pl_od_logistic,subfigure_annotation_pos_two_col, text("(a)", :left, annotation_fontsize))
-annotate!(pl_S[1],subfigure_annotation_pos_two_col, text("(c)", :left, annotation_fontsize))
-annotate!(pl_Λ[1],subfigure_annotation_pos_two_col, text("(e)", :left, annotation_fontsize))
-annotate!(pl_var[1],subfigure_annotation_pos_two_col, text("(g)", :left, annotation_fontsize))
-annotate!(pl_ac[1],subfigure_annotation_pos_two_col, text("(i)", :left, annotation_fontsize))
+annotate!(pl_od_logistic,subfigure_annotation_pos_one_adjusted , text("(a)", :left, annotation_fontsize))
+annotate!(pl_S[1],subfigure_annotation_pos_one_adjusted , text("(c)", :left, annotation_fontsize))
+annotate!(pl_Λ[1],subfigure_annotation_pos_one_adjusted , text("(e)", :left, annotation_fontsize))
+annotate!(pl_var[1],subfigure_annotation_pos_one_adjusted , text("(g)", :left, annotation_fontsize))
+annotate!(pl_ac[1],subfigure_annotation_pos_one_adjusted , text("(i)", :left, annotation_fontsize))
 
 pl_logistic = plot(pl_od_logistic,pl_S,pl_Λ,pl_var,pl_ac,layout = l)
 #savefig(pl_henon,"EWS_comparison_logistic.png")

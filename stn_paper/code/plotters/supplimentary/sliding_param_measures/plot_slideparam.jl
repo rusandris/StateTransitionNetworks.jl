@@ -9,8 +9,8 @@ legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 titlefontsize=20,
 left_margin=left_margin,
-top_margin=reduced_top_margin,
-right_margin=reduced_right_margin,
+top_margin=top_margin,
+right_margin=10Plots.mm,
 legend=:none,
 xformatter=:none,
 yguidefontrotation=0,
@@ -52,6 +52,9 @@ grid_size,window_size = Int.(method_param)
 r_min,r_max,r_crit = system_param
 nr_ics = size(Ss)[2]
 top_xaxis_ticks = 10 .^ [0,1,2,3,4,5]
+time_xticks = collect(range(times[1],times[end],length=5))
+time_xticks_strings = [L"5 \cdot 10^3",L"3 \cdot 10^4",L"5.5 \cdot 10^4",L"8 \cdot 10^4",L"10.5 \cdot 10^4"] #warning, hard-coded
+xticks_param=[3.8,3.81,3.82,3.83,3.84]
 
 #measures_xlims = (rs[1],rs[end])
 measures_xlims = (times[1],times[end])
@@ -64,16 +67,17 @@ r_windows = rs[end-length(t_windows)+1:end]
 #------------------------------------------------plot timeseries------------------------------------------
 pl_ts = plot(;plot_params...,top_margin=4Plots.mm);
 twiny(pl_ts) #shared y axis, multiple x axis
-plot!(pl_ts[2],xlims=(rs[1],rs[end]+0.001),xlabel=L"r(t)",xticks=[3.8,3.81,3.82,3.83,3.84],widen=true,guidefontsize=guidefontsize,tickfontsize=tickfontsize)
+plot!(pl_ts[2];xlims=(rs[1],3.84),xlabel=L"r(t)",guidefontsize=guidefontsize,
+    legendfontsize=legendfontsize,tickfontsize=tickfontsize,xticks=xticks_param,widen=true)
 
-plot!(pl_ts[1],times,timeseries,st=scatter,ms=0.8,ylims=(0.0,1.2),yticks=[0.0:0.5:1.0;],widen=true,ylabel=L"x(t)",mc=:gray10,ma=0.5,markerstrokewidth=0.0,legend=false);
+plot!(pl_ts[1],times,timeseries,st=scatter,ms=0.8,xticks=time_xticks,ylims=(0.0,1.2),yticks=[0.0:0.5:1.0;],widen=true,ylabel=L"x(t)",mc=:gray10,ma=0.5,markerstrokewidth=0.0,legend=false);
 vline!(pl_ts[1],[n_min+n_crit],ls=:dash,lw=2,lc=:red);
 
 
-pl_S = plot(;plot_params...);
-pl_L = plot(;plot_params...,ylims=(0.0,2.5),yticks=[0.0:1.0:2.5;]);
-pl_var = plot(;plot_params...,ylims=(0.0,0.12),yticks=[0.0:0.05:0.1;]);
-pl_ac = plot(;ylims=(-0.7,-0.45),yticks=[-0.7:0.1:-0.5;],xlims=[times[1],times[end]],xticks=[times[1]:30000:times[end];],xlabel=L"t",plot_params...,xformatter=:auto);
+pl_S = plot(;plot_params...,xticks=time_xticks);
+pl_L = plot(;plot_params...,ylims=(0.0,2.5),yticks=[0.0:1.0:2.5;],xticks=time_xticks);
+pl_var = plot(;plot_params...,ylims=(0.0,0.12),yticks=[0.0:0.05:0.1;],xticks=time_xticks);
+pl_ac = plot(;plot_params...,ylims=(-0.7,-0.45),yticks=[-0.7:0.1:-0.5;],xlims=[times[1],times[end]],xticks=time_xticks,xlabel=L"t",xformatter=:auto);
 
 
 for i in 1:nr_ics

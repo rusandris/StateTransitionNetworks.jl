@@ -14,7 +14,7 @@ fig_dir_name = "figs"
 fig_dir = "../../../../" * fig_dir_name * "/" 
 !(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
 
-#combine figs 
+#combine figs
 l = (1,2)
-pl = plot(pl_logistic,pl_henon,layout = l,size=colfig_size) #size=(1800,1500)
-savefig(pl,fig_dir*"EWS_comparison_logistic_henon_insets.png")
+pl = plot(pl_logistic,pl_henon,layout = l,size=bigfig_size)
+savefig(pl,fig_dir*"EWS_comparison_logistic_henon_insets_bigfig.png")

@@ -140,10 +140,10 @@ for (i,sample) in enumerate(samples)
     @show window_ends[measures_interval][end]
 
     #plot grid
-    plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,2],lc=linecolor);
-    plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lc=linecolor);
-    plot!(pl_var,window_ends[measures_interval],M_grid[measures_interval,4],lc=linecolor);
-    plot!(pl_ac,window_ends[measures_interval],M_grid[measures_interval,5],lc=linecolor); 
+    plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,2],lw=curve_lw,lc=linecolor);
+    plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lw=curve_lw,lc=linecolor);
+    plot!(pl_var,window_ends[measures_interval],M_grid[measures_interval,4],lw=curve_lw,lc=linecolor);
+    plot!(pl_ac,window_ends[measures_interval],M_grid[measures_interval,5],lw=curve_lw,lc=linecolor); 
 
 
     pls = [pl_rr,pl_S,pl_L,pl_var,pl_ac]
@@ -164,10 +164,10 @@ for (i,sample) in enumerate(samples)
     push!(plots_grid,pl)
 
     #plot OP
-    plot!(pl_S_OP,window_ends[measures_interval],M_OP[measures_interval,2],lc=linecolor);
-    plot!(pl_L_OP,window_ends[measures_interval],M_OP[measures_interval,3],lc=linecolor);
-    plot!(pl_var_OP,window_ends[measures_interval],M_OP[measures_interval,4],lc=linecolor);
-    plot!(pl_ac_OP,window_ends[measures_interval],M_OP[measures_interval,5],lc=linecolor); 
+    plot!(pl_S_OP,window_ends[measures_interval],M_OP[measures_interval,2],lw=curve_lw,lc=linecolor);
+    plot!(pl_L_OP,window_ends[measures_interval],M_OP[measures_interval,3],lw=curve_lw,lc=linecolor);
+    plot!(pl_var_OP,window_ends[measures_interval],M_OP[measures_interval,4],lw=curve_lw,lc=linecolor);
+    plot!(pl_ac_OP,window_ends[measures_interval],M_OP[measures_interval,5],lw=curve_lw,lc=linecolor); 
 
     pls_OP = [pl_rr,pl_S_OP,pl_L_OP,pl_var_OP,pl_ac_OP]
     #onset line (red) and termination line (green) on subplots

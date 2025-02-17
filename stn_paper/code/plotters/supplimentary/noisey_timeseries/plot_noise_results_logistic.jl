@@ -9,6 +9,7 @@ data_dir = "../../../../data/supplimentary/noisey_timeseries/"
 noise_levels = [0.0,0.05,0.1]
 ws = [3,5,7] #OP pattern lengths
 grid_sizes = [10,32] #grid sizes
+xticks_logistic = [3.8:0.05:4.0;]
 
 #---------------------logistic stuff-------------------
 logistic_dir = data_dir*"logistic_data/"
@@ -84,33 +85,33 @@ plots_log = []
 plots_log_OP = []
 for (i,noise_level) in enumerate(noise_levels)
     #grid
-    pl_S = plot(;ylims=(0.0,2.0),title = L"\sigma = %$noise_level", ylabel=L"S",xlabel=L"r",plot_params...)
-    pl_L = plot(;ylims=(0.0,2.0),title = L"\sigma = %$noise_level", ylabel=L"\Lambda",xlabel=L"r",plot_params...)
+    pl_S = plot(;ylims=(0.0,2.0),yticks=[0:2;],title = L"\sigma = %$noise_level", ylabel=L"S",xlabel=L"r",plot_params...)
+    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.5:1.5;],title = L"\sigma = %$noise_level", ylabel=L"\Lambda",xlabel=L"r",plot_params...)
 
-    annotate!(pl_S,subfigure_annotation_pos_two_col, text(S_labels[i], :left, annotation_fontsize))
-    annotate!(pl_L,subfigure_annotation_pos_two_col, text(L_labels[i], :left, annotation_fontsize))
+    annotate!(pl_S,subfigure_annotation_pos_two_col_alter_layout, text(S_labels[i], :left, annotation_fontsize))
+    annotate!(pl_L,subfigure_annotation_pos_two_col_alter_layout, text(L_labels[i], :left, annotation_fontsize))
 
     #OP
     pl_S_OP = deepcopy(pl_S)
     pl_L_OP = deepcopy(pl_L)
 
-    plot!(pl_S_OP;ylims=(0.0,1.5))
-    plot!(pl_L_OP;ylims=(0.0,1.5))
+    plot!(pl_S_OP;ylims=(0.0,1.5),yticks=[0:0.5:1.5;])
+    plot!(pl_L_OP;ylims=(0.0,1.5),yticks=[0:0.5:1.5;])
 
     if i == 1
-        plot!(pl_S_OP;ylims=(0.0,1.0))
-        plot!(pl_L_OP;ylims=(0.0,1.0))
+        plot!(pl_S_OP;ylims=(0.0,1.0),yticks=[0:0.5:1.0;])
+        plot!(pl_L_OP;ylims=(0.0,1.0),yticks=[0:0.5:1.0;])
     end
 
 
     if i == 3
         #grid
-        plot!(pl_S,ylims=(0.0,3.0),xformatter=:auto)
-        plot!(pl_L,xformatter=:auto)
+        plot!(pl_S,ylims=(0.0,3.0),yticks=[0:3;],xformatter=:auto,xticks=xticks_logistic)
+        plot!(pl_L,xformatter=:auto,xticks=xticks_logistic)
 
         #OP
-        plot!(pl_S_OP,xformatter=:auto)
-        plot!(pl_L_OP,xformatter=:auto)
+        plot!(pl_S_OP,xformatter=:auto,xticks=xticks_logistic)
+        plot!(pl_L_OP,xformatter=:auto,xticks=xticks_logistic)
     end
 
     #grid
@@ -140,10 +141,6 @@ for (i,noise_level) in enumerate(noise_levels)
 
 end
 
-
-
-annotate!(pl_dist_log,subfigure_annotation_pos_one_col, text("(a)", :left, annotation_fontsize))
-annotate!(pl_od_logistic,subfigure_annotation_pos_one_col, text("(c)", :left, annotation_fontsize))
 
 pl_log = plot(plots_log...,layout=(3,2),size=colfig_size)
 pl_log_OP = plot(plots_log_OP...,layout=(3,2),size=colfig_size)
