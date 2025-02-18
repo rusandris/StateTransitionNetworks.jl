@@ -71,48 +71,64 @@ top_margin=reduced_top_margin,
 right_margin=reduced_right_margin,
 legend=:topright,
 xformatter=:none,
+yformatter=:none,
 yguidefontrotation=0,
 marker_size=marker_size_colored,
 dpi=300)
 
 linealphas = [0.6,1.0]
 linealphas_OP = [0.3,0.6,1.0]
-S_labels = ["(a)","(c)","(e)"]
-L_labels = ["(b)","(d)","(f)"]
+S_labels = ["(a)","(b)","(c)"]
+S_OP_labels = ["(d)","(e)","(f)"]
+L_labels = ["(g)","(h)","(i)"]
+L_OP_labels = ["(j)","(k)","(l)"]
 rs = readdlm(measure_dirs_grid[1]*filenames_entropies_grid[1][1])[:,1]
 
-plots_log = []
-plots_log_OP = []
+plots_log_S = []
+plots_log_L = []
+plots_log_S_OP = []
+plots_log_L_OP = []
 for (i,noise_level) in enumerate(noise_levels)
-    #grid
-    pl_S = plot(;ylims=(0.0,2.0),yticks=[0:2;],title = L"\sigma = %$noise_level", ylabel=L"S",xlabel=L"r",plot_params...)
-    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.5:1.5;],title = L"\sigma = %$noise_level", ylabel=L"\Lambda",xlabel=L"r",plot_params...)
 
-    annotate!(pl_S,subfigure_annotation_pos_two_col_alter_layout, text(S_labels[i], :left, annotation_fontsize))
-    annotate!(pl_L,subfigure_annotation_pos_two_col_alter_layout, text(L_labels[i], :left, annotation_fontsize))
+    local_annot_pos = subfigure_annotation_pos_one_col
+
+    #skip y labels
+    if i == 1
+        ylabel_S_local=L"S"
+        ylabel_S_local_OP=L"S_{OP}"
+        ylabel_L_local=L"\Lambda" 
+        ylabel_L_local_OP=L"\Lambda_{OP}"
+    else
+        ylabel_S_local=""
+        ylabel_L_local=""
+        ylabel_S_local_OP=""
+        ylabel_L_local_OP=""
+    end
+    #grid
+    pl_S = plot(;ylims=(0.0,3.0),yticks=[0.0:1.5:3.0;],title = L"\sigma = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_S_local,plot_params...)
+    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.75:1.5;],title = L"\sigma = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_L_local,plot_params...)
 
     #OP
     pl_S_OP = deepcopy(pl_S)
     pl_L_OP = deepcopy(pl_L)
 
-    plot!(pl_S_OP;ylims=(0.0,1.5),yticks=[0:0.5:1.5;])
-    plot!(pl_L_OP;ylims=(0.0,1.5),yticks=[0:0.5:1.5;])
-
+    #re-enable yticks
     if i == 1
-        plot!(pl_S_OP;ylims=(0.0,1.0),yticks=[0:0.5:1.0;])
-        plot!(pl_L_OP;ylims=(0.0,1.0),yticks=[0:0.5:1.0;])
+        plot!(pl_S,yformatter=:auto)
+        plot!(pl_L,yformatter=:auto)
+        plot!(pl_S_OP,yformatter=:auto)
+        plot!(pl_L_OP,yformatter=:auto)
+        local_annot_pos = subfigure_annotation_pos_two_col_alter_layout
     end
 
+    annotate!(pl_S,local_annot_pos, text(S_labels[i], :left, annotation_fontsize))
+    annotate!(pl_L,local_annot_pos, text(L_labels[i], :left, annotation_fontsize))
+    annotate!(pl_S_OP,local_annot_pos, text(S_OP_labels[i], :left, annotation_fontsize))
+    annotate!(pl_L_OP,local_annot_pos, text(L_OP_labels[i], :left, annotation_fontsize))
 
-    if i == 3
-        #grid
-        plot!(pl_S,ylims=(0.0,3.0),yticks=[0:3;],xformatter=:auto,xticks=xticks_logistic)
-        plot!(pl_L,xformatter=:auto,xticks=xticks_logistic)
+    plot!(pl_S_OP;ylabel=ylabel_S_local_OP)
+    plot!(pl_L_OP;ylabel=ylabel_L_local_OP,xlabel=L"r",xformatter=:auto)
 
-        #OP
-        plot!(pl_S_OP,xformatter=:auto,xticks=xticks_logistic)
-        plot!(pl_L_OP,xformatter=:auto,xticks=xticks_logistic)
-    end
 
     #grid
     for (j,grid_size) in enumerate(grid_sizes)
@@ -124,7 +140,8 @@ for (i,noise_level) in enumerate(noise_levels)
         plot!(pl_S,rs,Ss,lc=:gray10,label=L"n = %$grid_size",la=linealphas[j])
         plot!(pl_L,rs,Λs,lc=:gray10,label=L"n = %$grid_size",la=linealphas[j])
     end
-    push!(plots_log,pl_S,pl_L)
+    push!(plots_log_S,pl_S)
+    push!(plots_log_L,pl_L)
 
 
     #OP
@@ -137,13 +154,15 @@ for (i,noise_level) in enumerate(noise_levels)
         plot!(pl_S_OP,rs,Ss,lc=:gray10,label=L"w = %$w",la=linealphas_OP[j])
         plot!(pl_L_OP,rs,Λs,lc=:gray10,label=L"w = %$w",la=linealphas_OP[j])
     end
-    push!(plots_log_OP,pl_S_OP,pl_L_OP)
+    push!(plots_log_S_OP,pl_S_OP)
+    push!(plots_log_L_OP,pl_L_OP)
 
 end
 
 
-pl_log = plot(plots_log...,layout=(3,2),size=colfig_size)
-pl_log_OP = plot(plots_log_OP...,layout=(3,2),size=colfig_size)
+pl_log_S = plot(plots_log_S...,plots_log_S_OP...,layout=(2,3))
+pl_log_L = plot(plots_log_L...,plots_log_L_OP...,layout=(2,3))
+pl_log = plot(pl_log_S,pl_log_L,layout=(2,1),size=bigfig_size)
 
 
 

@@ -10,21 +10,22 @@ cd(@__DIR__)
 include("pipeline_functions.jl")
 data_dir = "../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 
-output_dir = "../data_test/supplimentary/fibrillation_ECG/fibrillation_results/"
+output_dir = "../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 mkpath(output_dir)
 
 #-----------------------------params------------------------
 w = 4 #for op
 τ = 1 #for op
-grid_size = 22 # for binning
+grid_size = 20 # for binning
 #grid_sizes = [20]
 grid_edges = [0.2,1.2] # for binning
+grid_edges06 = [0.2,1.55] # for binning time series 06 
 #grid_edges = Float64[] #let the algo choose the grid minmax
 window_size = 400 
 lags = [1:10;]
 
 #write out params
-writedlm(output_dir*"method_params.txt",[grid_size,w,window_size,grid_edges...])
+writedlm(output_dir*"method_params.txt",[grid_size,w,window_size,grid_edges...,grid_edges06...])
 
 #4,10,11,12,20 in the paper
 samples = ["08","115" ,"39","06"] #filenames near-AF preAF
@@ -51,12 +52,17 @@ end
 linealphas = [1.0]
 plots = []
 for i in 1:length(rrs_intervals) 
+    if i == 4 
+        grid_edges_local = grid_edges06
+    else
+        grid_edges_local = grid_edges
+    end
 
     #time windows (window stops)
     indicator_window = (width = window_size, stride = 1)
     window_ends = windowmap(last, time_spans[i]; indicator_window...)
     #indicator time series
-    measures_grid = windowmap(ts -> early_warning_signals(ts,grid_size,grid_edges,lags;outside_grid=:skip), rrs_intervals[i]; indicator_window...)
+    measures_grid = windowmap(ts -> early_warning_signals(ts,grid_size,grid_edges_local,lags;outside_grid=:skip), rrs_intervals[i]; indicator_window...)
     M_grid = stack(measures_grid)'
 
     measures_OP = windowmap(ts -> early_warning_signals(ts,w,lags;τ=τ), rrs_intervals[i]; indicator_window...)

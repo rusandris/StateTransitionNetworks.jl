@@ -36,9 +36,10 @@ data_dir = "../../../../data/supplimentary/fibrillation_ECG/fibrillation_results
 result_files = readdir(data_dir)
 samples = readdlm(data_dir*"sample_ids.txt",String)
 method_params = readdlm(data_dir*"method_params.txt")
-grid_size,w,window_size,grid_min,grid_max = method_params
+grid_size,w,window_size,grid_min,grid_max,grid_min06,grid_max06 = method_params
 grid_size,w,window_size = Int.([grid_size,w,window_size])
 grid_edges = (grid_min,grid_max)
+grid_edges06 = (grid_min06,grid_max06)
 rrs_dir = "../../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 #--------------------plot data----------------------
 
@@ -48,7 +49,6 @@ legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 titlefontsize=20,
 left_margin=reduced_left_margin,
-top_margin=reduced_top_margin,
 right_margin=reduced_right_margin,
 legend=:none,
 xformatter=:none,
@@ -64,11 +64,18 @@ ann_onset = "(AFIB"
 ann_term = "(N"
 
 xticks = [[1600:300:2500;],[4900:300:6000;],[1200:300:2300;],[1600:300:2800;]]
-
+ylims_rr = (0.0,1.6)
 plots_grid = []
 plots_OP = []
 for (i,sample) in enumerate(samples)
-    pl_rr = plot(;legend=false,ylims=grid_edges,yticks=[grid_edges[1]:0.4:grid_edges[2];],plot_params...)
+    #set rr time series ylims and others
+    if i == 4
+        ylims_local = grid_edges06
+    else
+        ylims_local = grid_edges
+    end
+
+    pl_rr = plot(;legend=false,ylims=ylims_rr,yticks=[ylims_rr[1]:0.8:ylims_rr[2];],plot_params...)
     pl_S = plot(;legend=false,ylims=(-0.1,2.5),yticks=[0.0,1.0,2.0],plot_params...)
     pl_L = plot(;legend=false,ylims=(-0.1,3.0),yticks=[0:1:3;],plot_params...,) 
     pl_var = plot(;legend=false,ylims=(-0.02,0.08),yticks=[0.0:0.03:0.06;],plot_params...)
@@ -149,7 +156,7 @@ for (i,sample) in enumerate(samples)
     pls = [pl_rr,pl_S,pl_L,pl_var,pl_ac]
     #set xaxis limits
     xlims = (window_ends[measures_interval[1]]-window_size,window_ends[measures_interval[end]])
-
+    @show xlims
     #onset line (red) and termination line (green) on subplots
     for pl in pls
         vline!(pl,rr_idxs_onset,ls=:dash,lc=:red,lw=1,label="")

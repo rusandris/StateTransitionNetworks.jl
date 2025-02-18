@@ -11,9 +11,5 @@ fig_dir_name = "figs"
 fig_dir = "../../../../" * fig_dir_name * "/" 
 !(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
 
-savefig(pl_log,fig_dir*"logistic_noise_results_grid.png")
-savefig(pl_log_OP,fig_dir*"logistic_noise_results_OP.png")
-
-savefig(pl_henon,fig_dir*"/henon_noise_results_grid.png")
-savefig(pl_henon_OP,fig_dir*"/henon_noise_results_OP.png")
-
+savefig(pl_log,fig_dir*"logistic_noise_results.png")
+savefig(pl_henon,fig_dir*"/henon_noise_results.png")

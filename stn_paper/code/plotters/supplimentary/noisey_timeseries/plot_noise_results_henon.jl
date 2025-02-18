@@ -72,6 +72,7 @@ top_margin=reduced_top_margin,
 right_margin=reduced_right_margin,
 legend=true,
 xformatter=:none,
+yformatter=:none,
 yguidefontrotation=0,
 marker_size=marker_size_colored,
 dpi=300)
@@ -79,36 +80,56 @@ dpi=300)
 linealphas = [0.6,1.0]
 linealphas_OP = [0.3,0.6,1.0]
 rs = readdlm(measure_dirs_grid[1]*filenames_entropies_grid[1][1])[:,1]
-S_labels = ["(a)","(c)","(e)"]
-L_labels = ["(b)","(d)","(f)"]
+S_labels = ["(a)","(b)","(c)"]
+S_OP_labels = ["(d)","(e)","(f)"]
+L_labels = ["(g)","(h)","(i)"]
+L_OP_labels = ["(j)","(k)","(l)"]
 
-plots_henon = []
-plots_henon_OP = []
+plots_henon_S = []
+plots_henon_L = []
+plots_henon_S_OP = []
+plots_henon_L_OP = []
 for (i,noise_level) in enumerate(noise_levels)
-    #grid
-    pl_S = plot(;ylims=(0.0,2.0),yticks=[0:2;],title = L"\sigma = %$noise_level", ylabel=L"S",xlabel=L"a",plot_params...)
-    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.5:1.5;],title = L"\sigma = %$noise_level", ylabel=L"\Lambda",xlabel=L"a",plot_params...)
 
-    annotate!(pl_S,subfigure_annotation_pos_two_col_alter_layout, text(S_labels[i], :left, annotation_fontsize))
-    annotate!(pl_L,subfigure_annotation_pos_two_col_alter_layout, text(L_labels[i], :left, annotation_fontsize))
+    local_annot_pos = subfigure_annotation_pos_one_col
+
+    #skip y labels
+    if i == 1
+        ylabel_S_local=L"S"
+        ylabel_S_local_OP=L"S_{OP}"
+        ylabel_L_local=L"\Lambda"
+        ylabel_L_local_OP=L"\Lambda_{OP}" 
+    else
+        ylabel_S_local=""
+        ylabel_L_local=""
+        ylabel_S_local_OP=""
+        ylabel_L_local_OP=""
+    end
+
+    #grid
+    pl_S = plot(;ylims=(0.0,2.0),yticks=[0:2;],title = L"\sigma = %$noise_level",xticks=xticks_henon, ylabel=ylabel_S_local,plot_params...)
+    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.5:1.5;],title = L"\sigma = %$noise_level",xticks=xticks_henon,ylabel=ylabel_L_local,plot_params...)
 
     #OP
     pl_S_OP = deepcopy(pl_S)
     pl_L_OP = deepcopy(pl_L)
 
-    plot!(pl_S_OP;ylims=(0.0,1.0),yticks=[0:0.5:1.0;])
-    plot!(pl_L_OP;ylims=(0.0,2.0),yticks=[0:2;])
-
-
-    if i == 3
-        #grid
-        plot!(pl_S,xformatter=:auto,xticks=xticks_henon)
-        plot!(pl_L,xformatter=:auto,xticks=xticks_henon)
-
-        #OP
-        plot!(pl_S_OP,xformatter=:auto,xticks=xticks_henon)
-        plot!(pl_L_OP,xformatter=:auto,xticks=xticks_henon)
+    #re-enable yticks
+    if i == 1
+        plot!(pl_S,yformatter=:auto)
+        plot!(pl_L,yformatter=:auto)
+        plot!(pl_S_OP,yformatter=:auto)
+        plot!(pl_L_OP,yformatter=:auto)
+        local_annot_pos = subfigure_annotation_pos_two_col_alter_layout
     end
+
+    annotate!(pl_S,local_annot_pos, text(S_labels[i], :left, annotation_fontsize))
+    annotate!(pl_L,local_annot_pos, text(L_labels[i], :left, annotation_fontsize))
+    annotate!(pl_S_OP,local_annot_pos, text(S_OP_labels[i], :left, annotation_fontsize))
+    annotate!(pl_L_OP,local_annot_pos, text(L_OP_labels[i], :left, annotation_fontsize))
+
+    plot!(pl_S_OP;ylabel=ylabel_S_local_OP,ylims=(0.0,1.0),yticks=[0:0.5:1.0;])
+    plot!(pl_L_OP;ylabel=ylabel_L_local_OP,ylims=(0.0,2.0),yticks=[0:2;],xformatter=:auto,xlabel=L"a")
 
     #grid
     for (j,grid_size) in enumerate(grid_sizes)
@@ -120,7 +141,8 @@ for (i,noise_level) in enumerate(noise_levels)
         plot!(pl_S,rs,Ss,lc=:gray10,label=L"n = %$grid_size"*L"^2",la=linealphas[j])
         plot!(pl_L,rs,Λs,lc=:gray10,label=L"n = %$grid_size"*L"^2",la=linealphas[j])
     end
-    push!(plots_henon,pl_S,pl_L)
+    push!(plots_henon_S,pl_S)
+    push!(plots_henon_L,pl_L)
 
 
     #OP
@@ -133,10 +155,12 @@ for (i,noise_level) in enumerate(noise_levels)
         plot!(pl_S_OP,rs,Ss,lc=:gray10,label=L"w = %$w",la=linealphas_OP[j])
         plot!(pl_L_OP,rs,Λs,lc=:gray10,label=L"w = %$w",la=linealphas_OP[j])
     end
-    push!(plots_henon_OP,pl_S_OP,pl_L_OP)
+    push!(plots_henon_S_OP,pl_S_OP)
+    push!(plots_henon_L_OP,pl_L_OP)
 
 end
 
-pl_henon = plot(plots_henon...,layout=(3,2),size=colfig_size)
-pl_henon_OP = plot(plots_henon_OP...,layout=(3,2),size=colfig_size)
+pl_henon_S = plot(plots_henon_S...,plots_henon_S_OP...,layout=(2,3))
+pl_henon_L = plot(plots_henon_L...,plots_henon_L_OP...,layout=(2,3))
+pl_henon = plot(pl_henon_S,pl_henon_L,layout=(2,1),size=bigfig_size)
 
