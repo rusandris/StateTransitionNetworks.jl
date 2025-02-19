@@ -95,9 +95,9 @@ for (i,noise_level) in enumerate(noise_levels)
     #skip y labels
     if i == 1
         ylabel_S_local=L"S"
-        ylabel_S_local_OP=L"S_{OP}"
+        ylabel_S_local_OP=L"S_{\mathrm{OP}}"
         ylabel_L_local=L"\Lambda" 
-        ylabel_L_local_OP=L"\Lambda_{OP}"
+        ylabel_L_local_OP=L"\Lambda_{\mathrm{OP}}"
     else
         ylabel_S_local=""
         ylabel_L_local=""
@@ -106,7 +106,7 @@ for (i,noise_level) in enumerate(noise_levels)
     end
     #grid
     pl_S = plot(;ylims=(0.0,3.0),yticks=[0.0:1.5:3.0;],title = L"\sigma = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_S_local,plot_params...)
-    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.75:1.5;],title = L"\sigma = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_L_local,plot_params...)
+    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.6:1.2;],title = L"\sigma = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_L_local,plot_params...)
 
     #OP
     pl_S_OP = deepcopy(pl_S)

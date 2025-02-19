@@ -96,9 +96,9 @@ for (i,noise_level) in enumerate(noise_levels)
     #skip y labels
     if i == 1
         ylabel_S_local=L"S"
-        ylabel_S_local_OP=L"S_{OP}"
+        ylabel_S_local_OP=L"S_{\mathrm{OP}}"
         ylabel_L_local=L"\Lambda"
-        ylabel_L_local_OP=L"\Lambda_{OP}" 
+        ylabel_L_local_OP=L"\Lambda_{\mathrm{OP}}" 
     else
         ylabel_S_local=""
         ylabel_L_local=""

@@ -79,8 +79,8 @@ inset_ylims = [0.4,1.0]
 Ss = readdlm(logistic_results_dir * entropies_file)[:,5]
 Λs = readdlm(logistic_results_dir * lambdas_file)[:,5]
 
-s_label = L"S(12)"
-Λ_label = L"\Lambda(12)"
+s_label = L"S"
+Λ_label = L"\Lambda"
 
 #--------------plotting params------------
 alphas = [0.4:0.2:1.0;]
