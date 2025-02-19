@@ -67,17 +67,17 @@ r_windows = rs[end-length(t_windows)+1:end]
 #------------------------------------------------plot timeseries------------------------------------------
 pl_ts = plot(;plot_params...,top_margin=4Plots.mm);
 twiny(pl_ts) #shared y axis, multiple x axis
-plot!(pl_ts[2];xlims=(rs[1],3.84),xlabel=L"r(t)",guidefontsize=guidefontsize,
+plot!(pl_ts[2];xlims=(rs[1],3.84),xlabel=L"r_\tau",guidefontsize=guidefontsize,
     legendfontsize=legendfontsize,tickfontsize=tickfontsize,xticks=xticks_param,widen=true)
 
-plot!(pl_ts[1],times,timeseries,st=scatter,ms=0.8,xticks=time_xticks,ylims=(0.0,1.2),yticks=[0.0:0.5:1.0;],widen=true,ylabel=L"x(t)",mc=:gray10,ma=0.5,markerstrokewidth=0.0,legend=false);
+plot!(pl_ts[1],times,timeseries,st=scatter,ms=0.8,xticks=time_xticks,ylims=(0.0,1.2),yticks=[0.0:0.5:1.0;],widen=true,ylabel=L"x_\tau",mc=:gray10,ma=0.5,markerstrokewidth=0.0,legend=false);
 vline!(pl_ts[1],[n_min+n_crit],ls=:dash,lw=2,lc=:red);
 
 
 pl_S = plot(;plot_params...,xticks=time_xticks);
 pl_L = plot(;plot_params...,ylims=(0.0,2.5),yticks=[0.0:1.0:2.5;],xticks=time_xticks);
 pl_var = plot(;plot_params...,ylims=(0.0,0.12),yticks=[0.0:0.05:0.1;],xticks=time_xticks);
-pl_ac = plot(;plot_params...,ylims=(-0.7,-0.45),yticks=[-0.7:0.1:-0.5;],xlims=[times[1],times[end]],xticks=time_xticks,xlabel=L"t",xformatter=:auto);
+pl_ac = plot(;plot_params...,ylims=(-0.7,-0.45),yticks=[-0.7:0.1:-0.5;],xlims=[times[1],times[end]],xticks=time_xticks,xlabel=L"\tau",xformatter=:auto);
 
 
 for i in 1:nr_ics

@@ -6,7 +6,7 @@ using SparseArrays
 using DynamicalSystems
 using DelimitedFiles
 cd(@__DIR__)
-include("pipeline_functions.jl")
+include("functions_utils.jl")
 
 #------------------------Logistic stuff-----------------------
 

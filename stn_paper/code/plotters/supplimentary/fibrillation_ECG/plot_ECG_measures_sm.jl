@@ -197,10 +197,10 @@ fig_dir = "../../../../" * fig_dir_name * "/"
 !(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
 
 pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl,fig_dir*"fib_selection_paper_sm" * "_grid_$(Int(grid_size))" * "_window_$(Int(window_size))"*".png")
+savefig(pl,fig_dir*"ECG_measures_sm" * "_grid_$(Int(grid_size))" * "_window_$(Int(window_size))"*".png")
 
 pl_OP = plot(plots_OP...,layout = (1,length(plots_OP)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl_OP,fig_dir*"fib_selection_paper_sm" * "_OP_$(Int(w))" * "_window_$(Int(window_size))"*".png")
+savefig(pl_OP,fig_dir*"ECG_measures_sm" * "_OP_$(Int(w))" * "_window_$(Int(window_size))"*".png")
 
 
 
