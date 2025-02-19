@@ -37,7 +37,7 @@ const ϵ::Float64 = 1e-3 #1e-5
 const ps_renyi::Vector{Float64} = [1.2265,1.24,1.27,1.4]
 const qs::Vector{Float64} = [0.0:0.01:2;]
 
-data_dir = "data_test/main/henon_data/" 
+data_dir = "../data_test/main/henon_data/" 
 mkpath(data_dir)
 
 out_file_entropy = data_dir*"henon_entropies"  * "_T$T_string" * "_Ttr$Ttr_string" * "_b_0.3" * "_grid_$grid_size" * "param_$(ps[1])" * "_$(ps[end])" * ".txt"
