@@ -69,9 +69,9 @@ titlefontsize=20,
 left_margin=left_margin,
 top_margin=reduced_top_margin,
 right_margin=reduced_right_margin,
-legend=:topright,
 xformatter=:none,
 yformatter=:none,
+legend=false,
 yguidefontrotation=0,
 marker_size=marker_size_colored,
 dpi=300)
@@ -105,19 +105,22 @@ for (i,noise_level) in enumerate(noise_levels)
         ylabel_L_local_OP=""
     end
     #grid
-    pl_S = plot(;ylims=(0.0,3.0),yticks=[0.0:1.5:3.0;],title = L"\sigma = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_S_local,plot_params...)
-    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.6:1.2;],title = L"\sigma = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_L_local,plot_params...)
+    pl_S = plot(;ylims=(0.0,2.4),yticks=[0.0:1.2:2.4;],title = L"\sigma_{\mathrm{n}}/\sigma_{\mathrm{s}} = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_S_local,plot_params...)
+    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.6:1.2;],title = L"\sigma_{\mathrm{n}}/\sigma_{\mathrm{s}} = %$noise_level",xticks=xticks_logistic,ylabel=ylabel_L_local,plot_params...)
 
     #OP
     pl_S_OP = deepcopy(pl_S)
     pl_L_OP = deepcopy(pl_L)
 
-    #re-enable yticks
+    #mod ylims
+    plot!(pl_S_OP,ylims=(0.0,1.4),yticks=[0.0:0.7:1.4;])
+
+    #re-enable yticks,legends
     if i == 1
-        plot!(pl_S,yformatter=:auto)
-        plot!(pl_L,yformatter=:auto)
-        plot!(pl_S_OP,yformatter=:auto)
-        plot!(pl_L_OP,yformatter=:auto)
+        plot!(pl_S,yformatter=:auto,legend=true)
+        plot!(pl_L,yformatter=:auto,legend=true)
+        plot!(pl_S_OP,yformatter=:auto,legend=true)
+        plot!(pl_L_OP,yformatter=:auto,legend=true)
         local_annot_pos = subfigure_annotation_pos_two_col_alter_layout
     end
 

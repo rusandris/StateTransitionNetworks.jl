@@ -70,7 +70,7 @@ titlefontsize=20,
 left_margin=left_margin,
 top_margin=reduced_top_margin,
 right_margin=reduced_right_margin,
-legend=true,
+legend=false,
 xformatter=:none,
 yformatter=:none,
 yguidefontrotation=0,
@@ -107,8 +107,8 @@ for (i,noise_level) in enumerate(noise_levels)
     end
 
     #grid
-    pl_S = plot(;ylims=(0.0,2.0),yticks=[0:2;],title = L"\sigma = %$noise_level",xticks=xticks_henon, ylabel=ylabel_S_local,plot_params...)
-    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.5:1.5;],title = L"\sigma = %$noise_level",xticks=xticks_henon,ylabel=ylabel_L_local,plot_params...)
+    pl_S = plot(;ylims=(0.0,2.0),yticks=[0:2;],title = L"\sigma_{\mathrm{n}}/\sigma_{\mathrm{s}} = %$noise_level",xticks=xticks_henon, ylabel=ylabel_S_local,plot_params...)
+    pl_L = plot(;ylims=(0.0,1.5),yticks=[0:0.5:1.5;],title = L"\sigma_{\mathrm{n}}/\sigma_{\mathrm{s}} = %$noise_level",xticks=xticks_henon,ylabel=ylabel_L_local,plot_params...)
 
     #OP
     pl_S_OP = deepcopy(pl_S)
@@ -116,10 +116,10 @@ for (i,noise_level) in enumerate(noise_levels)
 
     #re-enable yticks
     if i == 1
-        plot!(pl_S,yformatter=:auto)
-        plot!(pl_L,yformatter=:auto)
-        plot!(pl_S_OP,yformatter=:auto)
-        plot!(pl_L_OP,yformatter=:auto)
+        plot!(pl_S,yformatter=:auto,legend=true)
+        plot!(pl_L,yformatter=:auto,legend=true)
+        plot!(pl_S_OP,yformatter=:auto,legend=true)
+        plot!(pl_L_OP,yformatter=:auto,legend=true)
         local_annot_pos = subfigure_annotation_pos_two_col_alter_layout
     end
 

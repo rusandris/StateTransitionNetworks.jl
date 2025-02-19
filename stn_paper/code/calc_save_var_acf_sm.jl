@@ -60,7 +60,7 @@ for (i,r) in enumerate(rs)
     #traj,t = trajectory(ds,T;Ttr=Ttr)
     #traj = Matrix(traj)
 
-    @time orbit!(orbits_log,ds,T,Ttr;reinit=true)
+    orbit!(orbits_log,ds,T,Ttr;reinit=true)
 
     #autocorrelation and variance
     vs = var(orbits_log;corrected=false) #lag1, normalized by variance
