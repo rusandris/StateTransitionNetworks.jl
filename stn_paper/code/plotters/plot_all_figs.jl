@@ -11,8 +11,8 @@ include("plot_functions_chaotic_maps.jl")
 include("main/plot_maps_main.jl")
 
 #supplimentary
-include("supplimentary/fibrillation_ECG/plot_fib_selection_paper_sm.jl")
-include("supplimentary/noisey_timeseries/plot_noise_results.jl")
-include("supplimentary/sliding_param_measures/plot_slideparam.jl")
-include("supplimentary/static_measure_comparison/plot_EWS_comparison_inset_logistic_henon.jl")
+include("supplimentary/fibrillation_ECG/plot_ECG_measures_sm.jl")
+include("supplimentary/noisey_timeseries/plot_noise_results_sm.jl")
+include("supplimentary/sliding_param_measures/plot_logistic_slideparam_sm.jl")
+include("supplimentary/static_measure_comparison/plot_EWS_comparison_inset_logistic_henon_sm.jl")
 include("supplimentary/wider_range_measures/plot_maps_sm.jl")
