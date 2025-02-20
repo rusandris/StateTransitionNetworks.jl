@@ -1,14 +1,12 @@
 Our package `StateTransitionNetworks.jl` and other functions and scripts to generate figures are written in the Julia programming language.
 
-These examples are likely but not guaranteed to work with the latest version of the package. To make sure they work, use the `v0.4.0-pub` release.
+These examples are likely but not guaranteed to work with the latest version of the package. To make sure they work, use the `v0.4.2-pub` release.
 
 For Julia installation instructions see: https://julialang.org/downloads/
 
-Run everything from the `stn_paper/` dir as working directory to avoid path errors.
-
 #### INSTALL AND SETUP
 
-Once you have successfully downloaded the `stn_paper/` directory (or by clicking on the `Download ZIP` option on Github, or by cloning the repository `git clone https://github.com/rusandris/StateTransitionNetworks.jl.git --branch v0.4.0-pub`  ), navigate to `stn_paper/` directory and follow these steps:
+Once you have successfully downloaded the `stn_paper/` directory (or by clicking on the `Download ZIP` option on Github, or by cloning the repository `git clone https://github.com/rusandris/StateTransitionNetworks.jl.git --branch v0.4.2-pub`  ), navigate to `stn_paper/` directory and follow these steps:
 
 1. Activate the environment:
     * in the `stn_paper/` directory open a Julia `REPL`, activate the env with: `] activate .` (the `]`is needed to enter package mode (blue) of the `REPL` and only needed once)
@@ -17,7 +15,7 @@ Once you have successfully downloaded the `stn_paper/` directory (or by clicking
 
    * if you only have the `stn_paper/` dir with the scripts, or you use Windows: 
 
-     ` add https://github.com/rusandris/StateTransitionNetworks.jl.git #v0.4.0-pub  `
+     ` add https://github.com/rusandris/StateTransitionNetworks.jl.git #v0.4.2-pub  `
 
    * if you downloaded the whole repository: ` add ../../StateTransitionNetworks.jl/`
 
@@ -25,7 +23,43 @@ Once you have successfully downloaded the `stn_paper/` directory (or by clicking
 
 3. Instantiate to install all packages: ` instantiate`
 
+#### Generate figures from pre-saved results
+
+Pre-saved results are in `presaved_results.zip` . 
+
+1. Extract to `data/` directory to `stn_paper`
+2. run `code/plotters/plot_all_figs.jl`
+
+The figures from the paper (all except Fig.1 in the Supplimental Material) can be reproduced by running `code/plotters/plot_all_figs.jl` and they will be saved to `stn_paper/figs`.
+
+Figures `logistic_noise_results.png` and `henon_noise_results.png` can only be reproduced using the presaved data at the moment, the source code that generate it can be made available later.
+
+Source code to critical and tent map results (Fig.1) can be made available on request.  
+
 #### RUN
+
+To generate the results run source code:
+
+* `generate_all_results.jl`
+
+and plot with
+
+* `plot_all_figs.jl`.
+
+Note that each script changes the working directory to their own, so keep that in mind while running things in the REPL. For example when starting with `stn_paper` as the working directory:
+
+```include("code/generate_all_results.jl")```
+```include("plotters/plot_all_figs.jl")```
+
+*Note:* Keep in mind that some method parameters (for example length of calculated time series) are chosen to produce results quickly and of course may lead to less accurate calculation. 
+
+To reproduce the exact figures,  one should use the parameters values in the comments (there are some values that are commented out after certain parameters) in scripts in `/code`:
+
+* `logistic_map_main.jl`
+* `henon_map_main.jl`
+* `logistic_map_sm.jl`
+* `henon_map_sm.jl`
+* `calc_save_var_acf_sm.jl`
 
 To run any file from the `code/` directory, here are some options:
 
@@ -35,21 +69,12 @@ To run any file from the `code/` directory, here are some options:
 
 * Run from `VSCode`: select environment and run
 
-To generate the results run the following source codes:
+Note:  The scripts 
 
 * `logistic_map_main.jl`
+* `logistic_map_sm.jl`
 * `henon_map_main.jl`
+* `henon_map_sm.jl`
 
-Note: To reproduce the exact figures,  one should use the parameters values in the comments (there are some values that are commented out after certain parameters). The ones that are currently set are chosen to produce results quickly and of course may lead to less accurate calculation. . 
+save the values continuously in `data/` and log status in the stdout/logfiles. If you run the same source code multiple times in a row, results get appended in the same file, leading to errors.
 
-Note:  The scripts save the values continuously in `data/` and log status in the stdout/logfiles. If you run the same script multiple times, they all save data in the same files (duplicates can occur, and this can cause errors in plotting).
-
-#### PLOT
-
-To get the main figure, run `code/plotters/plot_maps_main.jl`.  For example `include("code/plotters/plot_maps_main.jl")`
-
-To get the supplementary figure, run `code/plotters/plot_maps_sm.jl`. For example `include("code/plotters/plot_maps_sm.jl")`
-
-See the output in `figs/` (png).
-
-It is advised to do this in a separate Julia session, if you intend to run the plotter from the `REPL`.
