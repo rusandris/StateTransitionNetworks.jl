@@ -4,6 +4,7 @@ using ChaosTools
 using DelimitedFiles
 using SparseArrays
 using Printf
+cd(@__DIR__)
 include("functions_chaotic_maps.jl")
 
 println("Packages loaded...")

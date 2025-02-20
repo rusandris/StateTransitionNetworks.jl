@@ -38,8 +38,8 @@ samples = readdlm(data_dir*"sample_ids.txt",String)
 method_params = readdlm(data_dir*"method_params.txt")
 grid_size,w,window_size,grid_min,grid_max,grid_min06,grid_max06 = method_params
 grid_size,w,window_size = Int.([grid_size,w,window_size])
-grid_edges = (grid_min,grid_max)
-grid_edges06 = (grid_min06,grid_max06)
+grid_edges = [grid_min,grid_max]
+grid_edges06 = [grid_min06,grid_max06]
 rrs_dir = "../../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 #--------------------plot data----------------------
 

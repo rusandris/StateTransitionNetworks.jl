@@ -156,12 +156,12 @@ plot!(pl_Λ[2],xticks=inset_xticks,yticks=inset_yticks)
 #-------------------------var plot---------------------------
 ylims=[0.4,0.8]
 yticks=[0.4,0.6,0.8]
-var = EWS_standard_henon[:,1]
+vars = EWS_standard_henon[:,1]
 pl_var = plot(;yticks=yticks,ylims=ylims,plot_params...)
 #ylabel=L"\sigma^2"
 
 #plot measure curves
-plot!(pl_var,ps,var,lw=2,la=1.0,lc=linecolor,label = L"\sigma^2")
+plot!(pl_var,ps,vars,lw=2,la=1.0,lc=linecolor,label = L"\sigma^2")
 
 #plot vertical lines on var plot
 for (i,p) in enumerate(special_ps)

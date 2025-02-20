@@ -7,6 +7,9 @@ include("functions_utils.jl")
 #main results 
 include("logistic_map_main.jl")
 include("henon_map_main.jl")
+#save inset data separately for main
+include("save_inset_data_logistic.jl")
+include("save_inset_data_henon.jl")
 
 #supplimentary
 include("logistic_map_sm.jl")

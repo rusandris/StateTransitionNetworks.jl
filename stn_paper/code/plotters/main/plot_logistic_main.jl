@@ -96,7 +96,10 @@ lambdas_file = result_files[findall(f -> occursin("lambda", f),result_files)][1]
 Ss = readdlm(logistic_results_dir * entropies_file)[:,2:end]
 Λs = readdlm(logistic_results_dir * lambdas_file)[:,2:end]
 
-
+inset_measures_file = result_files[findall(f -> occursin("inset_measures", f),result_files)][1]
+inset_data = readdlm(logistic_results_dir * inset_measures_file)
+Ss_inset_data = inset_data[:,[1,2,3]]
+Λs_inset_data = inset_data[:,[1,4,5]]
 
 #--------------plotting params------------
 alphas = [0.4:0.2:1.0;]
@@ -182,6 +185,7 @@ pl_s_logistic = plot_measure(ps,Ss,special_ps;
     λs = λs,
     alphas=alphas,
     inset_box=inset_box,
+    inset_data = Ss_inset_data,
     inset_param_range=inset_param_range,
     marker_shapes=marker_shapes,
     marker_colors=marker_colors,
@@ -199,7 +203,7 @@ pl_lambda_logistic = plot_measure(ps,Λs,special_ps;
     labels = Λ_labels,
     alphas=alphas,
     inset_box=inset_box,
-    #inset_rw_vals=Λs_rw,
+    inset_data = Λs_inset_data,
     inset_param_range=inset_param_range,
     marker_shapes=marker_shapes,
     marker_colors=marker_colors,

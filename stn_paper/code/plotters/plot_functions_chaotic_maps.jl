@@ -1,5 +1,5 @@
 function plot_measure(ps,ms,special_ps;λs=[],labels,vertical_lw,
-    red_params=[],inset_param_range,inset_rw_vals=[],inset_box,inset_ticks,inset_tickfontsize,inset_ylims,alphas,marker_colors,orders,kwargs...)
+    red_params=[],inset_param_range,inset_data=[],inset_box,inset_ticks,inset_tickfontsize,inset_ylims,alphas,marker_colors,orders,kwargs...)
 
 
     pl = plot(;kwargs...)
@@ -34,13 +34,18 @@ function plot_measure(ps,ms,special_ps;λs=[],labels,vertical_lw,
     li = findlast(p -> p <= inset_param_range[end],ps)
     inset_indices = fi:li
     
-    if isempty(inset_rw_vals)
+    if isempty(inset_data)
         plot!(pl[2], ps[inset_indices], ms[inset_indices,2*length(orders)], label=nothing ,st=:scatter, markerstrokewidth=0, mc=:gray60, ms=4, ma=1) #plot highest order numerical
+        plot!(pl[2], ps[inset_indices], ms[inset_indices,length(orders)], label=nothing, lw=1, color=:gray10) #plot highest order analytical
     else
-        plot!(pl[2], ps[inset_indices], inset_rw_vals, label=nothing ,st=:scatter, markerstrokewidth=0, mc=:gray60, ms=4, ma=1) #plot highest order numerical
+        ps_inset = inset_data[:,1]
+        ms_inset = inset_data[:,2]
+        rw_vals_inset = inset_data[:,3]
+     
+        plot!(pl[2], ps_inset, rw_vals_inset, label=nothing ,st=:scatter, markerstrokewidth=0, mc=:gray60, ms=4, ma=1) #plot highest order numerical
+        plot!(pl[2], ps_inset, ms_inset, label=nothing, lw=1, color=:gray10) #plot highest order analytical
     end
 
-    plot!(pl[2], ps[inset_indices], ms[inset_indices,length(orders)], label=nothing, lw=1, color=:gray10) #plot highest order analytical
 
 
     if !isempty(red_params)

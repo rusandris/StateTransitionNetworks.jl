@@ -20,14 +20,13 @@ mkpath(data_dir)
 #------------------------------Henon stuff--------------------------------
 
 ds = Systems.henon()
-Δp = 2*1e-4
+Δp = 1e-3 #2*1e-4
 as = [1.2:Δp:1.4;]
 EWS_standard_henon = zeros(length(as),4)
 orbits_henon = zeros(T,2) 
 lag = 1
 
 for (i,a) in enumerate(as)
-    @show a
     set_parameter!(ds,1,a)
     #@time traj,t = trajectory(ds,T;Ttr=Ttr)
     #@time traj = Matrix(traj)
@@ -55,7 +54,6 @@ orbits_log = zeros(T,1)
 lag_logistic = 1
 
 for (i,r) in enumerate(rs)
-    @show r
     set_parameter!(ds,1,r)
     #traj,t = trajectory(ds,T;Ttr=Ttr)
     #traj = Matrix(traj)
