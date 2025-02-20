@@ -78,7 +78,7 @@ for i in 1:nr_ics
 end    
 
 #-------------------------------save data-------------------------------------
-data_dir = "../data_test/supplimentary/sliding_param_measures/"
+data_dir = "../data/supplimentary/sliding_param_measures/"
 mkpath(data_dir)
 
 #leave off transient

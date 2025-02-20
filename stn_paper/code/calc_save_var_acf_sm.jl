@@ -13,7 +13,7 @@ const T_string::String = @sprintf "%.E" T
 const Ttr::Int64 = 10^3 #10^6 
 const Ttr_string::String = @sprintf "%.E" Ttr
 
-data_dir = "../data_test/supplimentary/static_measures_var_ac/"
+data_dir = "../data/supplimentary/static_measures_var_ac/"
 mkpath(data_dir)
 
 #TODO:speed this up!

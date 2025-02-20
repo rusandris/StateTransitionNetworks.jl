@@ -12,7 +12,7 @@ include("plot_EWS_comparison_inset_henon.jl")
 
 fig_dir_name = "figs"
 fig_dir = "../../../../" * fig_dir_name * "/" 
-!(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
+mkpath(fig_dir)
 
 #combine figs
 l = (1,2)

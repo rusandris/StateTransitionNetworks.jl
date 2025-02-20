@@ -17,6 +17,6 @@ pl = plot(pl_logistic,pl_henon,layout=l2,size=bigfig_size);
 
 fig_dir_name = "figs"
 fig_dir = "../../../../" * fig_dir_name * "/" 
-!(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
+mkpath(fig_dir)
 savefig(pl,fig_dir * "logistic_henon_sm.png")
 

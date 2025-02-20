@@ -10,7 +10,7 @@ cd(@__DIR__)
 include("functions_utils.jl")
 data_dir = "../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 
-output_dir = "../data_test/supplimentary/fibrillation_ECG/fibrillation_results/"
+output_dir = "../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 mkpath(output_dir)
 
 #-----------------------------params------------------------

@@ -110,5 +110,5 @@ pl_log = plot(pl_ts,pl_L,pl_var,pl_ac,layout=(4,1),size=colfig_size);
 #------------------------------------------save fig----------------------------------------------
 fig_dir_name = "figs"
 fig_dir = "../../../../" * fig_dir_name * "/" 
-!(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
+mkpath(fig_dir)
 savefig(pl_log,fig_dir*"logistic_map_measures_comparison_slideparam_many_ics_zoom_tslength$n_max" * "_window$window_size" * "_grid$grid_size" * "_r_min$r_min" * "_r_max$r_max" * ".png")

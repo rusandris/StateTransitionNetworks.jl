@@ -1,6 +1,6 @@
 using DelimitedFiles
 cd(@__DIR__)
-data_dir = "../data_test/main/henon_data/"
+data_dir = "../data/main/henon_data/"
 inset_param_range = [1.2,1.25] #inset params
 result_files = readdir(data_dir)
 

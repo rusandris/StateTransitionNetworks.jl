@@ -139,13 +139,6 @@ for (i,sample) in enumerate(samples)
     interval_start = rr_idxs_onset[1]-pre_onset_offset - window_size
     measures_interval = interval_start:interval_end
 
-    @show rr_idxs_onset[1]
-    @show measures_interval
-    @show window_ends[measures_interval[1]]
-    @show window_ends[measures_interval[end]]
-    @show window_ends[measures_interval][1]
-    @show window_ends[measures_interval][end]
-
     #plot grid
     plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,2],lw=curve_lw,lc=linecolor);
     plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lw=curve_lw,lc=linecolor);
@@ -194,13 +187,13 @@ end
 
 fig_dir_name = "figs"
 fig_dir = "../../../../" * fig_dir_name * "/" 
-!(fig_dir_name in readdir("../../../../")) && (mkdir(fig_dir))
+mkpath(fig_dir)
 
 pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl,fig_dir*"ECG_measures_sm" * "_grid_$(Int(grid_size))" * "_window_$(Int(window_size))"*".png")
+savefig(pl,fig_dir*"ECG_measures_sm" * "_grid_$(Int(grid_size))" * "_window_$(Int(window_size))"*".pdf")
 
 pl_OP = plot(plots_OP...,layout = (1,length(plots_OP)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl_OP,fig_dir*"ECG_measures_sm" * "_OP_$(Int(w))" * "_window_$(Int(window_size))"*".png")
+savefig(pl_OP,fig_dir*"ECG_measures_sm" * "_OP_$(Int(w))" * "_window_$(Int(window_size))"*".pdf")
 
 
 
