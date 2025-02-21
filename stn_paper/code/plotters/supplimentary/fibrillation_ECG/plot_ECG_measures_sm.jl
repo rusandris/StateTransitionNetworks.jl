@@ -80,7 +80,7 @@ for (i,sample) in enumerate(samples)
     pl_L = plot(;legend=false,ylims=(-0.1,3.0),yticks=[0:1:3;],plot_params...,) 
     pl_var = plot(;legend=false,ylims=(-0.02,0.08),yticks=[0.0:0.03:0.06;],plot_params...)
     pl_ac = plot(;legend=false,ylims=(-0.8,1.2),yticks=[-0.5,0.0,0.5,1.0],plot_params...,xformatter=:auto)
-    xlabel!(pl_ac,"index")
+    xlabel!(pl_ac,"index",xguidefontsize=guidefontsize-12)
 
     if i == 1
         plot!(pl_rr,ylabel=L"RR",yformatter=:auto)
