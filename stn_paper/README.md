@@ -27,7 +27,7 @@ Once you have successfully downloaded the `stn_paper/` directory (or by clicking
 
 Pre-saved results are in `presaved_results.zip` . 
 
-1. Extract to `data/` directory to `stn_paper`
+1. Extract to `data/` directory to `stn_paper` (extract as folder `data`)
 2. run `code/plotters/plot_all_figs.jl`
 
 The figures from the paper (all except Fig.1 in the Supplimental Material) can be reproduced by running `code/plotters/plot_all_figs.jl` and they will be saved to `stn_paper/figs`.
@@ -36,9 +36,13 @@ Figures `logistic_noise_results.png` and `henon_noise_results.png` can only be r
 
 Source code to critical and tent map results (Fig.1) can be made available on request.  
 
-#### RUN
+#### Generate results
 
-To generate the results run source code:
+1. extract `data/` dir (extract as folder `data`) from `data_LTAF_misc.zip` that contains data taken from the LTAF dataset (https://physionet.org/content/ltafdb/1.0.0/). 
+
+2. open a new Julia session
+
+3. To generate the results run source code:
 
 * `generate_all_results.jl`
 
@@ -76,5 +80,5 @@ Note:  The scripts
 * `henon_map_main.jl`
 * `henon_map_sm.jl`
 
-save the values continuously in `data/` and log status in the stdout/logfiles. If you run the same source code multiple times in a row, results get appended in the same file, leading to errors.
+save the values continuously in `data/` and log status in the stdout/logfiles. If you run the same source code multiple times in a row, results get appended to the same file, leading to errors.
 
