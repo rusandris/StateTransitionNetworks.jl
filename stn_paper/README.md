@@ -1,6 +1,6 @@
 Our package `StateTransitionNetworks.jl` and other functions and scripts to generate figures are written in the Julia programming language.
 
-These examples are likely but not guaranteed to work with the latest version of the package. To make sure they work, use the `v0.4.2-pub` release.
+These examples are likely but not guaranteed to work with the latest version of the package. **To make sure they work, use the `v0.4.2-pub` release.**
 
 For Julia installation instructions see: https://julialang.org/downloads/
 
@@ -22,6 +22,8 @@ Once you have successfully downloaded the `stn_paper/` directory (or by clicking
      Note: Adding our package is done like this because`StateTransitionNetworks.jl` isn't in the official Julia registry yet.
 
 3. Instantiate to install all packages: ` instantiate`
+
+**All scripts that generate numerical results read and save results to `stn_paper/data`, and plotters save figures to `stn_paper/figs`. **  
 
 #### Generate figures from pre-saved results
 
