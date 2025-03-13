@@ -56,7 +56,7 @@ end
 Calculates analytically the Sinai-Kolmogorov entropy given the P transition probability matrix of the STN. 
 
 """
-function sinai_kolmogorov_entropy(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P))		
+function sinai_kolmogorov_entropy(P::SparseMatrixCSC;x=stationary_distribution(P))		
 	
 	v = ones(length(x))
 
@@ -77,7 +77,7 @@ Optional Keyword arguments:
 * `ϵ`: tolerance for linear solvers
 * `maxiter`: maxiter for linear solvers
 """
-function lyapunov_measure(P::SparseMatrixCSC;x::Vector{Float64}=stationary_distribution(P),alg::Function=hybrid_solve,ϵ=1e-12,maxiter=100000)
+function lyapunov_measure(P::SparseMatrixCSC;x=stationary_distribution(P),alg::Function=hybrid_solve,ϵ=1e-12,maxiter=100000)
 	
 	xt = transpose(x)
 	v = ones(length(x))
@@ -135,7 +135,7 @@ end
  
 #Schlogl notation: C1,C2
 
-function bit_number_measures(x::Vector{Float64})
+function bit_number_measures(x)
 
 	l = -log.(x)
 	replace!(l, Inf=>0.0)
@@ -168,7 +168,7 @@ function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64; tol::Floa
 end
 
 
-function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64,n::Int64; x::Vector{Float64}=stationary_distribution(P))
+function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64,n::Int64; x=stationary_distribution(P))
 
 	x_q = x .^ q
 	P_q = deepcopy(P)
@@ -178,7 +178,7 @@ function renyi_entropy(P::SparseMatrixCSC{Float64, Int64}, q::Float64,n::Int64; 
 
 end
 
-function renyi_entropy_spectrum(P::SparseMatrixCSC{Float64, Int64}, qs::Vector{Float64}; x::Vector{Float64}=stationary_distribution(P), verbose=true)
+function renyi_entropy_spectrum(P::SparseMatrixCSC{Float64, Int64}, qs::Vector{Float64}; x=stationary_distribution(P), verbose=true)
     Hs = zeros(length(qs))
     for (i,q) in enumerate(qs)
         verbose && @show q
