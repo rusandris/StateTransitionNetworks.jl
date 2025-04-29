@@ -1,34 +1,47 @@
-export higher_order_symbolics!
+export higher_order_symbolics!,higher_order_state
 
-function higher_order_symbolics!(symbolic_timeseries::Vector{T}, order::Int; delays = collect(0:order-1)) where T<:Integer
+function higher_order_symbolics!(symbolic_timeseries::Vector{T}, order::Int; delays = collect(0:order-1),warn_overflow=true) where T<:Integer
     length(delays) != order && throw(ArgumentError("The number of provided delays has to be the same as `order`"))
     delays[1] != 0 && throw(ArgumentError("The first delay has to be zero, viz. the actual element."))
-    warn=false
+    overflow=false
     nr_symbols = maximum(symbolic_timeseries) #assumed symbols go from 1 to nr_symbols
 
-    # new symbolic timeseries by OVERWRITING the old timeseries vector
+    #create new symbolic timeseries by OVERWRITING the old timeseries vector
     order>1 ? max_delay=maximum(delays) : max_delay=0
+
+    #helper vector to store symbol indices
+    #has order nr of elements
+    idxs = zeros(Int,order)
+
+    #loop through symb time series
+    #i can take order:length(symbolic_timeseries) in default case
     for i in 1+max_delay:length(symbolic_timeseries)
-        # build the higher order vector state
-        hs::T = 0
+        
+        #store indices of symbols used to build higher order symbol
+        # has "order" number of elements
         for d in 1:order
-            s = symbolic_timeseries[i-delays[d]]
-            hs += s*nr_symbols^(d-1)
+            idxs[d] = i-delays[d]
         end
-        #warn if overflow happens
-        hs < 0 && (warn = true) 
-        # encode the higher order state
+        #use @view here?
+        hs,of = higher_order_state(symbolic_timeseries[idxs], nr_symbols)
+        overflow = of
+        # place higher order state back in the original vector
         symbolic_timeseries[i-max_delay] = hs
     end
-    warn && @warn "Overflowing integer symbols when calculating higher order states!"
+    warn_overflow && overflow && @warn "Overflowing integer symbols when calculating higher order states!"
     return nothing
 end
 
 
-function higher_order_state(states::Vector{T}, nr_symbols::T) where T<:Integer
+function higher_order_state(symbols::Vector{T}, nr_symbols;warn_overflow=false) where T<:Integer
+    overflow=false #bool for warnings in case of overflow
     hs::T = 0
-    for (i,s) in enumerate(states)
-        hs += s*nr_symbols^(i-1)
+    for (i,s) in enumerate(symbols)
+        multiplier = nr_symbols^(i-1)
+        #warn if overflow happens
+        multiplier < 0 && (overflow = true)
+        hs += s*multiplier
     end
-    return hs
+    warn_overflow && overflow && @warn "Overflowing integer symbols when calculating higher order states!"
+    return hs,overflow
 end
