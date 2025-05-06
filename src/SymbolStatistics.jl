@@ -72,11 +72,12 @@ end
 
 
 function calculate_transition_matrix(trs::SymbolStatistics)
-    #transitions are put in order in trs.Q
-    nzrows = 1:trs.nr_unique_symbols
-    #easy slice
-    P = SparseMatrixCSC(trs.Q)
-    P = P[nzrows,nzrows]
+    #trs.Q contains how many times each transition i->j appeared
+    #1:trs.nr_unique_symbols are the rows (cols) with nonzero elements
+
+    #convert COO to CSC sparse representation
+    #using lower level method than SparseMatrixCSC(coo::SparseMatrixCOO)
+    P = sparse(trs.Q.is, trs.Q.js, trs.Q.vs, trs.nr_unique_symbols, trs.nr_unique_symbols)
     calculate_transition_matrix!(P)
     return P
 end                     
