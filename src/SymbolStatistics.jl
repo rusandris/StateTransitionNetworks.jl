@@ -7,7 +7,7 @@ abstract type AbstractSymbolStatistics end
 #--------------------SymbolStatistics------------------
 
 mutable struct SymbolStatistics{T} <: AbstractSymbolStatistics                    
-    symbol_space_size::Int64
+    symbol_space_size
     Q::SparseMatrixCOO{Float64, Int64}
     x::SparseVector{Float64,Int64}
     symbol_dict::Dict{T,Int64}
@@ -17,7 +17,7 @@ mutable struct SymbolStatistics{T} <: AbstractSymbolStatistics
 end
 
 
-function SymbolStatistics(T::Type,symbol_space_size::Int64)
+function SymbolStatistics(T::Type,symbol_space_size)
     Q = SparseMatrixCOO{Float64, Int64}(Int64[], Int64[], Float64[],symbol_space_size,symbol_space_size)
     x = SparseVector(symbol_space_size,Int64[],Float64[])
     symbol_dict = Dict{T,Int64}()
