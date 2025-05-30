@@ -14,7 +14,7 @@ output_dir = "../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 mkpath(output_dir)
 
 #-----------------------------params------------------------
-w = 4 #for op
+w = 5 #for op
 τ = 1 #for op
 grid_size = 20 # for binning
 #grid_sizes = [20]
@@ -69,11 +69,12 @@ for i in 1:length(rrs_intervals)
     M_OP = stack(measures_OP)'
 
     #write out measures and timeseries data
-    #S,Λ,var,ac
-    measures_select_grid = M_grid[:,[1,2,7,8]]
+    #S,Λ,C1,C2,var,ac
+    measures_select_grid = M_grid[:,[1,2,3,4,7,8]]
     writedlm(output_dir*"measures_grid_$(samples[i])"*"_grid_$grid_size"*"_window_$window_size"*".txt",hcat(window_ends,measures_select_grid))
 
-    measures_select_OP = M_OP[:,[1,2,7,8]]
+    #S,Λ,C1,C2,var,ac
+    measures_select_OP = M_OP[:,[1,2,3,4,7,8]]
     writedlm(output_dir*"measures_OP_$(samples[i])"*"_OP_$w"*"_window_$window_size"*".txt",hcat(window_ends,measures_select_OP))
 end
 

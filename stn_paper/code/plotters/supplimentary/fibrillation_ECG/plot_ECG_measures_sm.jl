@@ -50,7 +50,7 @@ tickfontsize=tickfontsize,
 titlefontsize=20,
 left_margin=reduced_left_margin,
 right_margin=reduced_right_margin,
-legend=:none,
+#legend=:none,
 xformatter=:none,
 yformatter=:none,
 yguidefontrotation=0,
@@ -76,8 +76,8 @@ for (i,sample) in enumerate(samples)
     end
 
     pl_rr = plot(;legend=false,ylims=ylims_rr,yticks=[ylims_rr[1]:0.8:ylims_rr[2];],plot_params...)
-    pl_S = plot(;legend=false,ylims=(-0.1,2.5),yticks=[0.0,1.0,2.0],plot_params...)
-    pl_L = plot(;legend=false,ylims=(-0.1,3.0),yticks=[0:1:3;],plot_params...,) 
+    pl_S = plot(;legend=true,ylims=(-0.1,2.5),yticks=[0.0,1.0,2.0],plot_params...)
+    pl_L = plot(;legend=true,ylims=(-0.1,3.0),yticks=[0:1:3;],plot_params...,) 
     pl_var = plot(;legend=false,ylims=(-0.02,0.08),yticks=[0.0:0.03:0.06;],plot_params...)
     pl_ac = plot(;legend=false,ylims=(-0.8,1.2),yticks=[-0.5,0.0,0.5,1.0],plot_params...,xformatter=:auto)
     xlabel!(pl_ac,"index",xguidefontsize=guidefontsize-12)
@@ -140,10 +140,16 @@ for (i,sample) in enumerate(samples)
     measures_interval = interval_start:interval_end
 
     #plot grid
-    plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,2],lw=curve_lw,lc=linecolor);
-    plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lw=curve_lw,lc=linecolor);
-    plot!(pl_var,window_ends[measures_interval],M_grid[measures_interval,4],lw=curve_lw,lc=linecolor);
-    plot!(pl_ac,window_ends[measures_interval],M_grid[measures_interval,5],lw=curve_lw,lc=linecolor); 
+    plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,2],lw=curve_lw,
+        label=L"S",lc=linecolor); #S
+    plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,4] ./ log(factorial(w)),lw=curve_lw,
+        label=L"PE(w=5)",lc=:gray50); #C1 OP
+    plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lw=curve_lw,
+        label=L"\Lambda",lc=linecolor); #L
+    plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,5],lw=curve_lw,
+        label=L"C_2",lc=:gray50); #C2
+    plot!(pl_var,window_ends[measures_interval],M_grid[measures_interval,6],lw=curve_lw,lc=linecolor); #var
+    plot!(pl_ac,window_ends[measures_interval],M_grid[measures_interval,7],lw=curve_lw,lc=linecolor); #acf
 
 
     pls = [pl_rr,pl_S,pl_L,pl_var,pl_ac]
