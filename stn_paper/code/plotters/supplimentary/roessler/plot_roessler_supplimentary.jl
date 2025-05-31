@@ -37,20 +37,12 @@ lambdas_file = result_files[findall(f -> occursin("lambdas", f),result_files)][1
 Ss = readdlm(roessler_results_dir * entropies_file)[:,2:end]
 Λs = readdlm(roessler_results_dir * lambdas_file)[:,2:end]
 
-inset_measures_file = result_files[findall(f -> occursin("inset_measures", f),result_files)][1]
-inset_data = readdlm(roessler_results_dir * inset_measures_file)
-Ss_inset_data = inset_data[:,[1,2,3]]
-Λs_inset_data = inset_data[:,[1,4,5]]
 
 #--------------plotting params------------
 alphas = [0.2:0.2:1.0;]
 #inset_indices = 1:201
-inset_param_range = [1.2,1.25]
-inset_ticks_entropies = [inset_param_range,[0.0,0.5]]
-inset_ticks_lambdas = [inset_param_range,[0.0,0.5]]
 
 s_labels = [L"S(%$(i))" for i in orders ]
-
 Λ_labels = [L"\Lambda(%$(i))" for i in orders ]
 
 
@@ -58,17 +50,18 @@ plot_params_od = (
 guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
-ylims=ylims_od,
-yticks=[0.0,0.5,1.0],
-xticks=[1.2,1.25,1.3,1.35,1.4],
+ylims=(-9,-2),
+xlims=[0.34,0.41],
+yticks=[-9,-5.5,-2],
+xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
 left_margin=reduced_left_margin,
-top_margin=reduced_top_margin,
+#top_margin=reduced_top_margin,
 #right_margin=4Plots.mm,
 legend=:none,
 #ylabel= L"x_n",
-xformatter=:none,
-yformatter=:none,
+xformatter=:auto,
+yformatter=:auto,
 yguidefontrotation=0,
 dpi=300)
 
@@ -78,7 +71,7 @@ legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 ylims=(-0.01,1.0),
 yticks=[0.0,0.5,1.0],
-xticks=[1.2,1.25,1.3,1.35,1.4],
+xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
 left_margin=reduced_left_margin,
 top_margin=reduced_top_margin,
@@ -96,8 +89,8 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-ylims=(-0.01,1.2),
 yticks=[0.0,0.5,1.0],
+xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
 left_margin=reduced_left_margin,
 right_margin=4Plots.mm,
@@ -106,28 +99,24 @@ legend=:none,
 #ylabel= L"\Lambda",
 xlabel = L"a",
 vertical_lw=2,
-xticks=[1.2,1.25,1.3,1.35,1.4],
 yformatter=:none,
 yguidefontrotation=0,
 dpi=300)
 
+special_ps = [0.36,0.368,0.4] #dummy 
 
-pl_od_henon = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_henon,ma_od = ma_od_henon,
-    marker_shapes=marker_shapes,marker_offset=0.08,marker_size=marker_size_colored,
-    marker_colors=marker_colors,plot_params_od...)
+pl_od_roessler = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_henon,ma_od = ma_od_henon,
+    marker_shapes=marker_shapes_roessler,marker_offset=0.3,marker_size=marker_size_colored,
+    marker_colors=marker_colors_roessler,plot_params_od...)
 
 
-pl_s_henon = plot_measure(ps,Ss,special_ps;
+pl_s_roessler = plot_measure(ps,Ss,special_ps;
     labels = s_labels,
     λs = λs,
     alphas=alphas,
-    inset_box=inset_box,
-    inset_data = Ss_inset_data,
-    inset_param_range=inset_param_range,
+    inset=false,
     marker_colors=marker_colors,
     orders=orders,
-    inset_ticks=inset_ticks_entropies,
-    inset_ylims = [-0.02,0.5],
     vertical_lw=2,
     marker_size=marker_size_colored,
     inset_tickfontsize=inset_tickfontsize,

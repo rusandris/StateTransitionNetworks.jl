@@ -1,5 +1,6 @@
 function plot_measure(ps,ms,special_ps;λs=[],labels,vertical_lw,
-    red_params=[],inset_param_range,inset_data=[],inset_box,inset_ticks,inset_tickfontsize,inset_ylims,alphas,marker_colors,orders,kwargs...)
+    red_params=[],inset_param_range=[],inset_data=[],inset_box=nothing,inset_ticks=[], inset=true,
+    inset_tickfontsize=12,inset_ylims=[-Inf,Inf],alphas,marker_colors,orders,kwargs...)
 
 
     pl = plot(;kwargs...)
@@ -24,29 +25,33 @@ function plot_measure(ps,ms,special_ps;λs=[],labels,vertical_lw,
         plot!(pl,[p,p],[ylims[1],ylims[end]],ls=:dash,lw=vertical_lw,lc=marker_colors[i],label=false)
     end
 
+
     #plot inset
-    inset_xticks,inset_yticks = inset_ticks
-    plot!(pl, inset=inset_box, subplot=2, framestyle=:box,xticks=inset_xticks,yticks=inset_yticks,ylims=inset_ylims,tickfontsize=inset_tickfontsize)
+    if inset 
+        if !(isempty(inset_data))
+            inset_xticks,inset_yticks = inset_ticks
+            plot!(pl, inset=inset_box, subplot=2, framestyle=:box,xticks=inset_xticks,yticks=inset_yticks,ylims=inset_ylims,tickfontsize=inset_tickfontsize)
+        
+            fi = findfirst(p -> p >= inset_param_range[1],ps)
+            li = findlast(p -> p <= inset_param_range[end],ps)
+            inset_indices = fi:li
 
-    
+        end
+        
 
-    fi = findfirst(p -> p >= inset_param_range[1],ps)
-    li = findlast(p -> p <= inset_param_range[end],ps)
-    inset_indices = fi:li
-    
-    if isempty(inset_data)
-        plot!(pl[2], ps[inset_indices], ms[inset_indices,2*length(orders)], label=nothing ,st=:scatter, markerstrokewidth=0, mc=:gray60, ms=4, ma=1) #plot highest order numerical
-        plot!(pl[2], ps[inset_indices], ms[inset_indices,length(orders)], label=nothing, lw=1, color=:gray10) #plot highest order analytical
-    else
-        ps_inset = inset_data[:,1]
-        ms_inset = inset_data[:,2]
-        rw_vals_inset = inset_data[:,3]
-     
-        plot!(pl[2], ps_inset, rw_vals_inset, label=nothing ,st=:scatter, markerstrokewidth=0, mc=:gray60, ms=4, ma=1) #plot highest order numerical
-        plot!(pl[2], ps_inset, ms_inset, label=nothing, lw=1, color=:gray10) #plot highest order analytical
+        
+        if isempty(inset_data)
+            plot!(pl[2], ps[inset_indices], ms[inset_indices,2*length(orders)], label=nothing ,st=:scatter, markerstrokewidth=0, mc=:gray60, ms=4, ma=1) #plot highest order numerical
+            plot!(pl[2], ps[inset_indices], ms[inset_indices,length(orders)], label=nothing, lw=1, color=:gray10) #plot highest order analytical
+        else
+            ps_inset = inset_data[:,1]
+            ms_inset = inset_data[:,2]
+            rw_vals_inset = inset_data[:,3]
+        
+            plot!(pl[2], ps_inset, rw_vals_inset, label=nothing ,st=:scatter, markerstrokewidth=0, mc=:gray60, ms=4, ma=1) #plot highest order numerical
+            plot!(pl[2], ps_inset, ms_inset, label=nothing, lw=1, color=:gray10) #plot highest order analytical
+        end
     end
-
-
 
     if !isempty(red_params)
         fi = findfirst(p -> p >= red_params[1],ps)
@@ -83,8 +88,7 @@ function plot_orbit_diagram(od,ps,special_ps;ms_od,ma_od,marker_shapes,marker_si
     ms=marker_size,
     st=:scatter,
     markerstrokewidth=0.5,
-    markerstrokecolor=:gray10,
-    xformatter=:none)
+    markerstrokecolor=:gray10)
 
     #plot vertical lines on od
     for (i,p) in enumerate(special_ps)
