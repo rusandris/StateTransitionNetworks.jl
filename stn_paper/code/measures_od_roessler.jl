@@ -41,7 +41,7 @@ ds = CoupledODEs(roessler_rule, u0, p;diffeq=diffeq)
 
 pmap = PoincareMap(ds,plane; rootkw=(xrtol=1e-10, atol=1e-10), direction=1) #becomes discrete system
 pmap = ProjectedDynamicalSystem(pmap,[1,3],[plane[2]]) #take out the the reduced dimension (3d->2d)
-grid_size = 2^7
+grid_size = 2^5
 grid_edges::Vector{Float64} = [-9.0,-0.001,-3.0,0.05]
 Δt = 0.01
 rw_ensemble = 1000 
@@ -56,6 +56,25 @@ const ϵ::Float64 = 1e-3 #1e-5
 out_file_entropy = data_dir*"roessler_entropies"  * "_n_poinc_$T" * "Ttr_$Ttr" * "_plane_$plane_string" * "_b_0.3" * "_grid_$grid_size" * "_param_$b_start" * "_$b_stop" * ".txt"
 out_file_lambda = data_dir*"roessler_lambdas" *  "_n_poinc_$T"* "Ttr_$Ttr" * "plane_$plane_string" * "_b_0.3" * "_grid_$grid_size" * "param_$b_start" * "_$b_stop" * ".txt"
 
+function avg_crossing_time(pmap,T;Ttr)
+	t_avg = 0.0
+
+	#transient 
+	for _ in 1:Ttr	
+		step!(pmap)
+	end
+
+	t0 = current_crossing_time(pmap) #first current crossing time
+
+	for _ in 1:T	
+		step!(pmap)
+    	t = current_crossing_time(pmap)
+        t_avg += t - t0
+        t0 = t
+	end
+	return t_avg/T
+end
+
 
 #---------------orbit diagram-----------------------
 
@@ -65,20 +84,32 @@ writedlm(data_dir*"od_roessler_b_saved_z_T_$T"*"_Ttr_$Ttr"*"_b_$(b_start)_$b_sto
 println("Done.")
 
 #---------------normal lyapunovs--------------------
+#calc here avg crossing time of pmap
 
 println("Lyapunov exponent calculation starting...")
 lyapunov_exponents = zeros(length(b_vals))
+ds_copy = deepcopy(ds) #create independent ds 
+pmap = PoincareMap(ds_copy,plane; rootkw=(xrtol=1e-10, atol=1e-10), direction=1) #becomes discrete system
+
+avg_crossing_times = zeros(length(b_vals))
 for (i,b) in enumerate(b_vals)
 	@show b
 
-	set_parameter!(ds,2,b)
-	
-	lyap_exp = lyapunov(ds,T;Ttr = Ttr)
-	lyapunov_exponents[i] = lyap_exp
+	#avg crossing time
+	set_parameter!(pmap,2,b)
+	avg_crossing_times[i] = avg_crossing_time(pmap,1000;Ttr=1000)
 
+	#=
+	#lyap exp
+	set_parameter!(ds_copy,2,b)
+	lyap_exp = lyapunov(ds_copy,T;Ttr = Ttr)
+	lyapunov_exponents[i] = lyap_exp
+	=#
 end
 
 writedlm(data_dir*"lyapexps_roessler_b_T_$T"*"_Ttr_$Ttr"*"_b_$(b_start)_$b_stop"*".txt",hcat(b_vals,lyapunov_exponents))
+writedlm(data_dir*"avg_cross_times_roessler_b_T_$T"*"_Ttr_$Ttr"*"_b_$(b_start)_$b_stop"*".txt",hcat(b_vals,avg_crossing_times))
+
 println("Done.")
 
 

@@ -25,11 +25,13 @@ od_data = [od_data[i,:] for i in 1:size(od_data,1)]
 orders_file = result_files[findfirst(f -> occursin("orders", f),result_files)]
 orders = vec(readdlm(roessler_results_dir * orders_file))
 
+avg_cross_time_file = result_files[findfirst(f -> occursin("avg", f),result_files)]
+avg_cross_times = readdlm(roessler_results_dir * avg_cross_time_file)
 
 lyapexps_file = result_files[findfirst(f -> occursin("lyapexps", f),result_files)]
 lyapexps_data = readdlm(roessler_results_dir * lyapexps_file)
 
-λs = lyapexps_data[:,2]
+λs = lyapexps_data[:,2] .* avg_cross_times[:,2]  #.* 5.49
 
 entropies_file = result_files[findall(f -> occursin("entropies", f),result_files)][1]
 lambdas_file = result_files[findall(f -> occursin("lambdas", f),result_files)][1]
@@ -149,4 +151,4 @@ mkpath(fig_dir)
 l = @layout [a{0.33h}; b{0.33h}; c{0.33h}]
 pl_roessler = plot(pl_od_roessler,pl_s_roessler,pl_lambda_roessler,layout = l,size=colfig_size)
 
-savefig(pl_roessler,fig_dir * "roessler_supplimentary_T1e5_grid128.png")
+savefig(pl_roessler,fig_dir * "roessler_supplimentary_T1e6_grid32.png")
