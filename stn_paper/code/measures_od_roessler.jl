@@ -1,6 +1,7 @@
 using StateTransitionNetworks
 using DynamicalSystems
 using StatsBase
+using OrdinaryDiffEq
 using DelimitedFiles
 using Printf
 cd(@__DIR__)
@@ -10,10 +11,11 @@ include("functions_chaotic_maps.jl")
 data_dir = "../data/supplimentary/roessler_data/" 
 mkpath(data_dir)
 
-T = 10^4 #length of time series (nr of poinc points) for measures
+T = 10^5 #length of time series (nr of poinc points) for measures
 nr_points = 100 #nr of poincare points on od
 Ttr = 10^4 #10000
-b_vals = [0.35:0.0001:0.4;]
+b_vals = [0.35:0.00005:0.4;]
+#b_vals = [0.368:0.00005:0.4;]
 b_start = b_vals[begin]
 b_stop = b_vals[end]
 
@@ -22,12 +24,25 @@ Ttr_string::String = @sprintf "%.E" Ttr
 
 plane = (2,0.0)
 plane_string::String = "$(plane[1])"*"_"*"$(plane[2])"
+diffeq = (alg = Tsit5(),dt = 1e-3,adaptive=true,dtmax=1e-1,maxiters=1e15)
 
-ds = Systems.roessler();
-pmap = PoincareMap(ds,plane;rootkw=(xrtol=1e-10, atol=1e-10), direction=1) #becomes discrete system
+#roessler system
+@inbounds function roessler_rule(u, p, t)
+    du1 = -u[2]-u[3]
+    du2 = u[1] + p[1]*u[2]
+    du3 = p[2] + u[3]*(u[1] - p[3])
+    return SVector{3}(du1, du2, du3)
+end
+
+u0=[1.0, -2.0, 0.1]
+p = [0.2,0.2,5.7] #a = 0.2, b = 0.2, c = 5.7
+ds = CoupledODEs(roessler_rule, u0, p;diffeq=diffeq)
+
+
+pmap = PoincareMap(ds,plane; rootkw=(xrtol=1e-10, atol=1e-10), direction=1) #becomes discrete system
 pmap = ProjectedDynamicalSystem(pmap,[1,3],[plane[2]]) #take out the the reduced dimension (3d->2d)
-grid_size = 2^5
-grid_edges::Vector{Float64} = [-10.0,0.0,-2.0,0.5]
+grid_size = 2^7
+grid_edges::Vector{Float64} = [-9.0,-0.001,-3.0,0.05]
 Δt = 0.01
 rw_ensemble = 1000 
 nr_steps = 10000
@@ -38,8 +53,8 @@ const N_steps::Int64 = 500
 const ensemble::Int64 = 100 #1000
 const ϵ::Float64 = 1e-3 #1e-5
 
-out_file_entropy = data_dir*"roessler_entropies"  * "_n_poinc_$nr_points" * "plane_$plane_string" * "_b_0.3" * "_grid_$grid_size" * "_param_$b_start" * "_$b_stop" * ".txt"
-out_file_lambda = data_dir*"roessler_lambdas" *  "_n_poinc_$nr_points" * "plane_$plane_string" * "_b_0.3" * "_grid_$grid_size" * "param_$b_start" * "_$b_stop" * ".txt"
+out_file_entropy = data_dir*"roessler_entropies"  * "_n_poinc_$T" * "Ttr_$Ttr" * "_plane_$plane_string" * "_b_0.3" * "_grid_$grid_size" * "_param_$b_start" * "_$b_stop" * ".txt"
+out_file_lambda = data_dir*"roessler_lambdas" *  "_n_poinc_$T"* "Ttr_$Ttr" * "plane_$plane_string" * "_b_0.3" * "_grid_$grid_size" * "param_$b_start" * "_$b_stop" * ".txt"
 
 
 #---------------orbit diagram-----------------------
@@ -100,10 +115,7 @@ calc_measures(pmap,b_vals,orders;
 @info "Measure calculation done and saved."
 flush(stderr)
 
-
-
-
-writedlm("data/data_netmeasures_roessler_b_T_$T"*"_Ttr_$Ttr"*"_traj_ens"*"_rwens_$rw_ensemble"*"_nsteps_$nr_steps"*"_grid_$grid_size"*"standardpsos" *"_b_$(b_start)_$b_stop"*".txt",hcat(b_vals,analytic_entropies,analytic_lyapunovs,num_entropies,num_lyapunovs))
+#writedlm("data/data_netmeasures_roessler_b_T_$T"*"_Ttr_$Ttr"*"_traj_ens"*"_rwens_$rw_ensemble"*"_nsteps_$nr_steps"*"_grid_$grid_size"*"standardpsos" *"_b_$(b_start)_$b_stop"*".txt",hcat(b_vals,analytic_entropies,analytic_lyapunovs,num_entropies,num_lyapunovs))
 
 
 

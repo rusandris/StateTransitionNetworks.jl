@@ -34,8 +34,8 @@ lyapexps_data = readdlm(roessler_results_dir * lyapexps_file)
 entropies_file = result_files[findall(f -> occursin("entropies", f),result_files)][1]
 lambdas_file = result_files[findall(f -> occursin("lambdas", f),result_files)][1]
 
-Ss = readdlm(roessler_results_dir * entropies_file)[:,2:end]
-Λs = readdlm(roessler_results_dir * lambdas_file)[:,2:end]
+Ss = readdlm(roessler_results_dir * entropies_file)[:,2:end] #[end:-1:1,2:end] #revert columns for plotting
+Λs = readdlm(roessler_results_dir * lambdas_file)[:,2:end] #revert columns for plotting
 
 
 #--------------plotting params------------
@@ -51,7 +51,7 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 ylims=(-9,-2),
-xlims=[0.34,0.41],
+#xlims=[0.34,0.41],
 yticks=[-9,-5.5,-2],
 xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
@@ -59,7 +59,8 @@ left_margin=reduced_left_margin,
 #top_margin=reduced_top_margin,
 #right_margin=4Plots.mm,
 legend=:none,
-#ylabel= L"x_n",
+xaxis=:flip,
+ylabel= L"x_n",
 xformatter=:auto,
 yformatter=:auto,
 yguidefontrotation=0,
@@ -69,7 +70,7 @@ plot_params_entropy = (
 guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
-ylims=(-0.01,1.0),
+ylims=(-0.1,1.2),
 yticks=[0.0,0.5,1.0],
 xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
@@ -77,10 +78,11 @@ left_margin=reduced_left_margin,
 top_margin=reduced_top_margin,
 #right_margin=4Plots.mm,
 legend=:none,
-#ylabel= L"S",
+xaxis=:flip,
+ylabel= L"S",
 vertical_lw=2,
-xformatter=:none,
-yformatter=:none,
+#xformatter=:none,
+#yformatter=:none,
 yguidefontrotation=0,
 dpi=300)
 
@@ -89,17 +91,19 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-yticks=[0.0,0.5,1.0],
+ylims = (-0.1,3.0),
+yticks=[0.0,1.0,2.0,3.0],
 xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
 left_margin=reduced_left_margin,
 right_margin=4Plots.mm,
-top_margin=reduced_top_margin,
+#top_margin=reduced_top_margin,
 legend=:none,
-#ylabel= L"\Lambda",
-xlabel = L"a",
+ylabel= L"\Lambda",
+xlabel = L"b",
+xaxis=:flip,
 vertical_lw=2,
-yformatter=:none,
+#yformatter=:none,
 yguidefontrotation=0,
 dpi=300)
 
@@ -115,7 +119,7 @@ pl_s_roessler = plot_measure(ps,Ss,special_ps;
     λs = λs,
     alphas=alphas,
     inset=false,
-    marker_colors=marker_colors,
+    marker_colors=marker_colors_roessler,
     orders=orders,
     vertical_lw=2,
     marker_size=marker_size_colored,
@@ -123,27 +127,26 @@ pl_s_roessler = plot_measure(ps,Ss,special_ps;
     plot_params_entropy...)
 
 
-pl_lambda_henon = plot_measure(ps,Λs,special_ps;
+pl_lambda_roessler = plot_measure(ps,Λs,special_ps;
     labels = Λ_labels,
     alphas=alphas,
-    inset_box=inset_box,
-    inset_data = Λs_inset_data,
-    inset_param_range=inset_param_range,
-    marker_colors=marker_colors,
+    inset=false,
+    marker_colors=marker_colors_roessler,
     orders=orders,
-    inset_ticks=inset_ticks_entropies,
-    inset_ylims = [-0.02,0.7],
-    inset_tickfontsize=inset_tickfontsize,
     vertical_lw=2,
     marker_size=marker_size_colored,
-    red_params=[1.22,1.227],
     plot_params_lambda...)
 
-annotate!(pl_spec,subfigure_annotation_pos_two_col_inner, text("(b)", :left, annotation_fontsize))
-annotate!(pl_od_henon,subfigure_annotation_pos_two_col_inner, text("(d)", :left, annotation_fontsize))
-annotate!(pl_s_henon[1],subfigure_annotation_pos_two_col_inner, text("(f)", :left, annotation_fontsize))
-annotate!(pl_lambda_henon[1],subfigure_annotation_pos_two_col_inner, text("(h)", :left, annotation_fontsize))
+annotate!(pl_od_roessler,subfigure_annotation_pos_two_col_inner, text("(d)", :left, annotation_fontsize))
+annotate!(pl_s_roessler[1],subfigure_annotation_pos_two_col_inner, text("(f)", :left, annotation_fontsize))
+annotate!(pl_lambda_roessler[1],subfigure_annotation_pos_two_col_inner, text("(h)", :left, annotation_fontsize))
 
 
-l = @layout [a{0.25h}; b{0.25h}; b{0.25h};d{0.25h}]
-pl_henon = plot(pl_spec,pl_od_henon,pl_s_henon,pl_lambda_henon,layout = l)
+fig_dir_name = "figs"
+fig_dir = "../../../../" * fig_dir_name * "/" 
+mkpath(fig_dir)
+
+l = @layout [a{0.33h}; b{0.33h}; c{0.33h}]
+pl_roessler = plot(pl_od_roessler,pl_s_roessler,pl_lambda_roessler,layout = l,size=colfig_size)
+
+savefig(pl_roessler,fig_dir * "roessler_supplimentary_T1e5_grid128.png")
