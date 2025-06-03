@@ -59,12 +59,13 @@ r = 2.
 ds_crit = DeterministicIteratedMap(f_crit, [0.4], [r])
 
 
-const T::Int64 = 10^6
+const T::Int64 = 10^7
 const T_string::String = @sprintf "%.E" T
 const Ttr::Int64 = 10^5
 const Ttr_string::String = @sprintf "%.E" Ttr
 const grid_size::Int64 = 2^5
 const grid_edges::Vector{Float64} = [0,1]
+writedlm(data_dir*"method_params.txt",[T,Ttr,grid_size])
 
 timeseries, = trajectory(ds_crit, T, [0.3]; Ttr=Ttr);
 #=
@@ -144,25 +145,6 @@ for (i,o) in enumerate(Os[1:end])
 end
 
 
-# plot for talk
-grid_size = 2^5
-Os = [1,2,4,8,10]
-qs = 0.01:0.01:2
-pl = plot()
-for (i,o) in enumerate(Os)
-    f_name = data_dir*"critical_renyi-q_dq=0.01_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_order=$(o).dat"
-    @show f_name, i, grid_size
-    data = readdlm(f_name)
-    qs = data[:,1]
-    Hs = data[:,2]
-    plot!(pl, qs, Hs, label=L"\tilde{K}_q(%$(o))", linewidth=3, alpha=(1/(length(Os)+1))*i, color="red")
-end
-plot!(pl, xlabel=L"q", ylabel=L"\tilde{K}_q(m)", ylim=[0,1.2], xguidefontsize=22, yguidefontsize=22, tickfontsize=14, legendfontsize=16, dpi=300)
-plot!(pl, xlim=[0,2], ylim=[0.,1.], yticks=[0,0.5,1], legend=:topright, left_margin=3Plots.mm)
-#annotate!(pl, (-0.18,  1), text("(a)", :left, 24))
-savefig(pl, figs_dir*"critical_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.pdf")
-savefig(pl, figs_dir*"critical_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.svg")
-
 #######################################
 # compute STATIC Renyi entropy spectrum
 #######################################
@@ -201,24 +183,6 @@ for (i,o) in enumerate(Os[1:end])
         writedlm(f_name,hcat(qs, Hs))
 end
 
-# plot for talk
-grid_size = 2^5
-Os = [1,2,4,8,10]
-qs = 0.01:0.01:2
-pl = plot()
-for (i,o) in enumerate(Os)
-    f_name = data_dir*"critical_static_renyi-q_dq=0.01_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_order=$(o).dat"
-    @show f_name, i, grid_size
-    data = readdlm(f_name)
-    qs = data[:,1]
-    Hs = data[:,2]
-    plot!(pl, qs, Hs/o, label=L"H_q(%$(o))/%$(o)", linewidth=3, alpha=(1/(length(Os)+1))*i, color="red")
-end
-plot!(pl, xlabel=L"q", ylabel=L"H_q(m)/m", xguidefontsize=22, yguidefontsize=22, tickfontsize=14, legendfontsize=16, dpi=300)
-plot!(pl, xlim=[0,2], ylim=[0,7], legend=:topright, left_margin=3Plots.mm)
-#plot!(pl, ylim=[0,2.5])
-savefig(pl, figs_dir*"critical_static_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid$(grid_size)_higherorder.pdf")
-savefig(pl, figs_dir*"critical_static_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.svg")
 
 
 #=
@@ -309,14 +273,12 @@ r = 0.8
 ds_tent = DeterministicIteratedMap(f_tent, [0.4], [r])
 
 timeseries, = trajectory(ds_tent, T, [0.3]; Ttr=Ttr);
-
+#=
 # time series plot
 plot(timeseries[:,1][end-500:end], label=L"r=%$(r)", linewidth=2, alpha=0.8, color=:orange)
 plot!(xlabel=L"\tau", ylabel=L"x_\tau", xguidefontsize=22, yguidefontsize=22, tickfontsize=14, legendfontsize=16, dpi=300)
 savefig(figs_dir*"asymmetric_triangular_x-t_r=$(r)_tmax=$(T_string)_ttrans=$(Ttr_string).pdf")
 savefig(figs_dir*"asymmetric_triangular_x-t_r=$(r)_tmax=$(T_string)_ttrans=$(Ttr_string).svg")
-
-sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
 
 # 1st order
 order = 1
@@ -324,12 +286,15 @@ higher_order_symbolics!(sts, order)
 @time P,Q,x = calculate_transition_matrix(@view sts[1:end-order+1]);
 @time S, Λ = network_measures(P; x=x, ϵ=1e-2, maxiter=10^8, alg=hybrid_solve)
 @time C1, C2 = bit_number_measures(x) 
+=#
 
+sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
 
 # compute Renyi entropy spectrum for HIGHER ORDER states
 grid_size = 2^5
 qs = collect(0.01:0.01:2)
 Os = [1,2,4,8,10]
+writedlm(data_dir*"orders_tent_dynamic.txt",Os)
 sts = zeros(Int128,length(timeseries))
 timeseries_to_grid!(sts, timeseries, grid_size; grid_edges = [0., 1.]);
 sts2 = zeros(Int128, length(sts))
@@ -346,51 +311,28 @@ for (i,o) in enumerate(Os[1:end])
 end
 
 
-# plot for talk
-grid_size = 2^5
-Os = [1,2,4,8,10]
-qs = 0.01:0.01:2
-Hsa = analytical_renyi_entropy_spectrum(r, qs)
-pl = plot()
-for (i,o) in enumerate(Os)
-    f_name = data_dir*"asymmetric_triangular_renyi-q_dq=0.01_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_order=$(o).dat"
-    @show f_name, i, grid_size
-    data = readdlm(f_name)
-    qs = data[:,1]
-    Hs = data[:,2]
-    plot!(pl, qs, Hs, label=L"\tilde{K}_q(%$(o))", linewidth=3, alpha=(1/(length(Os)+1))*i, color=:orange)
-end
-plot!(pl, qs, Hsa, label=L"K_q", ls=:dash, lw=2, alpha=0.8, color="black")
-plot!(pl, xlabel=L"q", ylabel=L"\tilde{K}_q(m), K_q", ylim=[0,1.2], xguidefontsize=22, yguidefontsize=22, tickfontsize=14, legendfontsize=16, dpi=300)
-plot!(pl, xlim=[0,2], ylim=[0.,1.], yticks=[0,0.5,1], legend=:bottomleft, left_margin=3Plots.mm)
-#annotate!(pl, (-0.18,  1), text("(a)", :left, 24))
-savefig(pl, figs_dir*"asymmetric_triangular_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.pdf")
-savefig(pl, figs_dir*"asymmetric_triangular_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.svg")
-
-
 #######################################
 # compute STATIC Renyi entropy spectrum
 #######################################
 grid_size = 2^5
 ε = 1/grid_size
 qs = collect(0.01:0.1:2)
+#=
 #Hqs = [ComplexityMeasures.entropy(Renyi(; q=q, base=ℯ), ValueHistogram(ε), timeseries) for q ∈ qs]
 plot(qs,Hqs, label=L"n=%$(grid_size)", linewidth=3, color="red")
 plot!(xlabel=L"q", ylabel=L"H_q", xguidefontsize=22, yguidefontsize=22, tickfontsize=14, legendfontsize=16, dpi=300)
 plot!(xlim=[0,2], ylim=[0.,7.], legend=:bottomleft, left_margin=3Plots.mm)
 #annotate!(pl, (-0.18,  1), text("(a)", :left, 24))
 savefig(figs_dir*"asymmetric_triangular_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size).pdf")
-
+=#
 
 sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
-@time P,Q,x = calculate_transition_matrix(sts);
-Hqs = static_renyi_entropy_spectrum(x, qs)
-plot!(qs,Hqs)
 
 # compute for higher order states
 grid_size = 2^5
 qs = collect(0.01:0.01:2)
-Os = [1,2,4,8,10]
+Os = [8,10,12,14] #[1,2,4,8,10]
+writedlm(data_dir*"orders_tent_static.txt",Os)
 sts = zeros(Int128,length(timeseries))
 timeseries_to_grid!(sts, timeseries, grid_size; grid_edges = [0., 1.]);
 sts2 = zeros(Int128, length(sts))
@@ -405,25 +347,4 @@ for (i,o) in enumerate(Os[1:end])
         f_name = data_dir*"asymmetric_triangular_static_renyi-q_dq=0.01_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_order=$(Int(o)).dat"
         writedlm(f_name,hcat(qs, Hs))
 end
-
-# plot for talk
-grid_size = 2^5
-Os = [1,2,4,8,10]
-qs = 0.01:0.01:2
-Hsa = analytical_renyi_entropy_spectrum(r, qs)
-pl = plot(dpi=300)
-for (i,o) in enumerate(Os)
-    f_name = data_dir*"asymmetric_triangular_static_renyi-q_dq=0.01_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_order=$(o).dat"
-    @show f_name, i, grid_size
-    data = readdlm(f_name)
-    qs = data[:,1]
-    Hs = data[:,2]
-    plot!(pl, qs, Hs/o, label=L"H_q(%$(o))/%$(o)", linewidth=3, alpha=(1/(length(Os)+1))*i, color=:orange)
-end
-plot!(pl, qs, Hsa, label=L"K_q", ls=:dash, lw=2, alpha=0.8, color="black")
-plot!(pl, xlabel=L"q", ylabel=L"H_q(m)/m", xguidefontsize=22, yguidefontsize=22, tickfontsize=14, legendfontsize=16, dpi=300)
-plot!(pl, xlim=[0,2], ylim=[0,3.5], legend=:topright, left_margin=3Plots.mm)
-#annotate!(pl, (-0.18,  1), text("(a)", :left, 24))
-savefig(pl, figs_dir*"asymmetric_triangular_static_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.pdf")
-savefig(pl, figs_dir*"asymmetric_triangular_static_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.svg")
 
