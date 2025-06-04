@@ -11,6 +11,14 @@ include("../../plot_functions_chaotic_maps.jl")
 #roessler results dir
 roessler_results_dir = "../../../../data/supplimentary/roessler_data/"
 
+fig_dir_name = "figs"
+fig_dir = "../../../../" * fig_dir_name * "/" 
+mkpath(fig_dir)
+method_params = readdlm(roessler_results_dir*"method_params.txt")
+T,Ttr,grid_size = Int.(method_params[1:3])
+T_string::String = @sprintf "%.E" T
+Ttr_string::String = @sprintf "%.E" Ttr
+grid_edges = Int.(method_params[4,:])
 #--------------------------measures fig---------------------
 
 result_files = readdir(roessler_results_dir)
@@ -18,7 +26,7 @@ result_files = readdir(roessler_results_dir)
 ps_file = result_files[findfirst(f -> occursin("roessler_p_values", f),result_files)]
 ps = vec(readdlm(roessler_results_dir * ps_file))
 
-od_file = result_files[findfirst(f -> occursin("od", f),result_files)]
+od_file = result_files[findfirst(f -> occursin("od_roessler", f),result_files)]
 od_data = readdlm(roessler_results_dir * od_file)
 od_data = [od_data[i,:] for i in 1:size(od_data,1)]
 
@@ -62,6 +70,7 @@ left_margin=reduced_left_margin,
 #right_margin=4Plots.mm,
 legend=:none,
 xaxis=:flip,
+title="Rössler system, PSOS " * L"y=2",
 ylabel= L"x_n",
 xformatter=:auto,
 yformatter=:auto,
@@ -72,16 +81,16 @@ plot_params_entropy = (
 guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
-ylims=(-0.1,1.2),
+ylims=(-0.1,1.0),
 yticks=[0.0,0.5,1.0],
 xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
 left_margin=reduced_left_margin,
 top_margin=reduced_top_margin,
 #right_margin=4Plots.mm,
-legend=:none,
+legend=:topright,
 xaxis=:flip,
-ylabel= L"S",
+ylabel= L"S,\langle T ~ \rangle \lambda",
 vertical_lw=2,
 #xformatter=:none,
 #yformatter=:none,
@@ -93,14 +102,15 @@ guidefontsize=guidefontsize,
 legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 #framestyle=:box,
-ylims = (-0.1,3.0),
+ylims = (-0.1,2.1),
 yticks=[0.0,1.0,2.0,3.0],
 xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
 left_margin=reduced_left_margin,
 right_margin=4Plots.mm,
 #top_margin=reduced_top_margin,
-legend=:none,
+#legend=:none,
+legend=:topright,
 ylabel= L"\Lambda",
 xlabel = L"b",
 xaxis=:flip,
@@ -143,12 +153,7 @@ annotate!(pl_od_roessler,subfigure_annotation_pos_two_col_inner, text("(d)", :le
 annotate!(pl_s_roessler[1],subfigure_annotation_pos_two_col_inner, text("(f)", :left, annotation_fontsize))
 annotate!(pl_lambda_roessler[1],subfigure_annotation_pos_two_col_inner, text("(h)", :left, annotation_fontsize))
 
-
-fig_dir_name = "figs"
-fig_dir = "../../../../" * fig_dir_name * "/" 
-mkpath(fig_dir)
-
 l = @layout [a{0.33h}; b{0.33h}; c{0.33h}]
 pl_roessler = plot(pl_od_roessler,pl_s_roessler,pl_lambda_roessler,layout = l,size=colfig_size)
 
-savefig(pl_roessler,fig_dir * "roessler_supplimentary_T1e6_grid32.png")
+savefig(pl_roessler,fig_dir * "roessler_supplimentary_Ttmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)"*".png")

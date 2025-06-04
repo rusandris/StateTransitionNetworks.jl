@@ -11,10 +11,10 @@ include("functions_chaotic_maps.jl")
 data_dir = "../data/supplimentary/roessler_data/" 
 mkpath(data_dir)
 
-T = 10^5 #length of time series (nr of poinc points) for measures
+T = 5*10^5 #length of time series (nr of poinc points) for measures
 nr_points = 100 #nr of poincare points on od
 Ttr = 10^4 #10000
-b_vals = [0.35:0.00005:0.4;]
+b_vals = [0.35:0.0001:0.4;]
 #b_vals = [0.368:0.00005:0.4;]
 b_start = b_vals[begin]
 b_stop = b_vals[end]
@@ -40,14 +40,17 @@ ds = CoupledODEs(roessler_rule, u0, p;diffeq=diffeq)
 
 
 pmap = PoincareMap(ds,plane; rootkw=(xrtol=1e-10, atol=1e-10), direction=1) #becomes discrete system
-pmap = ProjectedDynamicalSystem(pmap,[1,3],[plane[2]]) #take out the the reduced dimension (3d->2d)
+pmap = ProjectedDynamicalSystem(pmap,[1],[plane[2],0.0]) #take out the the reduced dimension (3d->2d)
 grid_size = 2^5
-grid_edges::Vector{Float64} = [-9.0,-0.001,-3.0,0.05]
+#grid_edges::Vector{Float64} = [-9,0.0,-3.0,0.05]
+#grid_edges::Vector{Float64} = [-10.0,-0.001,-2.0,0.5]
+grid_edges::Vector{Float64} = [-10.0,-2.0] #grid on only 1d (x component)
 Δt = 0.01
 rw_ensemble = 1000 
 nr_steps = 10000
+writedlm(data_dir*"method_params.txt",[T,Ttr,grid_size,grid_edges])
 
-orders::Vector{Int64} = [1,2,3,4] #[1,4,8,12]
+orders::Vector{Int64} = [1,4,8,12] #[1,2,3,4] #[1,4,8,12]
 const n::Int64 = 100 
 const N_steps::Int64 = 500
 const ensemble::Int64 = 100 #1000
@@ -99,12 +102,12 @@ for (i,b) in enumerate(b_vals)
 	set_parameter!(pmap,2,b)
 	avg_crossing_times[i] = avg_crossing_time(pmap,1000;Ttr=1000)
 
-	#=
+	
 	#lyap exp
 	set_parameter!(ds_copy,2,b)
 	lyap_exp = lyapunov(ds_copy,T;Ttr = Ttr)
 	lyapunov_exponents[i] = lyap_exp
-	=#
+	
 end
 
 writedlm(data_dir*"lyapexps_roessler_b_T_$T"*"_Ttr_$Ttr"*"_b_$(b_start)_$b_stop"*".txt",hcat(b_vals,lyapunov_exponents))
@@ -132,6 +135,7 @@ flush(stderr)
 
 calc_measures(pmap,b_vals,orders;
 	sts_eltype=Int128,
+	dim=1,
 	out_file_entropy=out_file_entropy,
 	out_file_lambda=out_file_lambda,
 	param_index=2,
