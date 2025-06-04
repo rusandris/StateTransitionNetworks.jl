@@ -59,12 +59,12 @@ r = 2.
 ds_crit = DeterministicIteratedMap(f_crit, [0.4], [r])
 
 
-const T::Int64 = 10^7
-const T_string::String = @sprintf "%.E" T
-const Ttr::Int64 = 10^5
-const Ttr_string::String = @sprintf "%.E" Ttr
-const grid_size::Int64 = 2^5
-const grid_edges::Vector{Float64} = [0,1]
+T::Int64 = 10^8
+T_string::String = @sprintf "%.E" T
+Ttr::Int64 = 10^5
+Ttr_string::String = @sprintf "%.E" Ttr
+grid_size::Int64 = 2^5
+grid_edges::Vector{Float64} = [0,1]
 writedlm(data_dir*"method_params.txt",[T,Ttr,grid_size])
 
 timeseries, = trajectory(ds_crit, T, [0.3]; Ttr=Ttr);
@@ -126,7 +126,7 @@ println("Lyapunov measure (10th order: ", Λ10)
 =#
 
 # compute DYNAMICAL Renyi entropy spectrum for HIGHER ORDER states
-grid_size = 2^5
+grid_size = 2^10
 qs = collect(0.01:0.01:2)
 Os = [1,2,4,8,10]
 sts = zeros(Int128,length(timeseries))
@@ -148,15 +148,17 @@ end
 #######################################
 # compute STATIC Renyi entropy spectrum
 #######################################
-grid_size = 2^5
+grid_size = 2^10
 ε = 1/grid_size
 qs = collect(0.01:0.1:2)
 #Hqs = [ComplexityMeasures.entropy(Renyi(; q=q, base=ℯ), ValueHistogram(ε), timeseries) for q ∈ qs]
+#=
 plot(qs,Hqs, label=L"n=%$(grid_size)", linewidth=3, color="red")
 plot!(xlabel=L"q", ylabel=L"H_q", xguidefontsize=22, yguidefontsize=22, tickfontsize=14, legendfontsize=16, dpi=300)
 plot!(xlim=[0,2], ylim=[0.,7.], legend=:bottomleft, left_margin=3Plots.mm)
 #annotate!(pl, (-0.18,  1), text("(a)", :left, 24))
 savefig(figs_dir*"critical_static_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size).pdf")
+=#
 
 
 sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
@@ -165,7 +167,7 @@ Hqs = static_renyi_entropy_spectrum(x, qs)
 plot!(qs,Hqs)
 
 # higher order states
-grid_size = 2^5
+grid_size = 2^10
 qs = collect(0.01:0.01:2)
 Os = [1,2,4,8,10]
 sts = zeros(Int128,length(timeseries))
@@ -291,7 +293,7 @@ higher_order_symbolics!(sts, order)
 sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
 
 # compute Renyi entropy spectrum for HIGHER ORDER states
-grid_size = 2^5
+grid_size = 2^10
 qs = collect(0.01:0.01:2)
 Os = [1,2,4,8,10]
 writedlm(data_dir*"orders_tent_dynamic.txt",Os)
@@ -314,7 +316,7 @@ end
 #######################################
 # compute STATIC Renyi entropy spectrum
 #######################################
-grid_size = 2^5
+grid_size = 2^10
 ε = 1/grid_size
 qs = collect(0.01:0.1:2)
 #=
@@ -329,7 +331,7 @@ savefig(figs_dir*"asymmetric_triangular_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr
 sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
 
 # compute for higher order states
-grid_size = 2^5
+grid_size = 2^10
 qs = collect(0.01:0.01:2)
 Os = [8,10,12,14] #[1,2,4,8,10]
 writedlm(data_dir*"orders_tent_static.txt",Os)

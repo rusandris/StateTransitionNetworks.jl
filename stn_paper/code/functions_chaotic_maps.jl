@@ -32,9 +32,8 @@ function orbit!(orbit_container,ds,nsteps,ntr,u0=initial_state(ds);reinit=false)
 end
 
 #calculate measures for all parameter values in ps 
-function calc_measures(ds,ps,orders;out_file_entropy,out_file_lambda,param_index,sts_eltype=Int64,grid_size,grid_edges,u0=initial_state(ds),reinit=false,T,Ttr,ensemble, N_steps,ϵ)
+function calc_measures(ds,ps,orders;out_file_entropy,out_file_lambda,param_index,dim=dimension(ds),sts_eltype=Int64,grid_size,grid_edges,u0=initial_state(ds),reinit=false,T,Ttr,ensemble, N_steps,ϵ)
 
-    dim = dimension(ds)
     sts = zeros(sts_eltype,T)
     sts_copy = similar(sts)
 
