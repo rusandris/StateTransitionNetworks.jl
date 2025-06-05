@@ -19,9 +19,9 @@ w = 5 #for op
 grid_size = 20 # for binning
 =#
 
-ws = [4,5,6] #for op
+ws = [3,4,5] #for op
 τ = 1 #for op
-grid_sizes = [10,15,20] # for binning
+grid_sizes = [20,25,30] # for binning
 
 #grid_sizes = [20]
 grid_edges = [0.2,1.2] # for binning

@@ -2,7 +2,7 @@ using DelimitedFiles
 #using CSV,DataFrames
 using Plots,LaTeXStrings
 cd(@__DIR__)
-include("../../plotting_params.jl")
+include("../plotting_params.jl")
 
 
 #find annotations that mark change of signal type
@@ -32,21 +32,24 @@ function find_annotations(annotation,sig_change_data,times)
 end  
 
 #--------------------read dir----------------------
-data_dir = "../../../../data/supplimentary/fibrillation_ECG/fibrillation_results/"
+data_dir = "../../../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 result_files = readdir(data_dir)
-samples = readdlm(data_dir*"sample_ids.txt",String)
+samples = readdlm(data_dir*"sample_ids.txt",String)[3:4] #take only two sample time serires instead of all 4
 method_params = readdlm(data_dir*"method_params.txt")
 grid_sizes = Int.(method_params[1,:])
 ws = Int.(method_params[2,:])
 window_size,grid_min,grid_max,grid_min06,grid_max06 = method_params[3:7]
 grid_edges = [grid_min,grid_max]
 grid_edges06 = [grid_min06,grid_max06]
-rrs_dir = "../../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
+rrs_dir = "../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 #--------------------plot data----------------------
+
+fig_dir = "../../../figs/" 
+mkpath(fig_dir)
 
 plot_params = (
 guidefontsize=guidefontsize,
-legendfontsize=legendfontsize-4,
+legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 titlefontsize=20,
 left_margin=reduced_left_margin,
@@ -69,13 +72,15 @@ post_onset_offset = 200 #xaxis limits: nr of idxs before onset
 ann_onset = "(AFIB"
 ann_term = "(N"
 
-xticks = [[1600:300:2500;],[4900:300:6000;],[1200:300:2300;],[1600:300:2800;]]
+#xticks = [[1600:300:2500;],[4900:300:6000;],[1200:300:2300;],[1600:300:2800;]]
+xticks = [[1200:300:2300;],[1600:300:2800;]]
+
 ylims_rr = (0.0,1.6)
 plots_grid = []
 plots_OP = []
 for (i,sample) in enumerate(samples)
     #set rr time series ylims and others
-    if i == 4
+    if i == length(samples)
         ylims_local = grid_edges06
     else
         ylims_local = grid_edges
@@ -84,8 +89,8 @@ for (i,sample) in enumerate(samples)
     pl_rr = plot(;legend=false,ylims=ylims_rr,yticks=[ylims_rr[1]:0.8:ylims_rr[2];],plot_params...)
     pl_S = plot(;legend=true,ylims=(-0.1,2.5),yticks=[0.0,1.0,2.0],plot_params...)
     pl_L = plot(;legend=true,ylims=(-0.1,3.0),yticks=[0:1:3;],plot_params...,) 
-    pl_var = plot(;legend=false,ylims=(-0.02,0.08),yticks=[0.0:0.03:0.06;],plot_params...)
-    pl_ac = plot(;legend=false,ylims=(-0.8,1.2),yticks=[-0.5,0.0,0.5,1.0],plot_params...,xformatter=:auto)
+    pl_var = plot(;legend=false,ylims=(-0.001,0.06),yticks=[0.0:0.03:0.06;],plot_params...)
+    pl_ac = plot(;legend=false,ylims=(-0.8,0.5),yticks=[-0.5,0.0,0.5,1.0],plot_params...,xformatter=:auto)
     xlabel!(pl_ac,"index",xguidefontsize=guidefontsize-12)
 
     if i == 1
@@ -113,12 +118,12 @@ for (i,sample) in enumerate(samples)
     #------------------------------------read rr intervals---------------------------------
     rrs_data = readdlm(rrs_dir*"rr_$sample.txt")
     rrs_intervals = Float64.(rrs_data[2:end,2]) 
-    plot!(pl_rr,rrs_intervals,st=:scatter,lc=linecolor,mc=linecolor,markerstrokewidth=0.0,markershape=:circle,ms=1,ma=0.6);
+    plot!(pl_rr,rrs_intervals,st=:scatter,lc=linecolor,mc=linecolor,markerstrokewidth=0.0,markershape=:circle,ms=1.5,ma=0.8);
 
     #--------------------------------------read and plot measures-----------------------------------------
     #--------------------------read and search onset times----------------------------
     @show samples[i]
-    title!(pl_rr,"$(samples[i])")
+    #title!(pl_rr,"$(samples[i])")
     sig_change_data = readdlm(rrs_dir*"ann_sigch_$(samples[i]).txt",skipstart=1)
     rrs_data = readdlm(rrs_dir*"rr_$(samples[i]).txt")
     times = rrs_data[:,1]
@@ -186,8 +191,8 @@ for (i,sample) in enumerate(samples)
     @show xlims
     #onset line (red) and termination line (green) on subplots
     for pl in pls
-        vline!(pl,rr_idxs_onset,ls=:dash,lc=:red,lw=1,label="")
-        vline!(pl,rr_idxs_termination,ls=:dash,lc=:green,lw=1,label="")
+        vline!(pl,rr_idxs_onset,ls=:dash,lc=:red,lw=2,label="")
+        vline!(pl,rr_idxs_termination,ls=:dash,lc=:green,lw=2,label="")
 
         #adjust x limits
         #additional offset with window_size on time series plot
@@ -199,8 +204,8 @@ for (i,sample) in enumerate(samples)
     pls_OP = [pl_rr,pl_S_OP,pl_L_OP,pl_var_OP,pl_ac_OP]
     #onset line (red) and termination line (green) on subplots
     for pl in pls_OP
-        vline!(pl,rr_idxs_onset,ls=:dash,lc=:red,lw=1,label="")
-        vline!(pl,rr_idxs_termination,ls=:dash,lc=:green,lw=1,label="")
+        vline!(pl,rr_idxs_onset,ls=:dash,lc=:red,lw=2,label="")
+        vline!(pl,rr_idxs_termination,ls=:dash,lc=:green,lw=2,label="")
 
         #adjust x limits
         #additional offset with window_size on time series plot
@@ -212,15 +217,12 @@ for (i,sample) in enumerate(samples)
 
 end
 
-fig_dir_name = "figs"
-fig_dir = "../../../../" * fig_dir_name * "/" 
-mkpath(fig_dir)
 
 pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl,fig_dir*"ECG_measures_sm" * "_window_$(Int(window_size))"*".pdf")
+savefig(pl,fig_dir*"ECG_measures_main" * "_window_$(Int(window_size))"*".pdf")
 
 pl_OP = plot(plots_OP...,layout = (1,length(plots_OP)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl_OP,fig_dir*"ECG_measures_sm" * "_OP" * "_window_$(Int(window_size))"*".pdf")
+savefig(pl_OP,fig_dir*"ECG_measures_main" * "_OP" * "_window_$(Int(window_size))"*".pdf")
 
 
 
