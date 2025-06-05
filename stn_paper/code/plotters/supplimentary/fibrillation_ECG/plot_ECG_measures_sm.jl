@@ -1,5 +1,5 @@
 using DelimitedFiles
-using CSV,DataFrames
+#using CSV,DataFrames
 using Plots,LaTeXStrings
 cd(@__DIR__)
 include("../../plotting_params.jl")
@@ -58,6 +58,11 @@ yguidefontrotation=0,
 marker_size=marker_size_colored,
 dpi=300)
 
+#params for different grid sizes, pattern lengths
+linecolor1 = :gray10 #[:gray70,:gray40,:gray10]
+linecolor2 = :red
+la = [0.3,0.6,1.0]
+
 #plots are zoomed in on onset
 pre_onset_offset = 500 #xaxis limits: nr of idxs before onset
 post_onset_offset = 200 #xaxis limits: nr of idxs before onset
@@ -111,17 +116,6 @@ for (i,sample) in enumerate(samples)
     plot!(pl_rr,rrs_intervals,st=:scatter,lc=linecolor,mc=linecolor,markerstrokewidth=0.0,markershape=:circle,ms=1,ma=0.6);
 
     #--------------------------------------read and plot measures-----------------------------------------
-
-    #grid
-    measures_file_grid = result_files[findall(f -> occursin("measures_grid_$sample", f),result_files)][1]
-    @show measures_file_grid
-    M_grid = readdlm(data_dir*measures_file_grid)
-    window_ends = M_grid[:,1]
-    #OP
-    measures_file_OP = result_files[findall(f -> occursin("measures_OP_$sample", f),result_files)][1]
-    @show measures_file_OP
-    M_OP = readdlm(data_dir*measures_file_OP)
-
     #--------------------------read and search onset times----------------------------
     @show samples[i]
     title!(pl_rr,"$(samples[i])")
@@ -132,6 +126,12 @@ for (i,sample) in enumerate(samples)
     rr_idxs_onset,ann_times_onset = find_annotations(ann_onset,sig_change_data,times)
     rr_idxs_termination,ann_times_termination = find_annotations(ann_term,sig_change_data,times)
 
+    #read window ends
+    measures_file_grid = result_files[findall(f -> occursin("measures_grid_$sample", f),result_files)][1]
+    @show measures_file_grid
+    M_grid = readdlm(data_dir*measures_file_grid)
+    window_ends = M_grid[:,1]
+
     #set plotting interval
     #rr time series indexes start from 1
     #measures indexes start from window_size
@@ -140,18 +140,41 @@ for (i,sample) in enumerate(samples)
     interval_start = rr_idxs_onset[1]-pre_onset_offset - window_size
     measures_interval = interval_start:interval_end
 
-    #plot grid
-    plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,2],lw=curve_lw,
-        label=L"S",lc=linecolor); #S
-    plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,4] ./ log(factorial(w)),lw=curve_lw,
-        label=L"PE(w=5)",lc=:gray50); #C1 OP
-    plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lw=curve_lw,
-        label=L"\Lambda",lc=linecolor); #L
-    plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,5],lw=curve_lw,
-        label=L"C_2",lc=:gray50); #C2
-    plot!(pl_var,window_ends[measures_interval],M_grid[measures_interval,6],lw=curve_lw,lc=linecolor); #var
-    plot!(pl_ac,window_ends[measures_interval],M_grid[measures_interval,7],lw=curve_lw,lc=linecolor); #acf
+    #loop through discretization params
+    for i in 1:length(grid_sizes)
+        w = ws[i]
+        grid_size = grid_sizes[i] 
 
+        #grid
+        measures_file_grid = result_files[findall(f -> occursin("measures_grid_$sample"*"_grid_$grid_size", f),result_files)][1]
+        @show measures_file_grid
+        M_grid = readdlm(data_dir*measures_file_grid)
+        #window_ends = M_grid[:,1]
+        #OP
+        measures_file_OP = result_files[findall(f -> occursin("measures_OP_$sample"*"_OP_$w", f),result_files)][1]
+        @show measures_file_OP
+        M_OP = readdlm(data_dir*measures_file_OP)
+
+        #plot grid
+        plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,2],lw=curve_lw,
+            label=L"S(n=%$grid_size)",lc=linecolor1,la=la[i]); #S
+        plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,4] ./ log(factorial(w)),lw=curve_lw,
+            label=L"PE(w=%$w)",lc=linecolor2,ls=:dash,la=la[i]); #C1 OP
+        plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lw=curve_lw,
+            label=L"\Lambda",lc=linecolors[i]); #L
+        plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,5],lw=curve_lw,
+            label=L"C_2",lc=linecolor2,ls=:dash,la=la[i]); #C2
+        plot!(pl_var,window_ends[measures_interval],M_grid[measures_interval,6],lw=curve_lw,lc=linecolors[i]); #var
+        plot!(pl_ac,window_ends[measures_interval],M_grid[measures_interval,7],lw=curve_lw,lc=linecolors[i]); #acf
+
+        #plot OP
+        plot!(pl_S_OP,window_ends[measures_interval],M_OP[measures_interval,2],lw=curve_lw,lc=linecolor);
+        plot!(pl_L_OP,window_ends[measures_interval],M_OP[measures_interval,3],lw=curve_lw,lc=linecolor);
+        plot!(pl_var_OP,window_ends[measures_interval],M_OP[measures_interval,4],lw=curve_lw,lc=linecolor);
+        plot!(pl_ac_OP,window_ends[measures_interval],M_OP[measures_interval,5],lw=curve_lw,lc=linecolor); 
+
+
+    end
 
     pls = [pl_rr,pl_S,pl_L,pl_var,pl_ac]
     #set xaxis limits
@@ -166,15 +189,8 @@ for (i,sample) in enumerate(samples)
         #additional offset with window_size on time series plot
         plot!(pl,xlims=xlims,xticks=xticks[i])
     end
-
     pl = plot(pls...,layout=(5,1),dpi=300)
     push!(plots_grid,pl)
-
-    #plot OP
-    plot!(pl_S_OP,window_ends[measures_interval],M_OP[measures_interval,2],lw=curve_lw,lc=linecolor);
-    plot!(pl_L_OP,window_ends[measures_interval],M_OP[measures_interval,3],lw=curve_lw,lc=linecolor);
-    plot!(pl_var_OP,window_ends[measures_interval],M_OP[measures_interval,4],lw=curve_lw,lc=linecolor);
-    plot!(pl_ac_OP,window_ends[measures_interval],M_OP[measures_interval,5],lw=curve_lw,lc=linecolor); 
 
     pls_OP = [pl_rr,pl_S_OP,pl_L_OP,pl_var_OP,pl_ac_OP]
     #onset line (red) and termination line (green) on subplots
@@ -197,10 +213,10 @@ fig_dir = "../../../../" * fig_dir_name * "/"
 mkpath(fig_dir)
 
 pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl,fig_dir*"ECG_measures_sm" * "_grid_$(Int(grid_size))" * "_window_$(Int(window_size))"*".pdf")
+savefig(pl,fig_dir*"ECG_measures_sm" * "_window_$(Int(window_size))"*".pdf")
 
 pl_OP = plot(plots_OP...,layout = (1,length(plots_OP)),size=(colfig_size[1]*1.5,colfig_size[2]))
-savefig(pl_OP,fig_dir*"ECG_measures_sm" * "_OP_$(Int(w))" * "_window_$(Int(window_size))"*".pdf")
+savefig(pl_OP,fig_dir*"ECG_measures_sm" * "_OP" * "_window_$(Int(window_size))"*".pdf")
 
 
 
