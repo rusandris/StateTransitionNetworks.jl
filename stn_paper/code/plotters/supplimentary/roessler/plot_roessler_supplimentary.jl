@@ -62,7 +62,7 @@ legendfontsize=legendfontsize,
 tickfontsize=tickfontsize,
 ylims=(-9,-2),
 #xlims=[0.34,0.41],
-yticks=[-9,-5.5,-2],
+yticks=[-8,-5.0,-2],
 xticks=[0.35,0.36,0.37,0.38,0.39,0.4],
 titlefontsize=20,
 left_margin=reduced_left_margin,
@@ -71,8 +71,8 @@ left_margin=reduced_left_margin,
 legend=:none,
 xaxis=:flip,
 title="Rössler system, PSOS " * L"y=2",
-ylabel= L"x_n",
-xformatter=:auto,
+ylabel= L"x_{\tau}",
+xformatter=:none,
 yformatter=:auto,
 yguidefontrotation=0,
 dpi=300)
@@ -92,7 +92,7 @@ legend=:topright,
 xaxis=:flip,
 ylabel= L"S,\langle T ~ \rangle \lambda",
 vertical_lw=2,
-#xformatter=:none,
+xformatter=:none,
 #yformatter=:none,
 yguidefontrotation=0,
 dpi=300)
@@ -149,9 +149,9 @@ pl_lambda_roessler = plot_measure(ps,Λs,special_ps;
     marker_size=marker_size_colored,
     plot_params_lambda...)
 
-annotate!(pl_od_roessler,subfigure_annotation_pos_two_col_inner, text("(d)", :left, annotation_fontsize))
-annotate!(pl_s_roessler[1],subfigure_annotation_pos_two_col_inner, text("(f)", :left, annotation_fontsize))
-annotate!(pl_lambda_roessler[1],subfigure_annotation_pos_two_col_inner, text("(h)", :left, annotation_fontsize))
+annotate!(pl_od_roessler,(1.13,1.0), text("(a)", :left, annotation_fontsize))
+annotate!(pl_s_roessler,(1.13,1.0), text("(b)", :left, annotation_fontsize))
+annotate!(pl_lambda_roessler,(1.13,1.0), text("(c)", :left, annotation_fontsize))
 
 l = @layout [a{0.33h}; b{0.33h}; c{0.33h}]
 pl_roessler = plot(pl_od_roessler,pl_s_roessler,pl_lambda_roessler,layout = l,size=colfig_size)
