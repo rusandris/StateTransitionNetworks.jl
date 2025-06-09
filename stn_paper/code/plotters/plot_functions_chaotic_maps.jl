@@ -28,18 +28,13 @@ function plot_measure(ps,ms,special_ps;λs=[],labels,vertical_lw,
 
     #plot inset
     if inset 
-        if !(isempty(inset_data))
-            inset_xticks,inset_yticks = inset_ticks
-            plot!(pl, inset=inset_box, subplot=2, framestyle=:box,xticks=inset_xticks,yticks=inset_yticks,ylims=inset_ylims,tickfontsize=inset_tickfontsize)
-        
-            fi = findfirst(p -> p >= inset_param_range[1],ps)
-            li = findlast(p -> p <= inset_param_range[end],ps)
-            inset_indices = fi:li
-
-        end
-        
-
-        
+        inset_xticks,inset_yticks = inset_ticks
+        plot!(pl, inset=inset_box, subplot=2, framestyle=:box,xticks=inset_xticks,yticks=inset_yticks,ylims=inset_ylims,tickfontsize=inset_tickfontsize)
+    
+        fi = findfirst(p -> p >= inset_param_range[1],ps)
+        li = findlast(p -> p <= inset_param_range[end],ps)
+        inset_indices = fi:li
+    
         if isempty(inset_data)
             plot!(pl[2], ps[inset_indices], ms[inset_indices,2*length(orders)], label=nothing ,st=:scatter, markerstrokewidth=0, mc=:gray60, ms=4, ma=1) #plot highest order numerical
             plot!(pl[2], ps[inset_indices], ms[inset_indices,length(orders)], label=nothing, lw=1, color=:gray10) #plot highest order analytical

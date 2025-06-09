@@ -31,7 +31,7 @@ od_data = readdlm(roessler_results_dir * od_file)
 od_data = [od_data[i,:] for i in 1:size(od_data,1)]
 
 orders_file = result_files[findfirst(f -> occursin("orders", f),result_files)]
-orders = vec(readdlm(roessler_results_dir * orders_file))
+orders = Int.(vec(readdlm(roessler_results_dir * orders_file)))
 
 avg_cross_time_file = result_files[findfirst(f -> occursin("avg", f),result_files)]
 avg_cross_times = readdlm(roessler_results_dir * avg_cross_time_file)
@@ -53,7 +53,7 @@ alphas = [0.2:0.2:1.0;]
 #inset_indices = 1:201
 
 s_labels = [L"S(%$(i))" for i in orders ]
-push!(s_labels,L"\langle T ~\rangle \lambda^{cont}")
+push!(s_labels,L"\langle T ~\rangle \lambda^{\textrm{cont}}")
 Λ_labels = [L"\Lambda(%$(i))" for i in orders ]
 
 
@@ -80,7 +80,7 @@ dpi=300)
 
 plot_params_entropy = (
 guidefontsize=guidefontsize,
-legendfontsize=legendfontsize,
+legendfontsize=legendfontsize+2,
 tickfontsize=tickfontsize,
 ylims=(-0.1,1.0),
 yticks=[0.0,0.5,1.0],
@@ -91,7 +91,7 @@ top_margin=reduced_top_margin,
 #right_margin=4Plots.mm,
 legend=:topright,
 xaxis=:flip,
-ylabel= L"S,\Lambda^{Poinc}",
+ylabel= L"S,\lambda^{\textrm{Poinc}}",
 vertical_lw=2,
 xformatter=:none,
 #yformatter=:none,
@@ -100,7 +100,7 @@ dpi=300)
 
 plot_params_lambda = (
 guidefontsize=guidefontsize,
-legendfontsize=legendfontsize,
+legendfontsize=legendfontsize+2,
 tickfontsize=tickfontsize,
 #framestyle=:box,
 ylims = (-0.1,2.1),

@@ -227,8 +227,9 @@ pl_lambda_logistic = plot_measure(ps,Λs,ps_log;
 
 annotate!(pl_dist_log,subfigure_annotation_pos_one_col, text("(a)", :left, annotation_fontsize))
 annotate!(pl_od_logistic,subfigure_annotation_pos_one_col, text("(c)", :left, annotation_fontsize))
-annotate!(pl_lambda_logistic[1],subfigure_annotation_pos_one_col, text("(f)", :left, annotation_fontsize))
 annotate!(pl_s_logistic[1],subfigure_annotation_pos_one_col, text("(e)", :left, annotation_fontsize))
+annotate!(pl_lambda_logistic[1],subfigure_annotation_pos_one_col, text("(g)", :left, annotation_fontsize))
+
 
 l = @layout [a{0.25h}; b{0.25h};c{0.25h};d{0.25h}]
 pl_logistic = plot(pl_dist_log,pl_od_logistic,pl_s_logistic,pl_lambda_logistic,layout = l)

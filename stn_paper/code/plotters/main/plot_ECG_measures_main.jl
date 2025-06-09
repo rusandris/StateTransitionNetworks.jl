@@ -89,8 +89,8 @@ for (i,sample) in enumerate(samples)
     end
 
     pl_rr = plot(;legend=false,ylims=ylims_rr,yticks=[ylims_rr[1]+0.2:0.6:ylims_rr[2]-0.2;],plot_params...,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-10)
-    pl_S = plot(;legend=true,ylims=(-0.1,2.1),yticks=[0.0,1.0,2.0],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm)
-    pl_L = plot(;legend=true,ylims=(-0.1,3.0),yticks=[0:1:2;],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm) 
+    pl_S = plot(;legend=false,ylims=(-0.1,2.1),yticks=[0.0,1.0,2.0],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm)
+    pl_L = plot(;legend=false,ylims=(-0.1,3.0),yticks=[0:1:2;],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm) 
     pl_var = plot(;legend=false,ylims=(0.02,0.045),yticks=[0.03,0.04],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm)
     pl_ac = plot(;legend=false,ylims=(-0.6,0.5),yticks=[-0.4,0.0,0.4],plot_params...,xformatter=:auto,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-10)
     xlabel!(pl_ac,"index",xguidefontsize=guidefontsize-12)
