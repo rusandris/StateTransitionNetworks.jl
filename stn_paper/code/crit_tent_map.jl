@@ -65,7 +65,6 @@ T_string::String = @sprintf "%.E" T
 Ttr::Int64 = 10^5
 Ttr_string::String = @sprintf "%.E" Ttr
 grid_edges::Vector{Float64} = [0,1]
-writedlm(data_dir*"method_params.txt",[T,Ttr,grid_size])
 
 timeseries, = trajectory(ds_crit, T, [0.3]; Ttr=Ttr);
 
@@ -74,6 +73,8 @@ grid_size = 2^10
 qs = collect(0.01:0.01:2)
 Os = [1,2,4,8,10]
 writedlm(data_dir*"orders_crit.txt",Os)
+writedlm(data_dir*"method_params.txt",[T,Ttr,grid_size])
+
 
 sts = zeros(Int128,length(timeseries))
 timeseries_to_grid!(sts, timeseries, grid_size; grid_edges = [0., 1.]);
