@@ -17,7 +17,7 @@ function plot_measure(ps,ms,special_ps;λs=[],labels,vertical_lw,
 
     #plot lyap_exps
     if !isempty(λs)
-        plot!(pl,ps,λs,lw=1,lc=:gray10,label=L"\lambda")
+        plot!(pl,ps,λs,lw=1,lc=:gray10,label=labels[end])
     end
 
     #plot vertical lines on S plot

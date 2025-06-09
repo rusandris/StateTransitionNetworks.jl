@@ -53,6 +53,7 @@ alphas = [0.2:0.2:1.0;]
 #inset_indices = 1:201
 
 s_labels = [L"S(%$(i))" for i in orders ]
+push!(s_labels,L"\langle T ~\rangle \lambda^{cont}")
 Λ_labels = [L"\Lambda(%$(i))" for i in orders ]
 
 
@@ -70,7 +71,7 @@ left_margin=reduced_left_margin,
 #right_margin=4Plots.mm,
 legend=:none,
 xaxis=:flip,
-title="Rössler system, PSOS " * L"y=2",
+title="Rössler system, PSOS: " * L"y=2",
 ylabel= L"x_{\tau}",
 xformatter=:none,
 yformatter=:auto,
@@ -90,7 +91,7 @@ top_margin=reduced_top_margin,
 #right_margin=4Plots.mm,
 legend=:topright,
 xaxis=:flip,
-ylabel= L"S,\langle T ~ \rangle \lambda",
+ylabel= L"S,\Lambda^{Poinc}",
 vertical_lw=2,
 xformatter=:none,
 #yformatter=:none,
