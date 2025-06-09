@@ -64,14 +64,13 @@ T::Int64 = 10^7
 T_string::String = @sprintf "%.E" T
 Ttr::Int64 = 10^5
 Ttr_string::String = @sprintf "%.E" Ttr
-grid_size::Int64 = 2^5
 grid_edges::Vector{Float64} = [0,1]
 writedlm(data_dir*"method_params.txt",[T,Ttr,grid_size])
 
 timeseries, = trajectory(ds_crit, T, [0.3]; Ttr=Ttr);
 
 # compute DYNAMICAL Renyi entropy spectrum for HIGHER ORDER states
-grid_size = 2^5
+grid_size = 2^10
 qs = collect(0.01:0.01:2)
 Os = [1,2,4,8,10]
 writedlm(data_dir*"orders_crit.txt",Os)
@@ -100,6 +99,11 @@ sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
 @time P,Q,x = calculate_transition_matrix(sts);
 Hqs = static_renyi_entropy_spectrum(x, qs)
 plot!(qs,Hqs)
+
+#Os = [8,12,14,16,30]
+Os = [1,2,4,8,10,12,14,16,30]
+
+writedlm(data_dir*"orders_crit_static.txt",Os)
 
 # higher order states
 sts = zeros(Int128,length(timeseries))
