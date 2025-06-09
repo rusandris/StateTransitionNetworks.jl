@@ -133,6 +133,10 @@ writedlm(data_dir * "roessler_p_values" * "_nr_param_$(length(b_vals))"*".txt",b
 @info "Calculating measures...."
 flush(stderr)
 
+ds = CoupledODEs(roessler_rule, u0, p;diffeq=diffeq)
+pmap = PoincareMap(ds,plane; rootkw=(xrtol=1e-10, atol=1e-10), direction=1) #becomes discrete system
+pmap = ProjectedDynamicalSystem(pmap,[1],[plane[2],0.0]) #take out the the reduced dimension (3d->2d)
+
 calc_measures(pmap,b_vals,orders;
 	sts_eltype=Int128,
 	dim=1,

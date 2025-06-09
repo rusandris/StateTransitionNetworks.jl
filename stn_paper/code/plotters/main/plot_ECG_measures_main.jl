@@ -36,8 +36,8 @@ data_dir = "../../../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 result_files = readdir(data_dir)
 samples = readdlm(data_dir*"sample_ids.txt",String)[3:4] #take only two sample time serires instead of all 4
 method_params = readdlm(data_dir*"method_params.txt")
-grid_sizes = Int.(method_params[1,:])
-ws = Int.(method_params[2,:])
+grid_sizes = Int.(method_params[1,:])[3] #only select n=30 for plotting
+ws = Int.(method_params[2,:])[end] #only select w=5 for plotting
 window_size,grid_min,grid_max,grid_min06,grid_max06 = method_params[3:7]
 grid_edges = [grid_min,grid_max]
 grid_edges06 = [grid_min06,grid_max06]
@@ -47,7 +47,7 @@ rrs_dir = "../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 fig_dir = "../../../figs/" 
 mkpath(fig_dir)
 
-subfigure_annotation_pos = (-0.3,0.9)
+subfigure_annotation_pos = (-0.3,1.0)
 
 plot_params = (
 guidefontsize=guidefontsize,
@@ -66,7 +66,7 @@ dpi=300)
 #params for different grid sizes, pattern lengths
 linecolor1 = :gray10 #[:gray70,:gray40,:gray10]
 linecolor2 = :red
-la = [0.3,0.6,1.0]
+la = [0.3,0.6,1.0][end] #slect only highest line alpha 
 
 #plots are zoomed in on onset
 pre_onset_offset = 500 #xaxis limits: nr of idxs before onset
@@ -168,13 +168,13 @@ for (i,sample) in enumerate(samples)
         #plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,4] ./ log(factorial(w)),lw=curve_lw,
         #    label=L"PE(w=%$w)",lc=linecolor2,ls=:dash,la=la[i]); #C1 OP
         
-        plot!(pl_S,window_ends[measures_interval],M_OP[measures_interval,4] ./ log(factorial(w)),lw=curve_lw,
-            label=L"PE(w=%$w)",lc=linecolor2,la=la[i]); #C1 OP
+        #plot!(pl_S,window_ends[measures_interval],M_OP[measures_interval,4] ./ log(factorial(w)),lw=curve_lw,
+        #    label=L"PE(w=%$w)",lc=linecolor2,la=la[i]); #C1 OP
 
         plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,3],lw=curve_lw,
             label=L"\Lambda(n=%$grid_size)",lc=linecolor1,la=la[i]); #L
-        plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,5],lw=curve_lw,
-            label=L"C_2(n=%$grid_size)",lc=:purple,la=la[i]); #C2
+        #plot!(pl_L,window_ends[measures_interval],M_grid[measures_interval,5],lw=curve_lw,
+        #    label=L"C_2(n=%$grid_size)",lc=:purple,la=la[i]); #C2
         plot!(pl_var,window_ends[measures_interval],M_grid[measures_interval,6],lw=curve_lw,lc=linecolor1); #var
         plot!(pl_ac,window_ends[measures_interval],M_grid[measures_interval,7],lw=curve_lw,lc=linecolor1); #acf
 
@@ -221,7 +221,7 @@ end
 
 
 pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1],colfig_size[2]-300))
-savefig(pl,fig_dir*"ECG_measures_main" * "_window_$(Int(window_size))"*".pdf")
+savefig(pl,fig_dir*"ECG_measures_main" * "_window_$(Int(window_size))"*"_grid30.pdf")
 
 pl_OP = plot(plots_OP...,layout = (1,length(plots_OP)),size=(colfig_size[1],colfig_size[2]))
 savefig(pl_OP,fig_dir*"ECG_measures_main" * "_OP" * "_window_$(Int(window_size))"*".pdf")

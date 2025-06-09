@@ -121,7 +121,7 @@ dpi=300)
 
 special_ps = [0.36,0.368,0.4] #dummy 
 
-pl_od_roessler = plot_orbit_diagram(od_data,ps,special_ps;ms_od = ms_od_henon,ma_od = ma_od_henon,
+pl_od_roessler = plot_orbit_diagram(od_data,ps,special_ps;ms_od = 1.0,ma_od = ma_od_henon,
     marker_shapes=marker_shapes_roessler,marker_offset=0.3,marker_size=marker_size_colored,
     marker_colors=marker_colors_roessler,plot_params_od...)
 
