@@ -34,7 +34,7 @@ end
 #--------------------read dir----------------------
 data_dir = "../../../../data/supplimentary/fibrillation_ECG/fibrillation_results/"
 result_files = readdir(data_dir)
-samples = readdlm(data_dir*"sample_ids.txt",String)[3:4] #take only two sample time serires instead of all 4
+samples = readdlm(data_dir*"sample_ids.txt",String)
 method_params = readdlm(data_dir*"method_params.txt")
 grid_sizes = Int.(method_params[1,:])
 ws = Int.(method_params[2,:])
@@ -47,7 +47,7 @@ rrs_dir = "../../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database
 fig_dir = "../../../../figs/" 
 mkpath(fig_dir)
 
-subfigure_annotation_pos = (-0.3,1.0)
+subfigure_annotation_pos = (-0.35,1.0)
 
 plot_params = (
 guidefontsize=guidefontsize,
@@ -76,8 +76,8 @@ post_onset_offset = 200 #xaxis limits: nr of idxs before onset
 ann_onset = "(AFIB"
 ann_term = "(N"
 
-#xticks = [[1600:300:2500;],[4900:300:6000;],[1200:300:2300;],[1600:300:2800;]]
-xticks = [[1200:300:2300;],[1600:300:2800;]]
+xticks = [[1600:300:2500;],[4900:300:6000;],[1200:300:2300;],[1600:300:2800;]]
+#xticks = [[1200:300:2300;],[1600:300:2800;]]
 
 ylims_rr = (0.0,1.6)
 plots_grid = []
@@ -93,13 +93,13 @@ for (i,sample) in enumerate(samples)
     pl_rr = plot(;legend=false,ylims=ylims_rr,yticks=[ylims_rr[1]+0.2:0.6:ylims_rr[2]-0.2;],plot_params...,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-10)
     pl_S = plot(;legend=true,ylims=(-0.1,2.1),yticks=[0.0,1.0,2.0],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm)
     pl_L = plot(;legend=true,ylims=(-0.1,3.0),yticks=[0:1:2;],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm) 
-    pl_var = plot(;legend=false,ylims=(0.02,0.045),yticks=[0.02,0.03,0.04],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm)
-    pl_ac = plot(;legend=false,ylims=(-0.6,0.5),yticks=[-0.4,0.0,0.4],plot_params...,xformatter=:auto,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-10)
+    pl_var = plot(;legend=false,ylims=(0.0,0.06),yticks=[0.02,0.03,0.04],plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm)
+    pl_ac = plot(;legend=false,ylims=(-0.6,1.1),yticks=[-0.4,0.0,0.4],plot_params...,xformatter=:auto,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-10)
     xlabel!(pl_ac,"index",xguidefontsize=guidefontsize-12)
 
     if i == 1
         plot!(pl_rr,ylabel=L"\Delta t_{RR}(s)",yformatter=:auto)
-        plot!(pl_S,ylabel=L"S",yformatter=:auto)
+        plot!(pl_S,ylabel=L"S,PE",yformatter=:auto)
         plot!(pl_L,ylabel=L"Λ",yformatter=:auto)
         plot!(pl_var,ylabel=L"\sigma^2",yformatter=:auto)
         plot!(pl_ac,ylabel=L"ACF(1)",yformatter=:auto)
@@ -127,7 +127,7 @@ for (i,sample) in enumerate(samples)
     #--------------------------------------read and plot measures-----------------------------------------
     #--------------------------read and search onset times----------------------------
     @show samples[i]
-    #title!(pl_rr,"$(samples[i])")
+    title!(pl_rr,"$(samples[i])")
     sig_change_data = readdlm(rrs_dir*"ann_sigch_$(samples[i]).txt",skipstart=1)
     rrs_data = readdlm(rrs_dir*"rr_$(samples[i]).txt")
     times = rrs_data[:,1]
@@ -222,7 +222,7 @@ for (i,sample) in enumerate(samples)
 end
 
 
-pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1],colfig_size[2]-300))
+pl = plot(plots_grid...,layout = (1,length(plots_grid)),size=(colfig_size[1]*1.5,colfig_size[2]-300),left_margin=5Plots.mm);
 savefig(pl,fig_dir*"ECG_measures_sm" * "_window_$(Int(window_size))"*".pdf")
 
 pl_OP = plot(plots_OP...,layout = (1,length(plots_OP)),size=(colfig_size[1],colfig_size[2]))
