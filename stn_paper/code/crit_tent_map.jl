@@ -72,7 +72,8 @@ timeseries, = trajectory(ds_crit, T, [0.3]; Ttr=Ttr);
 
 grid_size = grid_size_crit
 qs = collect(0.01:0.01:2)
-Os = [1,2,4,8,10]
+#Os = [1,2,4,8,10]
+Os = [1,[2:2:64;]...]
 writedlm(data_dir*"orders_crit.txt",Os)
 writedlm(data_dir*"method_params.txt",[T,Ttr,grid_size_tent,grid_size_crit])
 
@@ -105,7 +106,7 @@ Hqs = static_renyi_entropy_spectrum(x, qs)
 plot!(qs,Hqs)
 
 #Os = [8,12,14,16,30]
-Os = [1,2,4,8,10,12,14,16,30]
+#Os = [1,2,4,8,10,12,14,16,30]
 
 writedlm(data_dir*"orders_crit_static.txt",Os)
 
@@ -166,7 +167,7 @@ ds_tent = DeterministicIteratedMap(f_tent, [0.4], [r])
 
 grid_size = grid_size_tent
 qs = collect(0.01:0.01:2)
-Os = [1,2,4,8,10]
+#Os = [1,2,4,8,10]
 
 timeseries, = trajectory(ds_tent, T, [0.3]; Ttr=Ttr);
 
@@ -195,7 +196,8 @@ end
 #######################################
 # compute STATIC Renyi entropy spectrum
 #######################################
-Os_static = [8,12,14,16,30]
+#Os_static = [8,12,14,16,30]
+Os = [1,[2:2:64;]...]
 writedlm(data_dir*"orders_tent_static.txt",Os_static)
 sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
 
