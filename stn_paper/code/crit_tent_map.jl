@@ -197,7 +197,7 @@ end
 # compute STATIC Renyi entropy spectrum
 #######################################
 #Os_static = [8,12,14,16,30]
-Os = [1,[2:2:64;]...]
+Os_static = [1,[2:2:64;]...]
 writedlm(data_dir*"orders_tent_static.txt",Os_static)
 sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
 
