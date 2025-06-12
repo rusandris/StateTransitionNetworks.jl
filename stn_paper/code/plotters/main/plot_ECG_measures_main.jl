@@ -47,12 +47,12 @@ rrs_dir = "../../../data/supplimentary/fibrillation_ECG/Long_Term_AF_Database/"
 fig_dir = "../../../figs/" 
 mkpath(fig_dir)
 
-subfigure_annotation_pos = (-0.35,1.0)
+subfigure_annotation_pos = (-0.38,1.0)
 
 plot_params = (
 guidefontsize=guidefontsize,
-legendfontsize=legendfontsize-2,
-tickfontsize=tickfontsize-5,
+legendfontsize=legendfontsize,
+tickfontsize=tickfontsize,
 titlefontsize=20,
 left_margin=reduced_left_margin,
 right_margin=reduced_right_margin,
@@ -72,8 +72,8 @@ linecolors = [:gray10]
 la = [0.3,0.6,1.0][end] #slect only highest line alpha 
 
 #plots are zoomed in on onset
-pre_onset_offset = 500 #xaxis limits: nr of idxs before onset
-post_onset_offset = 500 #xaxis limits: nr of idxs after onset
+pre_onset_offset = 600 #xaxis limits: nr of idxs before onset
+post_onset_offset = 600 #xaxis limits: nr of idxs after onset
 #post_onset_offset_08 = 200 #xaxis limits: nr of idxs after onset
 #pre_onset_offset_08 = 200 #xaxis limits: nr of idxs after onset
 
@@ -85,7 +85,7 @@ ann_onset = "(AFIB"
 ann_term = "(N"
 
 #xticks = [[1600:200:3000;],[4500:200:6500;],[1200:200:2800;],[1400:200:2800;]]
-xticks = [[1200:200:2800;],[1400:200:2800;]]
+xticks = [[1200:400:2800;],[1200:400:3800;]]
 
 ylims_rr = (0.0,1.6)
 plots_grid = []
@@ -100,16 +100,16 @@ for (i,sample) in enumerate(samples)
     end
     #init plots with standard formatting
     pl_rr = plot(;legend=false,ylims=ylims_rr,yticks=[ylims_rr[1]+0.2:0.6:ylims_rr[2]-0.2;],plot_params...,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-10)
-    pl_S = plot(;legend=false,plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-8) #ylims=(-0.1,2.1),yticks=[0.0,1.0,2.0]
+    pl_S = plot(;legend=false,plot_params...,yticks=[0.5,1.0,1.5,2.0],ylims=(0.5,2.1),top_margin=-2Plots.mm,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize) #ylims=(-0.1,2.1),yticks=[0.0,1.0,2.0]
     pl_L = plot(;legend=false,plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm) #ylims=(-0.1,3.0),yticks=[0:1:2;]
     pl_var = plot(;legend=false,plot_params...,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm) #ylims=(0.0,0.06),yticks=[0.02,0.03,0.04]
-    pl_ac = plot(;legend=false,plot_params...,xformatter=:auto,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-10) #ylims=(-0.6,1.1),yticks=[-0.4,0.0,0.4]
+    pl_ac = plot(;legend=false,plot_params...,xformatter=:auto,top_margin=-2Plots.mm,bottom_margin=-2Plots.mm,yguidefontsize=guidefontsize-9) #ylims=(-0.6,1.1),yticks=[-0.4,0.0,0.4]
     xlabel!(pl_ac,"index",xguidefontsize=guidefontsize-12)
 
     #ylabels and annotation only for the first column 
     if i == 1
         plot!(pl_rr,ylabel=L"\Delta t_{RR}(s)",yformatter=:auto)
-        plot!(pl_S,ylabel=L"S,PE",yformatter=:auto)
+        plot!(pl_S,ylabel=L"S",yformatter=:auto)
         plot!(pl_L,ylabel=L"Λ",yformatter=:auto)
         plot!(pl_var,ylabel=L"\sigma^2",yformatter=:auto)
         plot!(pl_ac,ylabel=L"ACF(1)",yformatter=:auto)
@@ -131,7 +131,7 @@ for (i,sample) in enumerate(samples)
     #--------------------------------------read and plot measures-----------------------------------------
     #--------------------------read and search onset times----------------------------
     @show samples[i]
-    title!(pl_rr,"$(samples[i])")
+    #title!(pl_rr,"$(samples[i])")
     sig_change_data = readdlm(rrs_dir*"ann_sigch_$(samples[i]).txt",skipstart=1)
     rrs_data = readdlm(rrs_dir*"rr_$(samples[i]).txt")
     times = rrs_data[:,1] #actual time points in seconds
@@ -162,6 +162,14 @@ for (i,sample) in enumerate(samples)
         w = ws[i]
         grid_size = grid_sizes[i] 
 
+        #only show measures that are calculated for the shown parts of the time series 
+        #
+        start_show = rr_idxs_onset[1]-pre_onset_offset
+        @show start_show
+        line_alphas = zeros(length(window_ends))
+        @show length(line_alphas) 
+        line_alphas[start_show:end] .= 1.0
+
         #grid
         measures_file_grid = result_files[findall(f -> occursin("measures_grid_$sample"*"_grid_$grid_size", f),result_files)][1]
         @show measures_file_grid
@@ -175,19 +183,17 @@ for (i,sample) in enumerate(samples)
         @show length(idxs),length(M_grid[:,2])
         #plot grid measures
         plot!(pl_S,window_ends,M_grid[:,2],lw=curve_lw,
-            label=L"S(n=%$grid_size)",lc=linecolors[i],la=la[i]); #S
-        #plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,4] ./ log(factorial(w)),lw=curve_lw,
-        #    label=L"PE(w=%$w)",lc=linecolor2,ls=:dash,la=la[i]); #C1 
+            label=L"S(n=%$grid_size)",lc=linecolors[i],la=line_alphas);#la=la[i]); #S
         
-        plot!(pl_S,window_ends,M_OP[:,4] ./ log(factorial(w)),lw=curve_lw,
-            label=L"PE(w=%$w)",lc=linecolor2,la=la[i]); #C1 OP
+        #plot!(pl_S,window_ends,M_OP[:,4] ./ log(factorial(w)),lw=curve_lw,
+        #    label=L"PE(w=%$w)",lc=linecolor2,la=la[i]); #C1 OP
 
         plot!(pl_L,window_ends,M_grid[:,3],lw=curve_lw,
-            label=L"\Lambda(n=%$grid_size)",lc=linecolors[i],la=la[i]); #L
-        plot!(pl_L,window_ends,M_grid[:,5],lw=curve_lw,
-            label=L"C_2(n=%$grid_size)",lc=:purple,la=la[i]); #C2
-        plot!(pl_var,window_ends,M_grid[:,6],lw=curve_lw,lc=linecolors[i]); #var
-        plot!(pl_ac,window_ends,M_grid[:,7],lw=curve_lw,lc=linecolors[i]); #acf
+            label=L"\Lambda(n=%$grid_size)",lc=linecolors[i],la=line_alphas);#la=la[i]); #L
+        #plot!(pl_L,window_ends,M_grid[:,5],lw=curve_lw,
+        #    label=L"C_2(n=%$grid_size)",lc=:purple,la=la[i]); #C2
+        plot!(pl_var,window_ends,M_grid[:,6],lw=curve_lw,lc=linecolors[i],la=line_alphas); #var
+        plot!(pl_ac,window_ends,M_grid[:,7],lw=curve_lw,lc=linecolors[i],la=line_alphas); #acf
 
     end
 
@@ -210,6 +216,10 @@ for (i,sample) in enumerate(samples)
         #plot!(pl,xlims=(1,window_ends[end]),xticks=xticks[i]) #full x scale
         plot!(pl,xlims=(rr_idxs_onset[1]-pre_onset_offset,rr_idxs_onset[1]+post_onset_offset),xticks=xticks[i])
     end
+
+    #halve the number of ticks 
+    plot!(pl_ac,yticks=yticks(pl_ac[1])[1][1:2:end])
+
     pl = plot(pl_rr,pls...,layout=(5,1),dpi=300)
     push!(plots_grid,pl)
 

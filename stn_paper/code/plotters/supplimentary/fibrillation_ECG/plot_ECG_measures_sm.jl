@@ -67,14 +67,16 @@ dpi=300)
 linecolor1 = :gray10 #[:gray70,:gray40,:gray10]
 linecolor2 = :red
 linecolors = [:gray70,:gray40,:gray10]
+linecolors_red = [:red4,:red3,:red]
+linecolors_purple = [:darkorchid,:purple3,:purple4]
 la = [0.3,0.6,1.0]
 #la = [0.3,0.6,1.0][end] #slect only highest line alpha 
 
 #plots are zoomed in on onset
-pre_onset_offset = 500 #xaxis limits: nr of idxs before onset
-post_onset_offset = 500 #xaxis limits: nr of idxs after onset
+pre_onset_offset = 800 #xaxis limits: nr of idxs before onset
+post_onset_offset = 800 #xaxis limits: nr of idxs after onset
 post_onset_offset_08 = 200 #xaxis limits: nr of idxs after onset
-pre_onset_offset_08 = 200 #xaxis limits: nr of idxs after onset
+pre_onset_offset_08 = 800 #xaxis limits: nr of idxs after onset
 
 post_offsets = [post_onset_offset_08,fill(post_onset_offset,4)...]
 pre_offsets = [pre_onset_offset_08,fill(pre_onset_offset,4)...]
@@ -83,7 +85,7 @@ pre_offsets = [pre_onset_offset_08,fill(pre_onset_offset,4)...]
 ann_onset = "(AFIB"
 ann_term = "(N"
 
-xticks = [[1600:200:3000;],[4500:200:6500;],[1200:200:2800;],[1400:200:2800;]]
+xticks = [[1400:400:3000;],[4000:400:7500;],[1200:400:2800;],[1400:400:3800;]]
 #xticks = [[1200:300:2300;],[1600:300:2800;]]
 
 ylims_rr = (0.0,1.6)
@@ -177,20 +179,32 @@ for (i,sample) in enumerate(samples)
 
         @show length(idxs),length(M_grid[:,2])
         #plot grid measures
+
+        
+        #only show measures that are calculated for the shown parts of the time series 
+        #
+        start_show = rr_idxs_onset[1]-pre_onset_offset
+        @show start_show
+        line_alphas = zeros(length(window_ends))
+        @show length(line_alphas) 
+        line_alphas[start_show:end] .= 1.0
+        
+
         plot!(pl_S,window_ends,M_grid[:,2],lw=curve_lw,
-            label=L"S(n=%$grid_size)",lc=linecolors[i],la=la[i]); #S
-        #plot!(pl_S,window_ends[measures_interval],M_grid[measures_interval,4] ./ log(factorial(w)),lw=curve_lw,
-        #    label=L"PE(w=%$w)",lc=linecolor2,ls=:dash,la=la[i]); #C1 
+            label=L"S(n=%$grid_size)",lc=linecolors[i],la=line_alphas);#la=la[i]) #S
         
         plot!(pl_S,window_ends,M_OP[:,4] ./ log(factorial(w)),lw=curve_lw,
-            label=L"PE(w=%$w)",lc=linecolor2,la=la[i]); #C1 OP
+            label=L"PE(w=%$w)",lc=linecolors_red[i],la=line_alphas);##la=la[i]); #C1 OP
+        
+        #hline!([1.0],ls=:dash,lw=1,lc=:red)
 
         plot!(pl_L,window_ends,M_grid[:,3],lw=curve_lw,
-            label=L"\Lambda(n=%$grid_size)",lc=linecolors[i],la=la[i]); #L
+            label=L"\Lambda(n=%$grid_size)",lc=linecolors[i],la=line_alphas);#la=la[i]); #L
         plot!(pl_L,window_ends,M_grid[:,5],lw=curve_lw,
-            label=L"C_2(n=%$grid_size)",lc=:purple,la=la[i]); #C2
-        plot!(pl_var,window_ends,M_grid[:,6],lw=curve_lw,lc=linecolors[i]); #var
-        plot!(pl_ac,window_ends,M_grid[:,7],lw=curve_lw,lc=linecolors[i]); #acf
+            label=L"C_2(n=%$grid_size)",lc=linecolors_purple[i],la=line_alphas)#la=la[i]); #C2
+
+        plot!(pl_var,window_ends,M_grid[:,6],lw=curve_lw,lc=linecolors[i],la=line_alphas); #var
+        plot!(pl_ac,window_ends,M_grid[:,7],lw=curve_lw,lc=linecolors[i],la=line_alphas); #acf
 
     end
 
@@ -213,6 +227,14 @@ for (i,sample) in enumerate(samples)
         #plot!(pl,xlims=(1,window_ends[end]),xticks=xticks[i]) #full x scale
         plot!(pl,xlims=(rr_idxs_onset[1]-pre_onset_offset,rr_idxs_onset[1]+post_onset_offset),xticks=xticks[i])
     end
+
+    
+    #halve the number of ticks 
+    plot!(pl_ac,yticks=yticks(pl_ac[1])[1][1:2:end])
+
+    #halve the number of ticks 
+    plot!(pl_var,yticks=yticks(pl_var[1])[1][1:2:end])
+
     pl = plot(pl_rr,pls...,layout=(5,1),dpi=300)
     push!(plots_grid,pl)
 
