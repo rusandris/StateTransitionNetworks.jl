@@ -16,10 +16,15 @@ T_string::String = @sprintf "%.E" T
 Ttr_string::String = @sprintf "%.E" Ttr
 annotation_pos = (-0.25,  1.0)
 markershapes = [:rect,:utriangle,:cross,:diamond,:circle]
-line_alphas = reverse([1.0,0.7,0.5,0.3,0.1])
-markersize = 3
-msw = 0.2
-
+#line_alphas = reverse([1.0,0.7,0.5,0.3,0.1])
+line_alphas = fill(1.0,5)
+markersizes = reverse([1:5;])
+ms=3
+msw = 0.0
+#reds = [RGB(r,0.0,0.0) for r in [1.0,0.9,0.8,0.7,0.6]]
+#reds = [:coral,:tomato2,:crimson,:red3,:red4]
+reds = [:pink1,:hotpink1,:deeppink2,:crimson,:maroon]
+oranges = [:yellow,:orange,:orange3,:darkorange4,:orangered3]
 #---------------------------critical map--------------------------
 
 #-------------------dynamic renyi entropy spectrum--------------------
@@ -38,7 +43,7 @@ for (i,o) in enumerate(Os)
 
     qs = data[:,1]
     Hs = data[:,2]
-    plot!(pl_crit_Kq, qs, Hs, label=L"\tilde{K}_q(%$(o))", linewidth=1,markershape=:circle,mc=:red,ms=markersize,markerstrokecolor=:gray10,markerstrokewidth=msw,ma=line_alphas[i] ,la=line_alphas[i], color="red")
+    plot!(pl_crit_Kq, qs, Hs, label=L"\tilde{K}_q(%$(o))", linewidth=1,markershape=:circle,lc = reds[i],mc=reds[i],ms=ms,markerstrokecolor=:gray10,markerstrokewidth=msw,ma=line_alphas[i] ,la=line_alphas[i], color="red")
 
 end
 
@@ -58,14 +63,14 @@ Hs = data_crit[:,2]
 plot!(pl_crit_Kq, qs, Hs, label=L"\tilde{K}_q(8), "*L"n=2^{10}, "*L"10^{7}",markershape=:circle,mc=:gray10,ms=3,markerstrokewidth=msw, linewidth=1, alpha=1, color=:gray10)
 =#
 
-plot!(pl_crit_Kq,[1.0],[0.5],st=:scatter,mc=:red,markerstrokewidth=1,markerstrokecolor=:gray10,ms=markersize,label="") #theoretical value at q=1
+plot!(pl_crit_Kq,[1.0],[0.5],st=:scatter,mc=:red,markerstrokewidth=1,markerstrokecolor=:gray10,ms=markersizes[1],label="") #theoretical value at q=1
 
 
 plot!(pl_crit_Kq, xlabel=L"q", ylabel=L"\tilde{K}_q(m)", ylim=[0,1.2], 
     xformatter=:auto,guidefontsize=guidefontsize, tickfontsize=tickfontsize-2, 
-    legendfontsize=legendfontsize-2, dpi=300)
+    legendfontsize=legendfontsize, legend=:topright,legend_column=1,dpi=300)
     #title = "Critical map ")
-plot!(pl_crit_Kq, xlim=[0,2], ylim=[0.,1.1], yticks=[0,0.5,1.0], legend=:topright, left_margin=-1Plots.mm)
+plot!(pl_crit_Kq, xlim=[0,2], ylim=[0.,1.1], yticks=[0,0.5,1.0], left_margin=-1Plots.mm)
 annotate!(pl_crit_Kq, annotation_pos, text("(d)", :left, 18))
 #savefig(pl_crit_Kq, figs_dir*"critical_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.pdf")
 #savefig(pl_crit_Kq, figs_dir*"critical_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.svg")
@@ -85,15 +90,15 @@ for (i,o) in enumerate(Os)
     data = readdlm(data_dir * f_name)
     qs = data[:,1]
     Hs = data[:,2]
-    plot!(pl_crit_Hq, qs, Hs/o, label=L"H_q(%$(o))/%$(o)", linewidth=1,markershape=:circle,mc=:red,ms=markersize,markerstrokewidth=msw, ma=line_alphas[i],la=line_alphas[i], color="red")
+    plot!(pl_crit_Hq, qs, Hs/o, label=L"H_q(%$(o))/%$(o)", linewidth=1,markershape=:circle,lc = reds[i],mc=reds[i],ms=ms,markerstrokewidth=msw, ma=line_alphas[i],la=line_alphas[i], color="red")
 end
 plot!(pl_crit_Hq, xlabel=L"q", ylabel=L"H_q(m)/m", 
     xformatter=:auto, guidefontsize=guidefontsize, tickfontsize=tickfontsize-2,
-    legendfontsize=legendfontsize-2, dpi=300)
+    legendfontsize=legendfontsize,legend_column=2, dpi=300)
     #title = "Critical map ")
 
-plot!(pl_crit_Hq,[1.0],[0.5],st=:scatter,mc=:red,markerstrokewidth=1,markerstrokecolor=:gray10,ms=markersize,label="") #theoretical value at q=1
-plot!(pl_crit_Hq, xlim=[0,2], ylim=[0,1.1],yticks=[0,0.5,1.0], legend=:topright, left_margin=-1Plots.mm)
+plot!(pl_crit_Hq,[1.0],[0.5],st=:scatter,mc=:red,markerstrokewidth=1,markerstrokecolor=:gray10,ms=markersizes[1],label="") #theoretical value at q=1
+plot!(pl_crit_Hq, xlim=[0,2], ylim=[0,1.1],yticks=[0,0.5,1.0], legend=:topleft, left_margin=-1Plots.mm)
 annotate!(pl_crit_Hq, annotation_pos, text("(c)", :left, 18))
 
 #plot!(pl, ylim=[0,2.5])
@@ -141,12 +146,12 @@ for (i,o) in enumerate(Os)
 
     qs = data[:,1]
     Hs = data[:,2]
-    plot!(pl_tent_Kq, qs, Hs, label=L"\tilde{K}_q(%$(o))", linewidth=1,markershape=:circle,mc=:orange,ms=markersize,markerstrokewidth=msw, ma=line_alphas[i], la=line_alphas[i], color=:orange)
+    plot!(pl_tent_Kq, qs, Hs, label=L"\tilde{K}_q(%$(o))", linewidth=1,markershape=:circle,lc = oranges[i],mc=oranges[i],ms=ms,markerstrokewidth=msw, ma=line_alphas[i], la=line_alphas[i], color=:orange)
 end
 plot!(pl_tent_Kq, qs, Hsa, label=L"K_q", ls=:dash, lw=2, alpha=0.8, color="black")
 plot!(pl_tent_Kq, xlabel="", ylabel=L"\tilde{K}_q(m), K_q", ylim=[0,1.2], 
     guidefontsize=guidefontsize, tickfontsize=tickfontsize-2, 
-    legendfontsize=legendfontsize-2, dpi=300,xformatter=:none)
+    legendfontsize=legendfontsize,legend_column=2, dpi=300,xformatter=:none)
     #title = "Tent map " )
 plot!(pl_tent_Kq, xlim=[0,2], ylim=[0.,1.1], yticks=[0,0.5,1], legend=:bottomleft, left_margin=-1Plots.mm)
 annotate!(pl_tent_Kq, annotation_pos, text("(b)", :left, 18))
@@ -169,12 +174,12 @@ for (i,o) in enumerate(Os)
 
     qs = data[:,1]
     Hs = data[:,2]
-    plot!(pl_tent_Hq, qs, Hs/o, label=L"H_q(%$(o))/%$(o)", linewidth=1,markershape=:circle,mc=:orange,ms=markersize,markerstrokewidth=msw, ma=line_alphas[i], la=line_alphas[i], color=:orange)
+    plot!(pl_tent_Hq, qs, Hs/o, label=L"H_q(%$(o))/%$(o)", linewidth=1,markershape=:circle,lc = oranges[i],mc=oranges[i],ms=ms,markerstrokewidth=msw, ma=line_alphas[i], la=line_alphas[i], color=:orange)
 end
 plot!(pl_tent_Hq, qs, Hsa, label=L"K_q", ls=:dash, lw=2, alpha=0.8, color="black")
 plot!(pl_tent_Hq, xlabel="", ylabel=L"H_q(m)/m", 
     guidefontsize=guidefontsize, tickfontsize=tickfontsize-2,
-    legendfontsize=legendfontsize-2, dpi=300,xformatter=:none)
+    legendfontsize=legendfontsize,legend_column=2, dpi=300,xformatter=:none)
     #title = "Tent map ")
 plot!(pl_tent_Hq, xlim=[0,2], ylim=[0,1.1], yticks=[0.0,0.5,1.0],legend=:bottomleft, left_margin=-1Plots.mm)
 annotate!(pl_tent_Hq, annotation_pos, text("(a)", :left, 18))
@@ -183,4 +188,4 @@ annotate!(pl_tent_Hq, annotation_pos, text("(a)", :left, 18))
 
 
 pl = plot(pl_tent_Hq,pl_tent_Kq,pl_crit_Hq,pl_crit_Kq,layout=(2,2),size=(colfig_size[1],colfig_size[2]-300),left_margin=1Plots.mm,right_margin=2Plots.mm)
-savefig(pl,figs_dir*"renyi_static_dynamic_entropy_spectra_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)"*"_1e8.png")
+savefig(pl,figs_dir*"renyi_static_dynamic_entropy_spectra_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)"*".pdf")
