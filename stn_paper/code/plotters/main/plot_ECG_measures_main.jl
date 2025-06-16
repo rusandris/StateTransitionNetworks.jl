@@ -72,7 +72,7 @@ linecolors = [:gray10]
 la = [0.3,0.6,1.0][end] #slect only highest line alpha 
 
 #plots are zoomed in on onset
-pre_onset_offset = 600 #xaxis limits: nr of idxs before onset
+pre_onset_offset = 1400 #xaxis limits: nr of idxs before onset
 post_onset_offset = 600 #xaxis limits: nr of idxs after onset
 #post_onset_offset_08 = 200 #xaxis limits: nr of idxs after onset
 #pre_onset_offset_08 = 200 #xaxis limits: nr of idxs after onset

@@ -24,7 +24,7 @@ msw = 0.0
 #reds = [RGB(r,0.0,0.0) for r in [1.0,0.9,0.8,0.7,0.6]]
 #reds = [:coral,:tomato2,:crimson,:red3,:red4]
 reds = [:pink1,:hotpink1,:deeppink2,:crimson,:maroon]
-oranges = [:yellow,:orange,:orange3,:darkorange4,:orangered3]
+oranges = [:yellow,:orange,:darkorange3,:darkorange4,:yellow4]
 #---------------------------critical map--------------------------
 
 #-------------------dynamic renyi entropy spectrum--------------------
@@ -67,7 +67,7 @@ plot!(pl_crit_Kq,[1.0],[0.5],st=:scatter,mc=:red,markerstrokewidth=1,markerstrok
 
 
 plot!(pl_crit_Kq, xlabel=L"q", ylabel=L"\tilde{K}_q(m)", ylim=[0,1.2], 
-    xformatter=:auto,guidefontsize=guidefontsize, tickfontsize=tickfontsize-2, 
+    xformatter=:auto,guidefontsize=guidefontsize, tickfontsize=tickfontsize, 
     legendfontsize=legendfontsize, legend=:topright,legend_column=1,dpi=300)
     #title = "Critical map ")
 plot!(pl_crit_Kq, xlim=[0,2], ylim=[0.,1.1], yticks=[0,0.5,1.0], left_margin=-1Plots.mm)
@@ -148,7 +148,7 @@ for (i,o) in enumerate(Os)
     Hs = data[:,2]
     plot!(pl_tent_Kq, qs, Hs, label=L"\tilde{K}_q(%$(o))", linewidth=1,markershape=:circle,lc = oranges[i],mc=oranges[i],ms=ms,markerstrokewidth=msw, ma=line_alphas[i], la=line_alphas[i], color=:orange)
 end
-plot!(pl_tent_Kq, qs, Hsa, label=L"K_q", ls=:dash, lw=2, alpha=0.8, color="black")
+plot!(pl_tent_Kq, qs[1:10:end], Hsa[1:10:end], label=L"K_q", st=:scatter, ms=3, markershape=:x, alpha=1.0, color=:gray10)
 plot!(pl_tent_Kq, xlabel="", ylabel=L"\tilde{K}_q(m), K_q", ylim=[0,1.2], 
     guidefontsize=guidefontsize, tickfontsize=tickfontsize-2, 
     legendfontsize=legendfontsize,legend_column=2, dpi=300,xformatter=:none)
@@ -176,7 +176,7 @@ for (i,o) in enumerate(Os)
     Hs = data[:,2]
     plot!(pl_tent_Hq, qs, Hs/o, label=L"H_q(%$(o))/%$(o)", linewidth=1,markershape=:circle,lc = oranges[i],mc=oranges[i],ms=ms,markerstrokewidth=msw, ma=line_alphas[i], la=line_alphas[i], color=:orange)
 end
-plot!(pl_tent_Hq, qs, Hsa, label=L"K_q", ls=:dash, lw=2, alpha=0.8, color="black")
+plot!(pl_tent_Hq, qs[1:10:end], Hsa[1:10:end], label=L"K_q", st=:scatter, ms=3, markershape=:x, alpha=1.0, color=:gray10)
 plot!(pl_tent_Hq, xlabel="", ylabel=L"H_q(m)/m", 
     guidefontsize=guidefontsize, tickfontsize=tickfontsize-2,
     legendfontsize=legendfontsize,legend_column=2, dpi=300,xformatter=:none)
@@ -187,5 +187,5 @@ annotate!(pl_tent_Hq, annotation_pos, text("(a)", :left, 18))
 #savefig(pl, figs_dir*"asymmetric_triangular_static_renyi_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_higherorder.svg")
 
 
-pl = plot(pl_tent_Hq,pl_tent_Kq,pl_crit_Hq,pl_crit_Kq,layout=(2,2),size=(colfig_size[1],colfig_size[2]-300),left_margin=1Plots.mm,right_margin=2Plots.mm)
+pl = plot(pl_tent_Hq,pl_tent_Kq,pl_crit_Hq,pl_crit_Kq,layout=(2,2),size=(colfig_size[1],colfig_size[2]-300),left_margin=1Plots.mm,right_margin=3Plots.mm)
 savefig(pl,figs_dir*"renyi_static_dynamic_entropy_spectra_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)"*".pdf")

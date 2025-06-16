@@ -52,7 +52,7 @@ subfigure_annotation_pos = (-0.45,1.0)
 plot_params = (
 guidefontsize=guidefontsize,
 legendfontsize=legendfontsize-2,
-tickfontsize=tickfontsize-5,
+tickfontsize=tickfontsize-3,
 titlefontsize=20,
 left_margin=reduced_left_margin,
 right_margin=reduced_right_margin,
@@ -73,7 +73,7 @@ la = [0.3,0.6,1.0]
 #la = [0.3,0.6,1.0][end] #slect only highest line alpha 
 
 #plots are zoomed in on onset
-pre_onset_offset = 800 #xaxis limits: nr of idxs before onset
+pre_onset_offset = 1400 #xaxis limits: nr of idxs before onset
 post_onset_offset = 800 #xaxis limits: nr of idxs after onset
 post_onset_offset_08 = 200 #xaxis limits: nr of idxs after onset
 pre_onset_offset_08 = 800 #xaxis limits: nr of idxs after onset
@@ -85,7 +85,7 @@ pre_offsets = [pre_onset_offset_08,fill(pre_onset_offset,4)...]
 ann_onset = "(AFIB"
 ann_term = "(N"
 
-xticks = [[1400:400:3000;],[4000:400:7500;],[1200:400:2800;],[1400:400:3800;]]
+xticks = [[1400:400:3000;],[4000:800:7500;],[1000:800:2800;],[1400:800:3800;]]
 #xticks = [[1200:300:2300;],[1600:300:2800;]]
 
 ylims_rr = (0.0,1.6)
