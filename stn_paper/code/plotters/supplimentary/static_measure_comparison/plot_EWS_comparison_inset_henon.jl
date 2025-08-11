@@ -100,8 +100,8 @@ dpi=300)
 
 #---------------------------S plot------------------------------
 ylims = [0.0,1.0]
-yticks = [0.0,0.5,1.0]
-pl_S = plot(;yticks=yticks,ylims=ylims,plot_params...)
+yticks_S = [0.0,0.5,1.0]
+pl_S = plot(;yticks=yticks_S,ylims=ylims,plot_params...)
 #ylabel= L"S"
 #plot measure curves
 plot!(pl_S,ps,Ss,lw=2,la=1.0,lc=linecolor,label = s_label)
@@ -128,8 +128,8 @@ plot!(pl_S[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #---------------------------Λ plot------------------------------
 ylims = [0.0,1.5]
-yticks = [0.0,0.75,1.5]
-pl_Λ = plot(;yticks=yticks,ylims=ylims,plot_params...)
+yticks_L = [0.0,0.75,1.5]
+pl_Λ = plot(;yticks=yticks_L,ylims=ylims,plot_params...)
 #ylabel= L"\Lambda"
 
 #plot measure curves
@@ -155,9 +155,9 @@ plot!(pl_Λ[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #-------------------------var plot---------------------------
 ylims=[0.4,0.8]
-yticks=[0.4,0.6,0.8]
+yticks_var=[0.4,0.6,0.8]
 vars = EWS_standard_henon[:,1]
-pl_var = plot(;yticks=yticks,ylims=ylims,plot_params...)
+pl_var = plot(;yticks=yticks_var,ylims=ylims,plot_params...)
 #ylabel=L"\sigma^2"
 
 #plot measure curves
@@ -182,9 +182,9 @@ lens!(pl_var,inset_xlims, inset_ylims, inset = (1,inset_box),grid=true,
 plot!(pl_var[2],xticks=inset_xticks,yticks=inset_yticks)
 #-------------------------ac plot---------------------------
 ylims=[-0.7,0.5]
-yticks=[-0.7,-0.1,0.5]
+yticks_ac=[-0.7,-0.1,0.5]
 ac = EWS_standard_henon[:,3]
-pl_ac = plot(;xlabel=L"a",ylims=ylims,yticks=yticks,plot_params...,xformatter=:auto)
+pl_ac = plot(;xlabel=L"a",ylims=ylims,yticks=yticks_ac,plot_params...,xformatter=:auto)
 #ylabel=L"ACF(1)"
 
 #plot measure curves

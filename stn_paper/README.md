@@ -32,15 +32,15 @@ Pre-saved results are in `presaved_results.zip` .
 1. Extract to `data/` directory to `stn_paper` (extract as folder `data`)
 2. run `code/plotters/plot_all_figs.jl`
 
-The figures from the paper (all except Fig.1 in the Supplimental Material) can be reproduced by running `code/plotters/plot_all_figs.jl` and they will be saved to `stn_paper/figs`.
+The figures from the paper can be reproduced by running `code/plotters/plot_all_figs.jl` and they will be saved to `stn_paper/figs`.
 
-Figures `logistic_noise_results.png` and `henon_noise_results.png` can only be reproduced using the presaved data at the moment, the source code that generate it can be made available later.
+Figures `logistic_noise_results.png` and `henon_noise_results.png` can only be reproduced using the presaved data at the moment, the source code that generate it can be made available upon request.
 
-Source code to critical and tent map results (Fig.1) can be made available on request.  
+The `data_LTAF_misc.zip` contains derived data from the [Long Term AF Database](https://physionet.org/content/ltafdb/1.0.0/), which is made available under the ODC Attribution License. Parts of the data were extracted (saved inside the zip in .txt format) using the [WFDB Software Package](https://physionet.org/physiotools/wag/wag.htm) .
 
 #### Generate results
 
-1. extract `data/` dir (extract as folder `data`) from `data_LTAF_misc.zip` that contains data taken from the LTAF dataset (https://physionet.org/content/ltafdb/1.0.0/). 
+1. extract `data/` dir (extract as folder `data`) from `data_LTAF_misc.zip` that contains data taken from the LTAF dataset 
 
 2. open a new Julia session
 

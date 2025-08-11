@@ -102,8 +102,8 @@ dpi=300)
 
 #---------------------------S plot------------------------------
 ylims = [0.0,1.5]
-yticks = [0.0,0.75,1.5]
-pl_S = plot(;ylabel = s_label,yticks=yticks,ylims=ylims,plot_params...)
+yticks_S = [0.0,0.75,1.5]
+pl_S = plot(;ylabel = s_label,yticks=yticks_S,ylims=ylims,plot_params...)
 
 #plot measure curves
 plot!(pl_S,ps,Ss,lw=2,la=1.0,lc=linecolor)
@@ -129,8 +129,8 @@ plot!(pl_S[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #---------------------------Λ plot------------------------------
 ylims = [0.0,1.5]
-yticks = [0.0,0.75,1.5]
-pl_Λ = plot(;ylabel = Λ_label,yticks=yticks,ylims=ylims,plot_params...)
+yticks_L = [0.0,0.75,1.5]
+pl_Λ = plot(;ylabel = Λ_label,yticks=yticks_L,ylims=ylims,plot_params...)
 
 #plot measure curves
 plot!(pl_Λ,ps,Λs,lw=2,la=1.0,lc=linecolor)
@@ -156,9 +156,9 @@ plot!(pl_Λ[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #-------------------------var plot---------------------------
 ylims=[0,0.3]
-yticks=[0.0,0.15,0.3]
+yticks_var=[0.0,0.15,0.3]
 vars = EWS_standard_log[:,1]
-pl_var = plot(;ylabel=L"\sigma^2",yticks=yticks,ylims=ylims,plot_params...)
+pl_var = plot(;ylabel=L"\sigma^2",yticks=yticks_var,ylims=ylims,plot_params...)
 
 #plot measure curves
 plot!(pl_var,ps,vars,lw=2,la=1.0,lc=linecolor,label = L"\sigma^2")
@@ -186,9 +186,9 @@ plot!(pl_var[2],xticks=inset_xticks,yticks=inset_yticks)
 
 #-------------------------ac plot---------------------------
 ylims=[-1.5,0.1]
-yticks=[-1.5,-0.75,0.0]
+yticks_ac=[-1.5,-0.75,0.0]
 ac = EWS_standard_log[:,2]
-pl_ac = plot(;ylabel=L"ACF(1)",xlabel=L"r",ylims=ylims,yticks=yticks,plot_params...,xformatter=:auto)
+pl_ac = plot(;ylabel=L"ACF(1)",xlabel=L"r",ylims=ylims,yticks=yticks_ac,plot_params...,xformatter=:auto)
 
 
 #plot measure curves
