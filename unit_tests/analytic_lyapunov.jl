@@ -1,5 +1,6 @@
 using StateTransitionNetworks
-using DynamicalSystems
+using DynamicalSystemsBase
+using PredefinedDynamicalSystems
 using Test
 
 ensemble = 10^3

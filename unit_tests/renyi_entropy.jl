@@ -1,6 +1,7 @@
 using Revise
 using StateTransitionNetworks
-using DynamicalSystems
+using DynamicalSystemsBase
+using PredefinedDynamicalSystems
 using Test
 
 @testset "test truncated renyi_entropy at q=0 (topological entropy)" begin

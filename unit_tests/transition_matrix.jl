@@ -1,7 +1,7 @@
-using Revise
 using StateTransitionNetworks
 using SparseArrays
-using DynamicalSystems
+using DynamicalSystemsBase
+using PredefinedDynamicalSystems
 using Random
 using Test
 

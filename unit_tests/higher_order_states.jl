@@ -1,6 +1,7 @@
 using Revise
 using StateTransitionNetworks
-using DynamicalSystems
+using DynamicalSystemsBase
+using PredefinedDynamicalSystems
 using Random
 using Test
 

@@ -1,5 +1,6 @@
 using StateTransitionNetworks
-using DynamicalSystems
+using DynamicalSystemsBase
+using PredefinedDynamicalSystems
 using Test
 using LinearAlgebra
 

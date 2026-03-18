@@ -1,6 +1,7 @@
 using StateTransitionNetworks
-using DynamicalSystems
 using Test
+using DynamicalSystemsBase
+using PredefinedDynamicalSystems
 
 
 @testset "test analytic formula and random walk sim" begin
