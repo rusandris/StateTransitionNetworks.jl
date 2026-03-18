@@ -4,7 +4,6 @@ import Graphs: SimpleDiGraph,DiGraph,add_edge!, inneighbors,outneighbors, nv, ne
 import StatsBase: sample, mean, var, Weights
 import Base: extrema
 using MetaGraphsNext
-using GraphPlot,Cairo,Compose
 using SparseArrays
 using LuxurySparse
 using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,AbstractStateSpaceSet
@@ -24,7 +23,7 @@ include("iterative_linsolve.jl")
 include("network_measures.jl")
 include("create_stn.jl")
 include("simulate_random_walks.jl")
-include("plot_stn.jl")
+#include("plot_stn.jl")
 include("timeseries_analysis.jl")
 include("operations.jl")
 include("deprecations.jl")
