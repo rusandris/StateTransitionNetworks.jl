@@ -13,7 +13,7 @@ cd(@__DIR__)
 figs_dir="../figs/"
 mkpath(figs_dir)
 
-data_dir="../data/supplimentary/crit_tent_maps_onlyHq/"
+data_dir="../data/supplimentary/critical_tent_maps/"
 mkpath(data_dir)
 
 include("functions_chaotic_maps.jl")
@@ -60,24 +60,23 @@ r = 2.
 ds_crit = DeterministicIteratedMap(f_crit, [0.4], [r])
 
 
-T::Int64 = 10^8
+T::Int64 = 10^5 #10^8
 T_string::String = @sprintf "%.E" T
-Ttr::Int64 = 10^5
+Ttr::Int64 = 10^3 #10^5
 Ttr_string::String = @sprintf "%.E" Ttr
 grid_edges::Vector{Float64} = [0,1]
-grid_size_crit = 2^10
+grid_size_crit = 2^5 #2^10
 grid_size_tent = 2^5
 
 timeseries, = trajectory(ds_crit, T, [0.3]; Ttr=Ttr);
 
 grid_size = grid_size_crit
-qs = collect(0.01:0.01:2)
-#Os = [1,2,4,8,10]
-Os = [1,[2:2:64;]...]
+qs = collect(0.01:0.05:2) #qs = collect(0.01:0.01:2)
+Os = [1,2,4,8,10]
 writedlm(data_dir*"orders_crit.txt",Os)
 writedlm(data_dir*"method_params.txt",[T,Ttr,grid_size_tent,grid_size_crit])
 
-#=
+
 # compute DYNAMICAL Renyi entropy spectrum for HIGHER ORDER states
 
 sts = zeros(Int128,length(timeseries))
@@ -94,7 +93,7 @@ for (i,o) in enumerate(Os[1:end])
         f_name = data_dir*"critical_renyi-q_dq=0.01_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_order=$(Int(o)).dat"
         writedlm(f_name,hcat(qs, Hs))
 end
-=#
+
 
 #######################################
 # compute STATIC Renyi entropy spectrum
@@ -107,6 +106,7 @@ plot!(qs,Hqs)
 
 #Os = [8,12,14,16,30]
 #Os = [1,2,4,8,10,12,14,16,30]
+Os = [1,[2:2:64;]...]
 
 writedlm(data_dir*"orders_crit_static.txt",Os)
 
@@ -166,14 +166,14 @@ r = 0.8
 ds_tent = DeterministicIteratedMap(f_tent, [0.4], [r])
 
 grid_size = grid_size_tent
-qs = collect(0.01:0.01:2)
-#Os = [1,2,4,8,10]
+qs = collect(0.01:0.05:2) #qs = collect(0.01:0.01:2)
+Os = [1,2,4,8,10]
 
 timeseries, = trajectory(ds_tent, T, [0.3]; Ttr=Ttr);
 
 sts = timeseries_to_grid(timeseries, grid_size; grid_edges = [0., 1.]);
 
-#=
+
 # compute dynamic Renyi entropy spectrum for HIGHER ORDER states
 
 writedlm(data_dir*"orders_tent_dynamic.txt",Os)
@@ -191,7 +191,7 @@ for (i,o) in enumerate(Os[1:end])
         f_name = data_dir*"asymmetric_triangular_renyi-q_dq=0.01_r=$(r)_tmax$T_string"*"_ttrans$Ttr_string"*"_grid=$(grid_size)_order=$(Int(o)).dat"
         writedlm(f_name,hcat(qs, Hs))
 end
-=#
+
 
 #######################################
 # compute STATIC Renyi entropy spectrum

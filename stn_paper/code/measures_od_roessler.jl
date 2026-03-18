@@ -1,7 +1,7 @@
 using StateTransitionNetworks
 using DynamicalSystems
 using StatsBase
-using OrdinaryDiffEq
+#using OrdinaryDiffEq
 using DelimitedFiles
 using Printf
 cd(@__DIR__)
@@ -14,7 +14,8 @@ mkpath(data_dir)
 T = 5*10^5 #length of time series (nr of poinc points) for measures
 nr_points = 100 #nr of poincare points on od
 Ttr = 10^4 #10000
-b_vals = [0.35:0.0001:0.4;]
+#SET FOR LOWER RESOLUTION FOR TESTING
+b_vals = [0.35:0.0005:0.4;] #[0.35:0.0001:0.4;]
 #b_vals = [0.368:0.00005:0.4;]
 b_start = b_vals[begin]
 b_stop = b_vals[end]
@@ -24,7 +25,7 @@ Ttr_string::String = @sprintf "%.E" Ttr
 
 plane = (2,0.0)
 plane_string::String = "$(plane[1])"*"_"*"$(plane[2])"
-diffeq = (alg = Tsit5(),dt = 1e-3,adaptive=true,dtmax=1e-1,maxiters=1e15)
+#diffeq = (alg = Tsit5(),dt = 1e-3,adaptive=true,dtmax=1e-1,maxiters=1e15)
 
 #roessler system
 @inbounds function roessler_rule(u, p, t)
@@ -36,7 +37,7 @@ end
 
 u0=[1.0, -2.0, 0.1]
 p = [0.2,0.2,5.7] #a = 0.2, b = 0.2, c = 5.7
-ds = CoupledODEs(roessler_rule, u0, p;diffeq=diffeq)
+ds = CoupledODEs(roessler_rule, u0, p)#diffeq=diffeq)
 
 
 pmap = PoincareMap(ds,plane; rootkw=(xrtol=1e-10, atol=1e-10), direction=1) #becomes discrete system
@@ -44,7 +45,7 @@ pmap = ProjectedDynamicalSystem(pmap,[1],[plane[2],0.0]) #take out the the reduc
 grid_size = 2^5
 #grid_edges::Vector{Float64} = [-9,0.0,-3.0,0.05]
 #grid_edges::Vector{Float64} = [-10.0,-0.001,-2.0,0.5]
-grid_edges::Vector{Float64} = [-10.0,-2.0] #grid on only 1d (x component)
+grid_edges = [-10.0,-2.0] #grid on only 1d (x component)
 Δt = 0.01
 rw_ensemble = 1000 
 nr_steps = 10000
@@ -133,7 +134,7 @@ writedlm(data_dir * "roessler_p_values" * "_nr_param_$(length(b_vals))"*".txt",b
 @info "Calculating measures...."
 flush(stderr)
 
-ds = CoupledODEs(roessler_rule, u0, p;diffeq=diffeq)
+ds = CoupledODEs(roessler_rule, u0, p)#diffeq=diffeq)
 pmap = PoincareMap(ds,plane; rootkw=(xrtol=1e-10, atol=1e-10), direction=1) #becomes discrete system
 pmap = ProjectedDynamicalSystem(pmap,[1],[plane[2],0.0]) #take out the the reduced dimension (3d->2d)
 
