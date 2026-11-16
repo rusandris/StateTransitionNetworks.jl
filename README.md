@@ -80,11 +80,11 @@ With this, one can access observed ordinal patterns directly
 ```julia
 julia> outcomes(to_op)
   5-element Vector{SVector{3, Int64}}:
- [1, 2, 3]
- [1, 3, 2]
- [3, 2, 1]
- [2, 1, 3]
- [3, 1, 2]
+   [1, 2, 3]
+   [1, 3, 2]
+   [3, 2, 1]
+   [2, 1, 3]
+   [3, 1, 2]
 ```
 
 ### Get dynamic measures using Markov chains: Sinai-Kolmogorov (metric) entropy, Lyapunov measure (trajectory-level varentropy)
@@ -116,14 +116,52 @@ P = transfermatrix(to)
 network_measures(P) #KS entropy, Λ for periodic dynamics (r=3.5)
  # -> (0.0, 0.0)
 
+```
+### Build transfer matrix incrementally 
+```julia
+timeseries1 = rand(100) #example time series
+timeseries2 = rand(100) #another time series (from a different experiment perhaps)
+n_bins = 5
+binning = ValueBinning(RectangularBinning(n_bins, true)) #5 bins (symbols) from min and max of time series
+symb_seq1 = codify(binning,timeseries1)
+symb_seq2 = codify(binning,timeseries2)
+
+#gather all transitions into one object
+symb_stats = SymbolStatistics(Int64, n_bins) #expecting symbols of Int64, max number of symbols is n_bins 
+
+#add transitions one-by-one
+add_transition!(symb_stats,(1,2)) #add transition 1 -> 2
+add_transition!(symb_stats, (2, 1)) #add transition 2 -> 3
+
+#add transitions in one scoop
+add_transitions!(symb_stats, symb_seq1) # transitions from timeseries1
+add_transitions!(symb_stats,symb_seq2) #transitions from timeseries2
+
+#get transition matrix
+P = calculate_transition_matrix(symb_stats)
 
 ```
 
+### Using higher-order symbols 
+Stringing consecutive symbols together let's us study long-range correlations of symbol transitions. 
+```julia
+  using ComplexityMeasures,StateTransitionNetworks
+  x = [0.1, 0.2, 0.7, 0.3, 0.8, 0.3, 0.2, 0.8]
+  binning = ValueBinning(RectangularBinning(3))
+  symb_seq = codify(binning, x) #first order -> [1,1,3,1,3,1,1,3]
+  higher_order_symbolics!(symb_seq,2) #turn into pairs of symbols in-place (N-k+1 gets replaced, if k is the order)
 
-
-**TODO** : 
-  - add incremental construction example
-  - add reference to PRR publication
+  julia> symb_seq[1:end-1]
+    7-element Vector{Int64}:
+      4
+      6
+     10
+      6
+     10
+      4
+      6
+```
 
 # References
-Sándor, B.; Schneider, B.; Lázár, Z.I.; Ercsey-Ravasz M. : [A Novel Measure Inspired by Lyapunov Exponents for the Characterization of Dynamics in State-Transition Networks](https://www.mdpi.com/1099-4300/23/1/103)
+1. Sándor, B.; Schneider, B.; Lázár, Z.I.; Ercsey-Ravasz M. : [A Novel Measure Inspired by Lyapunov Exponents for the Characterization of Dynamics in State-Transition Networks](https://www.mdpi.com/1099-4300/23/1/103)
+2. Sándor, B.; Rusu, A.; Lázár, Z.I.; Ercsey-Ravasz M. : [Measuring dynamical phase transitions in time series](https://doi.org/10.1103/98vk-ws9s)
