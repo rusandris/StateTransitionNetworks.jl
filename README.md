@@ -26,14 +26,14 @@ Given a time series, like
 ```julia
   using ComplexityMeasures
   binning = ValueBinning(RectangularBinning(4)) #4 bins (symbols) from min and max of time series
-  symb_seq_bins = codify(binning, x) #symbolic time series with binning
+  symb_seq_bins = codify(binning, x) #sequence of bin indices -> [1,2,4...]
 ```
 Symbols are represented by integers (index of the bin in which the value falls).
 * or for example via ordinal patterns (OP)
 ```julia
   using ComplexityMeasures
   op = OrdinalPatterns{3}() #pattern length of 3 (6 possible in total)
-  symb_seq_op = codify(op, x) #symbolic time series with OP
+  symb_seq_op = codify(op, x) #sequence of OP labels -> [1,2,6...]
 ```
 
 ### Get transfer matrix of a symbolic sequence
@@ -73,9 +73,20 @@ julia> P_op
 Some functionality from here, for example general transfer matrix construction, was also ported to **ComplexityMeasures**. 
 ```julia
   using ComplexityMeasures
-  to_op = transferoperator(op,symb_seq_op)
+  to_op = transferoperator(op,x)
   P_op = transfermatrix(to_op)
 ```
+With this, one can access observed ordinal patterns directly
+```julia
+julia> outcomes(to_op)
+  5-element Vector{SVector{3, Int64}}:
+ [1, 2, 3]
+ [1, 3, 2]
+ [3, 2, 1]
+ [2, 1, 3]
+ [3, 1, 2]
+```
+
 ### Get dynamic measures using Markov chains: Sinai-Kolmogorov (metric) entropy, Lyapunov measure (trajectory-level varentropy)
 ```julia
   using StateTransitionNetworks
@@ -85,13 +96,34 @@ Some functionality from here, for example general transfer matrix construction, 
   S_KS, Λ = network_measures(P_op) #together
 
 ```
+#### Example for a chaotic map
+```julia 
+using DynamicalSystems
+ds = Systems.logistic(r=4.0) 
+traj,t = trajectory(ds, 10000; Ttr = 10000)
+timeseries = traj[:,1]
+op = OrdinalPatterns{5}() #ordinal patterns
+to = transferoperator(op,timeseries)
+P = transfermatrix(to)
+network_measures(P) #KS entropy, Λ for chaotic dynamics (r=4)
+ # -> (0.6561118001665418, 0.03863994032705764)
+
+#set to periodic dynamics
+ds = Systems.logistic(r=3.5)
+traj,t = trajectory(ds, 10000; Ttr = 10000); timeseries = traj[:,1]
+to = transferoperator(op,timeseries)
+P = transfermatrix(to)
+network_measures(P) #KS entropy, Λ for periodic dynamics (r=3.5)
+ # -> (0.0, 0.0)
+
+
+```
+
 
 
 **TODO** : 
-  - add logistic/henon example for KS,Lambda
   - add incremental construction example
   - add reference to PRR publication
-  - show symbols?
 
 # References
 Sándor, B.; Schneider, B.; Lázár, Z.I.; Ercsey-Ravasz M. : [A Novel Measure Inspired by Lyapunov Exponents for the Characterization of Dynamics in State-Transition Networks](https://www.mdpi.com/1099-4300/23/1/103)
