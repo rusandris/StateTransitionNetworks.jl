@@ -17,30 +17,30 @@ using StateTransitionNetworks
 ## Basic usage
 Given a time series, like
 ```julia
-  x = [0.1, 0.2, 0.7, 0.3, 0.1, 0.3, 0.2, 0.1, 0.3, 0.4, 0.1, 0.0] #example time series
+x = [0.1, 0.2, 0.7, 0.3, 0.1, 0.3, 0.2, 0.1, 0.3, 0.4, 0.1, 0.0] #example time series
 ```
 
 #### Create symbols  (also called outcomes) from the data points of the time series 
 ##### For example using [ComplexityMeasures.jl](https://juliadynamics.github.io/DynamicalSystemsDocs.jl/complexitymeasures/dev/)
 * by applying binning
 ```julia
-  using ComplexityMeasures
-  binning = ValueBinning(RectangularBinning(4)) #4 bins (symbols) from min and max of time series
-  symb_seq_bins = codify(binning, x) #sequence of bin indices -> [1,2,4...]
+using ComplexityMeasures
+binning = ValueBinning(RectangularBinning(4)) #4 bins (symbols) from min and max of time series
+symb_seq_bins = codify(binning, x) #sequence of bin indices -> [1,2,4...]
 ```
 Symbols are represented by integers (index of the bin in which the value falls).
 * or for example via ordinal patterns (OP)
 ```julia
-  using ComplexityMeasures
-  op = OrdinalPatterns{3}() #pattern length of 3 (6 possible in total)
-  symb_seq_op = codify(op, x) #sequence of OP labels -> [1,2,6...]
+using ComplexityMeasures
+op = OrdinalPatterns{3}() #pattern length of 3 (6 possible in total)
+symb_seq_op = codify(op, x) #sequence of OP labels -> [1,2,6...]
 ```
 
 ### Get transfer matrix of a symbolic sequence
 * by internal method of **StateTransitionNetwork**
 ```julia
-  using StateTransitionNetworks
-  P_bins, Q_bins, ρ_bins =  calculate_transition_matrix(symb_seq_bins)
+using StateTransitionNetworks
+P_bins, Q_bins, ρ_bins =  calculate_transition_matrix(symb_seq_bins)
 ```
 Here generally the returned objects are 
 * `P` transfer matrix, where `P[i,j]` is the transition probability from symbol `i -> j` (normalized row-vise: `sum(P[i,:] == 1.0)`)
@@ -72,9 +72,9 @@ julia> P_op
 
 Some functionality from here, for example general transfer matrix construction, was also ported to **ComplexityMeasures**. 
 ```julia
-  using ComplexityMeasures
-  to_op = transferoperator(op,x)
-  P_op = transfermatrix(to_op)
+using ComplexityMeasures
+to_op = transferoperator(op,x)
+P_op = transfermatrix(to_op)
 ```
 With this, one can access observed ordinal patterns directly
 ```julia
@@ -89,11 +89,11 @@ julia> outcomes(to_op)
 
 ### Get dynamic measures using Markov chains: Sinai-Kolmogorov (metric) entropy, Lyapunov measure (trajectory-level varentropy)
 ```julia
-  using StateTransitionNetworks
-  S_KS,_ = sinai_kolmogorov_entropy(P_op)
-  Λ,_ = lyapunov_measure(P_op)
+using StateTransitionNetworks
+S_KS,_ = sinai_kolmogorov_entropy(P_op)
+Λ,_ = lyapunov_measure(P_op)
 
-  S_KS, Λ = network_measures(P_op) #together
+S_KS, Λ = network_measures(P_op) #together
 
 ```
 #### Example for a chaotic map
@@ -143,23 +143,23 @@ P = calculate_transition_matrix(symb_stats)
 ```
 
 ### Using higher-order symbols 
-Stringing consecutive symbols together let's us study long-range correlations of symbol transitions. 
+Stringing consecutive symbols together lets us study long-range correlations of symbol transitions. 
 ```julia
-  using ComplexityMeasures,StateTransitionNetworks
-  x = [0.1, 0.2, 0.7, 0.3, 0.8, 0.3, 0.2, 0.8]
-  binning = ValueBinning(RectangularBinning(3))
-  symb_seq = codify(binning, x) #first order -> [1,1,3,1,3,1,1,3]
-  higher_order_symbolics!(symb_seq,2) #turn into pairs of symbols in-place (N-k+1 gets replaced, if k is the order)
+using ComplexityMeasures,StateTransitionNetworks
+x = [0.1, 0.2, 0.7, 0.3, 0.8, 0.3, 0.2, 0.8]
+binning = ValueBinning(RectangularBinning(3))
+symb_seq = codify(binning, x) #first order -> [1,1,3,1,3,1,1,3]
+higher_order_symbolics!(symb_seq,2) #turn into pairs of symbols in-place (N-k+1 gets replaced, if k is the order)
 
-  julia> symb_seq[1:end-1]
-    7-element Vector{Int64}:
-      4
-      6
-     10
-      6
-     10
-      4
-      6
+julia> symb_seq[1:end-1]
+  7-element Vector{Int64}:
+    4
+    6
+   10
+    6
+   10
+    4
+    6
 ```
 
 # References
