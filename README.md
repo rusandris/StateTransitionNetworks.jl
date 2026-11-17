@@ -165,3 +165,5 @@ julia> symb_seq[1:end-1]
 # References
 1. Sándor, B.; Schneider, B.; Lázár, Z.I.; Ercsey-Ravasz M. : [A Novel Measure Inspired by Lyapunov Exponents for the Characterization of Dynamics in State-Transition Networks](https://www.mdpi.com/1099-4300/23/1/103)
 2. Sándor, B.; Rusu, A.; Lázár, Z.I.; Ercsey-Ravasz M. : [Measuring dynamical phase transitions in time series](https://doi.org/10.1103/98vk-ws9s)
+## Acknowledgements
+This work was supported by the grant of the Romanian Ministry of Research, project PN-IV-P2-2.1-TE-2023-1548.
