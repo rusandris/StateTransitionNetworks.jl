@@ -1,9 +1,10 @@
 name = "StateTransitionNetworks"
 uuid = "3840ccf8-8f4d-4ca1-a48b-c3a8348f3866"
-authors = ["dnskrly <karoly.denes42@gmail.com>", "sbulcsu <bulcsu.sandor@ubbcluj.ro>", "rusandris <rusandris@gmail.com>"]
 version = "0.4.3"
+authors = ["dnskrly <karoly.denes42@gmail.com>", "sbulcsu <bulcsu.sandor@ubbcluj.ro>", "rusandris <rusandris@gmail.com>"]
 
 [deps]
+ComplexityMeasures = "ab4b797d-85ee-42ba-b621-05d793b346a2"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 DelayEmbeddings = "5732040d-69e3-5649-938a-b6b4f237613f"
 DynamicalSystemsBase = "6e36e845-645a-534a-86f2-f5d4aa5a06b4"
@@ -13,5 +14,10 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
 MetaGraphsNext = "fa8bd995-216d-47f1-8a91-f3b68fbeb377"
 Permutations = "2ae35dd2-176d-5d53-8349-f30d82d94d4f"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+
+[compat]
+ComplexityMeasures = "3.9.0"
+ProgressMeter = "1.13.0"

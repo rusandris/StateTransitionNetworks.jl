@@ -6,11 +6,16 @@ import Base: extrema
 using MetaGraphsNext
 using SparseArrays
 using LuxurySparse
-using DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,StateSpaceSet,AbstractStateSpaceSet
+import DynamicalSystemsBase: DynamicalSystemsBase,poincaresos,
+	StateSpaceSet,AbstractStateSpaceSet,set_parameter!,
+	step!,set_parameters!,
+	current_state,current_time,successful_step
+import ComplexityMeasures: codify,OrdinalPatterns
 import DynamicalSystemsBase: minmaxima
 import LinearAlgebra: eigen, Diagonal, I, nullspace, norm
 import DataStructures: OrderedDict
 using KrylovKit
+using ProgressMeter
 export linsolve
 
 
@@ -26,6 +31,8 @@ include("simulate_random_walks.jl")
 #include("plot_stn.jl")
 include("timeseries_analysis.jl")
 include("operations.jl")
+include("ensemble_symbolization.jl")
 include("deprecations.jl")
+
 
 end
