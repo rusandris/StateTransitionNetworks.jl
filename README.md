@@ -161,6 +161,60 @@ julia> symb_seq[1:end-1]
     4
     6
 ```
+### Transition statistics and measures from non-autonomous dynamics    
+If the time series isn't stationary (due to non-autonomous effects like drives and parameter drifts), the transition matrix is built using an ensemble-based approach. Symbol transitions and their statistics are gathered from stepping an ensemble of initial conditions, recording each ensemble member's evolution from one instantaneous attractor to another.
+
+##### Duffing equation with drifting periodic forcing
+Here we demonstrate the method on a system with linear parameter drift, using a symbolized trajectory ensemble defined on a constant grid partition.
+```julia
+
+using DynamicalSystems
+using StateTransitionNetworks
+using ComplexityMeasures
+#------------------------define duffing system with parameter drift------------------------
+
+init_drift_pars = [1.0, 0.2, 0.4, 0.0005] #last parameter is the drift rate
+init_nodrift_pars = [1.0, 0.2, 0.4, 0.0]
+
+function duffing_drift(u0 = [0.1, 0.25]; init_sys_pars=init_drift_pars)
+    ω = init_sys_pars[1]
+    β = init_sys_pars[2]
+    ε0 = init_sys_pars[3]
+    α = init_sys_pars[4]
+    return CoupledODEs(duffing_drift_rule, u0, [ω, β, ε0, α])
+end
+
+@inbounds function duffing_drift_rule(x, p, t)
+    ω, β, ε0, α = p
+    dx1 = x[2]
+    dx2 = (ε0+α*t)*cos(ω*t) + x[1] - x[1]^3 - 2β * x[2] #linear drift with time
+    return SVector(dx1, dx2)
+end
+
+# create continuous time system
+ds = duffing_drift(; init_sys_pars=init_nodrift_pars)
+
+#---------------------run ensemble symbolics, with drift--------------------------
+#order of symbols 
+order = 2
+n_steps = 130
+N_ens = 40^2 
+init_ensemble_grid_edges=[(-1.5,1.5),(-1.5,1.5)]
+Ttr = 400
+
+#---------ensemble measures using a grid partition------------
+symbolization_pars_grid = (symb_type=:grid,grid_size = 2^3,grid_edges=[-1.5,-1.5,1.5,1.5])
+
+Ss_ens_grid, Λs_ens_grid, C1s_ens_grid, C2s_ens_grid = ensemble_measures(n_steps,N_ens,duffing_drift,symbolization_pars_grid,order;
+               init_ensemble_grid_edges=init_ensemble_grid_edges,Ttr=Ttr,
+               auto_sys_pars=init_nodrift_pars,nonauto_sys_pars=init_drift_pars,p_index=3,Δt=2π/init_drift_pars[1])
+
+
+```
+
+Entropy values can be compared to [instantaneous Lyapunov-exponents](https://juliadynamics.github.io/DynamicalSystemsDocs.jl/chaostools/dev/lyapunovs/#Instantaneous-Lyapunov-exponent-for-non-autonomous-systems), see in the `examples/`.
+
+
 
 # References
 1. Sándor, B.; Schneider, B.; Lázár, Z.I.; Ercsey-Ravasz M. : [A Novel Measure Inspired by Lyapunov Exponents for the Characterization of Dynamics in State-Transition Networks](https://www.mdpi.com/1099-4300/23/1/103)
