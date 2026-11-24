@@ -212,7 +212,7 @@ Ss_ens_grid, Λs_ens_grid, C1s_ens_grid, C2s_ens_grid = ensemble_measures(n_step
 
 ```
 
-Entropy values can be compared to [instantaneous Lyapunov-exponents](https://juliadynamics.github.io/DynamicalSystemsDocs.jl/chaostools/dev/lyapunovs/#Instantaneous-Lyapunov-exponent-for-non-autonomous-systems).
+Entropy values can be compared to [instantaneous Lyapunov-exponents](https://juliadynamics.github.io/DynamicalSystemsDocs.jl/chaostools/dev/lyapunovs/#Instantaneous-Lyapunov-exponent-for-non-autonomous-systems), see in the `examples/`.
 
 
 
