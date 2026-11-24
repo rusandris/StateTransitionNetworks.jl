@@ -161,9 +161,11 @@ julia> symb_seq[1:end-1]
     4
     6
 ```
-### Transition statistics and measures from nonautonomous dynamics    
-If the time series isn't stationary (due to nonautonomous effects like drives and parameter drifts), the transition matrix is built using an ensemble-based approach. Symbol transitions and their statistics are gathered from stepping an ensemble of initial conditions, recording each ensemble member's evolution from one instantaneous attractor to another.
+### Transition statistics and measures from non-autonomous dynamics    
+If the time series isn't stationary (due to non-autonomous effects like drives and parameter drifts), the transition matrix is built using an ensemble-based approach. Symbol transitions and their statistics are gathered from stepping an ensemble of initial conditions, recording each ensemble member's evolution from one instantaneous attractor to another.
 
+##### Duffing equation with drifting periodic forcing
+Here we demonstrate the method on a system with linear parameter drift, using a symbolized trajectory ensemble defined on a constant grid partition.
 ```julia
 
 using DynamicalSystems
@@ -171,7 +173,7 @@ using StateTransitionNetworks
 using ComplexityMeasures
 #------------------------define duffing system with parameter drift------------------------
 
-init_drift_pars = [1.0, 0.2, 0.4, 0.0005]
+init_drift_pars = [1.0, 0.2, 0.4, 0.0005] #last parameter is the drift rate
 init_nodrift_pars = [1.0, 0.2, 0.4, 0.0]
 
 function duffing_drift(u0 = [0.1, 0.25]; init_sys_pars=init_drift_pars)
@@ -185,7 +187,7 @@ end
 @inbounds function duffing_drift_rule(x, p, t)
     ω, β, ε0, α = p
     dx1 = x[2]
-    dx2 = (ε0+α*t)*cos(ω*t) + x[1] - x[1]^3 - 2β * x[2]
+    dx2 = (ε0+α*t)*cos(ω*t) + x[1] - x[1]^3 - 2β * x[2] #linear drift with time
     return SVector(dx1, dx2)
 end
 
@@ -196,9 +198,10 @@ ds = duffing_drift(; init_sys_pars=init_nodrift_pars)
 #order of symbols 
 order = 2
 n_steps = 130
-N_ens = 40^2 # 200^2 #80^2
+N_ens = 40^2 
 init_ensemble_grid_edges=[(-1.5,1.5),(-1.5,1.5)]
 Ttr = 400
+
 #---------ensemble measures using a grid partition------------
 symbolization_pars_grid = (symb_type=:grid,grid_size = 2^3,grid_edges=[-1.5,-1.5,1.5,1.5])
 
