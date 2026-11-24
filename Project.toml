@@ -1,6 +1,6 @@
 name = "StateTransitionNetworks"
 uuid = "3840ccf8-8f4d-4ca1-a48b-c3a8348f3866"
-version = "0.4.3"
+version = "0.4.4"
 authors = ["dnskrly <karoly.denes42@gmail.com>", "sbulcsu <bulcsu.sandor@ubbcluj.ro>", "rusandris <rusandris@gmail.com>"]
 
 [deps]
